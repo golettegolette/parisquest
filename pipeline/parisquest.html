@@ -140,15 +140,6 @@ sup { font-size: .62em; line-height: 0; }
 .tier b { display: block; font-family: var(--f-plaque); font-size: 18px; font-variant-numeric: tabular-nums; }
 .tier span { font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
 
-.arrs { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 6px; }
-.arr { background: var(--stone-2); border-radius: 6px; padding: 5px 6px 6px; box-shadow: inset 0 0 0 1px var(--joint); display: flex; flex-direction: column; gap: 2px; }
-.arr b { font-family: var(--f-plaque); font-size: 16px; color: var(--navy); line-height: 1; }
-.arr span { font-size: 11.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.arr i { height: 4px; border-radius: 2px; background: rgba(38,34,27,.12); overflow: hidden; }
-.arr u { display: block; height: 100%; background: var(--navy); }
-.arr.done { background: var(--r4); box-shadow: none; }
-.arr.done b, .arr.done span { color: var(--white); }
-.arr.done u { background: var(--white); }
 .fams { display: flex; flex-direction: column; gap: 6px; }
 .fam { display: grid; grid-template-columns: 14px 1fr auto; gap: 2px 10px; align-items: center; border: 0; background: none; text-align: left; padding: 7px 8px; border-radius: 7px; }
 .fam:hover { background: rgba(246,242,232,.45); }
@@ -341,14 +332,11 @@ const fmtDist = m => m < 1000 ? `${Math.max(5, Math.round(m / 5) * 5)} m` : `${(
 const TIERS = ["Commune", "Peu commune", "Rare", "Épique", "Légendaire"];
 const TIER_VAR = ["--r0", "--r1", "--r2", "--r3", "--r4"];
 const REWARD = [10, 15, 25, 40, 60];
-const BOOSTER_SIZE = 5, SCOUT_DAYS = 7, MAX_LEVEL = 5, ARR_BONUS = 200;
-/* Les rues se capturent toutes seules en marchant et se colorient sur la carte (pas de point). */
-const isStreet = it => it.k === "rue";
+const BOOSTER_SIZE = 5, SCOUT_DAYS = 7, MAX_LEVEL = 5;
 const CONIFERS = new Set(["Pinus", "Taxus", "Araucaria", "Taxodium", "Cedrus", "Sequoia", "Sequoiadendron", "Abies", "Picea", "Cupressus", "Metasequoia", "Larix", "Calocedrus", "Cryptomeria", "Thuja", "Juniperus", "Pseudotsuga", "Cephalotaxus", "Chamaecyparis", "Torreya"]);
 const DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
 
 let FAMS = {}, KINDS = {}, ITEMS = [], COLS = [], BYID = new Map(), TOTALS = {};
-let ARR_ITEMS = {}, ARR_PATHS = {}, STREET_BY_ID = new Map();
 let PARK_PATHS = null, MONDE_PATHS = [], ARR_PATH = null, WATER_PATH = null, STREET_PATH = null, STREET_LABELS = [];
 
 /* ---------- État ---------- */
@@ -356,7 +344,7 @@ const STORE_KEY = "parisquest.v2";
 /* Version hébergée (GitHub Pages ou serveur local) : vrai GPS, fond de carte, photos. Le mode test n'y est visible qu'avec ?test dans l'adresse. */
 const HOSTED = !!window.PQ_HOSTED;
 const TEST_ALLOWED = !HOSTED || /[?&]test\b/.test(location.search);
-const DEFAULT_STATE = () => ({ pos: { lat: 48.8600, lon: 2.3565 }, owned: {}, ecus: 0, scouts: [], lastBooster: null, dayOffset: 0, done: {}, doneArr: {}, hidden: {}, test: !HOSTED });
+const DEFAULT_STATE = () => ({ pos: { lat: 48.8600, lon: 2.3565 }, owned: {}, ecus: 0, scouts: [], lastBooster: null, dayOffset: 0, done: {}, hidden: {}, test: !HOSTED });
 function load() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -399,8 +387,8 @@ function prepare(pl, mp) {
   for (const p of parkRings) for (const r of p.rings) { const P = PARK_PATHS[p.c] || PARK_PATHS.park; P.moveTo(r[0], r[1]); for (let j = 2; j < r.length; j += 2) P.lineTo(r[j], r[j + 1]); P.closePath(); }
   const ringsToPath = (P, rings) => { for (const r of rings) { for (let j = 0; j < r.length; j += 2) { const q = proj(decLat(r[j]), decLon(r[j + 1])); j ? P.lineTo(q[0], q[1]) : P.moveTo(q[0], q[1]); } P.closePath(); } };
   if (mp.arr && mp.arr.length) {
-    ARR_PATH = new Path2D(); mp.arr.forEach(a => { ringsToPath(ARR_PATH, a.r); const P = new Path2D(); ringsToPath(P, a.r); ARR_PATHS[a.n] = P; });
-    ARR_P = mp.arr.filter(a => a.at && a.at[0]).map(a => [a.n + (a.n === "1" ? "er" : "e"), proj(a.at[0], a.at[1]), a.n]);
+    ARR_PATH = new Path2D(); mp.arr.forEach(a => ringsToPath(ARR_PATH, a.r));
+    ARR_P = mp.arr.filter(a => a.at && a.at[0]).map(a => [a.n + (a.n === "1" ? "er" : "e"), proj(a.at[0], a.at[1])]);
   }
   if (mp.water && mp.water.length) { WATER_PATH = new Path2D(); mp.water.forEach(rs => ringsToPath(WATER_PATH, rs)); }
   MONDE_PATHS = mondeRings.map(rs => { const P = new Path2D(); for (const r of rs) { P.moveTo(r[0], r[1]); for (let j = 2; j < r.length; j += 2) P.lineTo(r[j], r[j + 1]); P.closePath(); } return P; });
@@ -424,7 +412,6 @@ function prepare(pl, mp) {
     }
     gridAdd(Math.floor(it.p[0] / CELL), Math.floor(it.p[1] / CELL), idx);
     BYID.set(it.i, it);
-    if (isStreet(it) && it.r) (ARR_ITEMS[it.r] = ARR_ITEMS[it.r] || []).push(idx);
     const f = kd.f; TOTALS[f] = (TOTALS[f] || 0) + 1;
   });
 }
@@ -598,21 +585,8 @@ function draw() {
   ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * tx, dpr * ty);
   if (!ML) drawBase(s);
   else if (ARR_PATH) { ctx.strokeStyle = "rgba(23,43,77,.5)"; ctx.lineWidth = 1.6 / s; ctx.setLineDash([6 / s, 4 / s]); ctx.stroke(ARR_PATH); ctx.setLineDash([]); }
-  drawConquest(s);
   if (MONDE_PATHS.length && !S.hidden.patrimoine) { ctx.strokeStyle = "rgba(181,134,42,.85)"; ctx.lineWidth = 2 / s; ctx.setLineDash([6 / s, 4 / s]); MONDE_PATHS.forEach(P => ctx.stroke(P)); ctx.setLineDash([]); }
   drawOverlay(s, tx, ty, W, H);
-}
-/* Arrondissements complétés (dorés) et rues visitées, coloriées selon leur rareté */
-function drawConquest(s) {
-  for (const n in S.doneArr) { const P = ARR_PATHS[n]; if (!P) continue; ctx.fillStyle = "rgba(181,134,42,.13)"; ctx.fill(P); ctx.strokeStyle = "rgba(181,134,42,.9)"; ctx.lineWidth = 2.5 / s; ctx.stroke(P); }
-  if (!STREET_BY_ID.size) return;
-  if (!S.hidden.rues) {
-    ctx.lineJoin = "round"; ctx.lineWidth = 2.6 / s; ctx.globalAlpha = .88;
-    for (const id in S.owned) { const P = STREET_BY_ID.get(id); if (!P) continue; const c = getTierColor(S.owned[id].tier); ctx.fillStyle = c; ctx.strokeStyle = c; ctx.fill(P); ctx.stroke(P); }
-    ctx.globalAlpha = 1;
-  }
-  const sel = ui.sel && STREET_BY_ID.get(ui.sel);
-  if (sel) { ctx.lineWidth = 7 / s; ctx.strokeStyle = "rgba(246,242,232,.95)"; ctx.stroke(sel); ctx.lineWidth = 2.5 / s; ctx.strokeStyle = "#172B4D"; ctx.stroke(sel); }
 }
 function drawBase(s) {
   ctx.fillStyle = STREET_PATH ? "#C3B391" : "#CDBF9F"; ctx.fill(ARR_PATH || PARIS);
@@ -635,7 +609,7 @@ function drawOverlay(s, tx, ty, W, H) {
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.font = "600 14px 'Barlow Condensed', 'Arial Narrow', sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "rgba(23,43,77,.4)";
-  if (s < 60) { if (ML) ctx.fillStyle = "rgba(23,43,77,.55)"; for (const [n, p, k] of ARR_P) { const pc = k && ui.ready ? arrPct(k) : 0; ctx.fillText(pc ? `${n} · ${pc} %` : n, p[0] * s + tx, p[1] * s + ty); } }
+  if (s < 60) { if (ML) ctx.fillStyle = "rgba(23,43,77,.55)"; for (const [n, p] of ARR_P) ctx.fillText(n, p[0] * s + tx, p[1] * s + ty); }
   if (!ML && STREET_LABELS.length && s >= 70) drawStreetLabels();
   if (!ui.ready) return;
   const small = s < 10, mid = s < 30;
@@ -647,7 +621,7 @@ function drawOverlay(s, tx, ty, W, H) {
   ctx.globalAlpha = small ? .55 : .85;
   for (const it of ITEMS) {
     const x = it.p[0] * s + tx, y = it.p[1] * s + ty;
-    if (x < -pad || y < -pad || x > W + pad || y > H + pad || !visible(it) || isStreet(it)) continue;
+    if (x < -pad || y < -pad || x > W + pad || y > H + pad || !visible(it)) continue;
     if (S.owned[it.i]) { owned.push([it, x, y]); continue; }
     ctx.fillStyle = FAMS[KINDS[it.k].f].color;
     if (small) ctx.fillRect(x - rFree, y - rFree, rFree * 2, rFree * 2);
@@ -666,7 +640,7 @@ function drawOverlay(s, tx, ty, W, H) {
     ctx.lineWidth = 1; ctx.strokeStyle = "#F6F2E8"; ctx.stroke();
   }
   const sel = ui.sel && BYID.get(ui.sel);
-  if (sel && !STREET_BY_ID.has(sel.i)) { const x = sel.p[0] * s + tx, y = sel.p[1] * s + ty; ctx.beginPath(); ctx.arc(x, y, Math.max(11, rOwn + 5), 0, 6.283); ctx.lineWidth = 3; ctx.strokeStyle = "#F6F2E8"; ctx.stroke(); ctx.lineWidth = 1.2; ctx.strokeStyle = "#172B4D"; ctx.stroke(); }
+  if (sel) { const x = sel.p[0] * s + tx, y = sel.p[1] * s + ty; ctx.beginPath(); ctx.arc(x, y, Math.max(11, rOwn + 5), 0, 6.283); ctx.lineWidth = 3; ctx.strokeStyle = "#F6F2E8"; ctx.stroke(); ctx.lineWidth = 1.2; ctx.strokeStyle = "#172B4D"; ctx.stroke(); }
   // joueur
   const px = P[0] * s + tx, py = P[1] * s + ty;
   if (!S.test && ui.acc && ui.gps === "ok") { const ra = ui.acc / MPU * s; if (ra > 14) { ctx.beginPath(); ctx.arc(px, py, ra, 0, 6.283); ctx.fillStyle = "rgba(45,99,176,.12)"; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = "rgba(45,99,176,.5)"; ctx.stroke(); } }
@@ -811,62 +785,17 @@ function onTap(px, py) {
     const d = Math.hypot(it.p[0] * v.s + v.tx - px, it.p[1] * v.s + v.ty - py);
     if (d < bd) { bd = d; best = it; }
   }
-  if (!best) best = streetAt(wx, wy);
   if (best) { ui.sel = best.i === ui.sel ? null : best.i; render(); renderSheet(); return; }
   if (S.test) { const [lat, lon] = unproj(wx, wy); movePlayer(lat, lon); }
   else if (ui.sel) { ui.sel = null; render(); renderSheet(); }
 }
-function streetAt(wx, wy) {
-  if (!STREET_BY_ID.size) return null;
-  const tol = 14 / v.s; let hit = null;
-  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.lineWidth = tol * 2;
-  for (const i of candidates(wx, wy, tol)) {
-    const it = ITEMS[i]; if (!isStreet(it) || !visible(it)) continue;
-    const P = STREET_BY_ID.get(it.i); if (!P) continue;
-    if (ctx.isPointInPath(P, wx, wy)) { hit = it; break; }
-    if (!hit && ctx.isPointInStroke(P, wx, wy)) hit = it;
-  }
-  ctx.restore(); return hit;
-}
-function movePlayer(lat, lon) { S.pos = { lat, lon }; ui.cycle = 0; save(); autoStreets(); renderSheet(); render(); if (ui.view === "reperage") renderReperage(); }
-
-/* Capture automatique des rues : il suffit d'y passer (GPS précis à 40 m ou mieux). Une visite par jour fait monter le niveau. */
-function arrPct(r) { const a = ARR_ITEMS[r]; if (!a || !a.length) return 0; let n = 0; for (const i of a) if (S.owned[ITEMS[i].i]) n++; return Math.floor(n / a.length * 100); }
-function checkArr(it) {
-  const r = it.r; if (!r || S.doneArr[r] || !ARR_ITEMS[r]) return null;
-  if (!ARR_ITEMS[r].every(i => S.owned[ITEMS[i].i])) return null;
-  S.doneArr[r] = true; S.ecus += ARR_BONUS;
-  return `${r}${r === "1" ? "er" : "e"} arrondissement entièrement parcouru (+${ARR_BONUS} écus)`;
-}
-function autoStreets() {
-  if (!ui.ready || (!S.test && !(ui.acc != null && ui.acc <= 40))) return;
-  const P = proj(S.pos.lat, S.pos.lon), d0 = today(), news = [], ups = [], msgs = [];
-  let gain = 0;
-  for (const i of candidates(P[0], P[1], .6)) {
-    const it = ITEMS[i]; if (!isStreet(it) || distTo(it, P) > it.rad) continue;
-    const o = S.owned[it.i];
-    if (!o) {
-      const si = S.scouts.findIndex(x => x.id === it.i);
-      let reward = REWARD[it.t] || 10; if (si >= 0) { reward *= 2; S.scouts.splice(si, 1); }
-      S.owned[it.i] = { tier: it.t, lvl: 1, first: d0, last: d0, at: Date.now() };
-      S.ecus += reward; gain += reward; news.push(it);
-      msgs.push(...checkCollections(it)); const m = checkArr(it); if (m) msgs.push(m);
-    } else if (o.last !== d0 && o.lvl < MAX_LEVEL) { o.lvl += 1; o.last = d0; S.ecus += 5; gain += 5; ups.push(it); }
-  }
-  if (!news.length && !ups.length) return;
-  save(); refreshAll();
-  const parts = [];
-  if (news.length === 1) parts.push(`Nouvelle rue : ${news[0].n} (${TIERS[news[0].t]})`);
-  else if (news.length) parts.push(`${news.length} nouvelles rues : ${news.map(x => x.n).join(", ")}`);
-  if (ups.length) parts.push(ups.length === 1 ? `${ups[0].n} passe niveau ${S.owned[ups[0].i].lvl}` : `${ups.length} rues gagnent un niveau`);
-  toast([...parts, `+${gain} écus`, ...msgs].join(" · "));
-}
+function movePlayer(lat, lon) { S.pos = { lat, lon }; ui.cycle = 0; save(); renderSheet(); render(); if (ui.view === "reperage") renderReperage(); }
 
 /* ---------- Cible et capture ---------- */
 let targetCache = null;
 function inRangeList() {
   const P = proj(S.pos.lat, S.pos.lon), out = [];
-  for (const i of candidates(P[0], P[1], 1.5)) { const it = ITEMS[i]; if (!visible(it) || isStreet(it)) continue; const d = distTo(it, P); if (d <= it.rad) out.push({ it, d }); }
+  for (const i of candidates(P[0], P[1], 1.5)) { const it = ITEMS[i]; if (!visible(it)) continue; const d = distTo(it, P); if (d <= it.rad) out.push({ it, d }); }
   out.sort((a, b) => (S.owned[a.it.i] ? 1 : 0) - (S.owned[b.it.i] ? 1 : 0) || a.d - b.d);
   return out;
 }
@@ -874,7 +803,7 @@ function nearestFree() {
   const P = proj(S.pos.lat, S.pos.lon);
   for (let r = CELL; r <= CELL * 24; r *= 2) {
     let best = null, bd = Infinity;
-    for (const i of candidates(P[0], P[1], r)) { const it = ITEMS[i]; if (S.owned[it.i] || !visible(it) || isStreet(it)) continue; const d = distTo(it, P); if (d < bd) { bd = d; best = it; } }
+    for (const i of candidates(P[0], P[1], r)) { const it = ITEMS[i]; if (S.owned[it.i] || !visible(it)) continue; const d = distTo(it, P); if (d < bd) { bd = d; best = it; } }
     if (best && bd <= r * MPU) return { it: best, d: bd };
   }
   return null;
@@ -914,7 +843,7 @@ function renderSheet() {
   else if (o.last === d0) { label = "Revenez demain"; note = `Niveau ${o.lvl}. Une visite par jour fait monter la carte d'un niveau.`; }
   else { label = `Niveau ${o.lvl + 1}`; enabled = true; note = "Nouvelle visite : la carte gagne un niveau."; }
   const kd = KINDS[it.k];
-  const named = !!o || isStreet(it) || (ui.sel === it.i && !S.scouts.some(x => x.id === it.i));
+  const named = !!o || it.k === "rue" || (ui.sel === it.i && !S.scouts.some(x => x.id === it.i));
   const title = esc(named ? it.n : kd.l);
   const sub = [named && it.n !== kd.l ? esc(kd.l) : "", it.site && it.site !== it.n ? esc(it.site) : "", it.r ? arrLabel(it.r) : ""].filter(Boolean).join(" · ");
   sheet.innerHTML = `<div class="sheet-text">
@@ -942,7 +871,7 @@ function act(id) {
     let reward = REWARD[it.t] || 10; if (si >= 0) { reward *= 2; S.scouts.splice(si, 1); }
     S.owned[id] = { tier: it.t, lvl: 1, first: d0, last: d0, at: Date.now() };
     S.ecus += reward;
-    const msgs = checkCollections(it); const ma = isStreet(it) ? checkArr(it) : null; if (ma) msgs.push(ma);
+    const msgs = checkCollections(it);
     save(); refreshAll();
     showReveal(it, { kicker: `Nouvelle carte · ${FAMS[famOf(it)].name}`, title: TIERS[it.t], sub: `+${reward} écus${si >= 0 ? " (repérage accompli, gain doublé)" : ""}` }, msgs);
   } else if (o.last !== d0 && o.lvl < MAX_LEVEL) {
@@ -999,7 +928,6 @@ function renderCollection() {
     <h2>Ma collection</h2>
     <p class="lede">${nf(ownedIds.length)} carte${ownedIds.length > 1 ? "s" : ""} sur ${nf(ITEMS.length)} lieux de Paris. Approchez-vous d'un lieu pour le capturer, revenez les jours suivants pour monter son niveau.</p>
     <div class="tiers">${TIERS.map((n, i) => `<div class="tier" style="background:var(${TIER_VAR[i]})"><b>${nf(tierCounts[i])}</b><span>${n}</span></div>`).join("")}</div>
-    <div class="panel"><h3>Rues parcourues par arrondissement</h3><div class="arrs">${Object.keys(ARR_ITEMS).sort((a, b) => a - b).map(r => { const pc = arrPct(r), done = !!S.doneArr[r]; return `<div class="arr${done ? " done" : ""}"><b>${r}<sup>${r === "1" ? "er" : "e"}</sup></b><span>${done ? "Complet" : pc + " %"}</span><i><u style="width:${done ? 100 : pc}%"></u></i></div>`; }).join("")}</div><p class="lede" style="margin-top:8px;font-size:13px">Passez dans une rue pour la capturer : elle se colore sur la carte selon sa rareté. Toutes les rues d'un arrondissement : +${ARR_BONUS} écus.</p></div>
     <div class="panel"><h3>Familles</h3><div class="fams">
       <button class="fam" data-f="" aria-pressed="${!fam}" style="--c:var(--navy)"><i></i><strong>Toutes</strong><span class="n">${nf(ownedIds.length)} / ${nf(ITEMS.length)}</span></button>
       ${Object.entries(FAMS).map(([k, f]) => { const n = ownedBy[k] || 0, t = TOTALS[k] || 0; return `<button class="fam" data-f="${k}" aria-pressed="${fam === k}" style="--c:${f.color}"><i></i><strong>${esc(f.name)}</strong><span class="n">${nf(n)} / ${nf(t)}</span><span class="bar"><b style="width:${t ? Math.max(n ? 1 : 0, n / t * 100) : 0}%"></b></span></button>`; }).join("")}
@@ -1037,7 +965,7 @@ function openBooster() {
   const d0 = today(); if (S.lastBooster === d0) return;
   const P = proj(S.pos.lat, S.pos.lon), taken = new Set(S.scouts.map(s => s.id));
   const pool = [];
-  for (const i of candidates(P[0], P[1], CELL * 6)) { const it = ITEMS[i]; if (S.owned[it.i] || taken.has(it.i) || !visible(it) || isStreet(it)) continue; pool.push({ it, d: distTo(it, P) }); }
+  for (const i of candidates(P[0], P[1], CELL * 6)) { const it = ITEMS[i]; if (S.owned[it.i] || taken.has(it.i) || !visible(it)) continue; pool.push({ it, d: distTo(it, P) }); }
   pool.sort((a, b) => a.d - b.d);
   const pick = [], famUsed = new Set();
   for (const c of pool) { if (pick.length >= BOOSTER_SIZE) break; const f = famOf(c.it); if (!famUsed.has(f)) { famUsed.add(f); pick.push(c); } }
@@ -1123,17 +1051,15 @@ new ResizeObserver(resize).observe(wrap);
 resize(); setView("collection"); renderTestbar();
 let streetsLoaded = false;
 function loadStreets() {
-  if (streetsLoaded || !ui.ready) return; streetsLoaded = true;
+  if (streetsLoaded || ML || !ui.ready) return; streetsLoaded = true;
   fetch("data/streets.json").then(r => r.json()).then(st => {
     const P = new Path2D();
     for (const e of st.streets) {
-      const Q = new Path2D();
       for (const r of e.r) {
         let a = 0, b = 0;
-        for (let j = 0; j < r.length; j += 2) { a += r[j]; b += r[j + 1]; const q = proj(decLat(a), decLon(b)); if (j) { P.lineTo(q[0], q[1]); Q.lineTo(q[0], q[1]); } else { P.moveTo(q[0], q[1]); Q.moveTo(q[0], q[1]); } }
-        P.closePath(); Q.closePath();
+        for (let j = 0; j < r.length; j += 2) { a += r[j]; b += r[j + 1]; const q = proj(decLat(a), decLon(b)); j ? P.lineTo(q[0], q[1]) : P.moveTo(q[0], q[1]); }
+        P.closePath();
       }
-      if (e.i) STREET_BY_ID.set(e.i, Q);
       const it = e.i && BYID.get(e.i);
       if (it && e.len > 0.4) { let ang = e.ang; if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI; STREET_LABELS.push({ x: it.p[0], y: it.p[1], ang, len: e.len, t: it.n }); }
     }
