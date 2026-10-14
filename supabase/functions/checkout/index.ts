@@ -1,10 +1,12 @@
 // Parisquest : crée une session de paiement Stripe Checkout pour le joueur connecté.
 // Déploiement : supabase functions deploy checkout
-// Secrets requis : STRIPE_SECRET_KEY, SITE_URL, STRIPE_PRICE_PASS, STRIPE_PRICE_E500, STRIPE_PRICE_E1200, STRIPE_PRICE_E3500, STRIPE_PRICE_E8000
+// Secrets requis : STRIPE_SECRET_KEY, SITE_URL, STRIPE_PRICE_PASS, STRIPE_PRICE_P10, STRIPE_PRICE_PARIGO, STRIPE_PRICE_E500, STRIPE_PRICE_E1200, STRIPE_PRICE_E3500, STRIPE_PRICE_E8000
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
 const OFFERS: Record<string, { mode: "payment" | "subscription"; env: string }> = {
   pass: { mode: "subscription", env: "STRIPE_PRICE_PASS" },
+  p10: { mode: "payment", env: "STRIPE_PRICE_P10" },
+  parigo: { mode: "payment", env: "STRIPE_PRICE_PARIGO" },
   e500: { mode: "payment", env: "STRIPE_PRICE_E500" },
   e1200: { mode: "payment", env: "STRIPE_PRICE_E1200" },
   e3500: { mode: "payment", env: "STRIPE_PRICE_E3500" },

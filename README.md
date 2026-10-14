@@ -16,7 +16,8 @@ Pour essayer sans se déplacer, ajoutez `?test` à l'adresse : un mode test appa
 - **Visites** : aller sur place valide une carte possédée (+10 écus). Première visite : sceau « Visité ». Ensuite, une visite par jour fait monter la carte d'un niveau, jusqu'au niveau 5.
 - **Collections** : 38 séries thématiques, 50 écus à la complétion. **Succès** : 13 objectifs à paliers (10, 25, 60, 150 écus).
 - **Bataille** : deck de 5 cartes, 5 terrains annoncés, +30 % pour la famille du terrain.
-- **Boutique** : écus (500 pour 0,99 € à 8 000 pour 9,99 €), Pass PariGo à 4 € par mois (un paquet toutes les 2 minutes), Pack PariGo à 500 écus (20 cartes, 40 / 30 / 18 / 9 / 3 %, une Épique ou mieux garantie). Les écus ne sont jamais reconvertibles en argent.
+- **Boutique** : 10 paquets pour 0,99 € (ajoutés à la réserve, sans limite) ; Pass PariGo à 4 € par mois (un paquet toutes les 2 minutes et un Pack PariGo offert chaque jour) ; Pack PariGo à 1,99 € (20 cartes, 40 / 30 / 18 / 9 / 3 %, une Épique ou mieux garantie) ; écus de 0,99 € à 9,99 € pour le Marché. Les écus ne sont jamais reconvertibles en argent.
+- **Après un paquet** : le paquet suivant s'ouvre directement depuis l'écran d'ouverture, ou s'affiche grisé avec le chrono. Chaque nouvelle carte montre une mini-carte du quartier.
 
 Tant que le serveur n'est pas branché, le jeu tourne en démo locale : la progression et le compteur restent dans le navigateur et ne sont pas protégés. Avec le serveur (dossier `supabase/`), les paquets, le tirage et la collection sont gérés côté serveur et impossibles à tromper. La position du joueur n'est jamais enregistrée.
 

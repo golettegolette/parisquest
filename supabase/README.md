@@ -22,11 +22,11 @@ Claude crée alors `supabase/config.json`, reconstruit le site et le publie. Les
 ## Paiements (Stripe), dans un second temps
 
 1. Créer un compte [Stripe](https://stripe.com) (en mode test d'abord) et renseigner l'entreprise qui encaisse.
-2. **Produits** : créer 5 prix. Pass PariGo, 4 € par mois (récurrent). Écus : 500 à 0,99 €, 1 200 à 1,99 €, 3 500 à 4,99 €, 8 000 à 9,99 € (paiement unique). Noter les identifiants `price_…`.
+2. **Produits** : créer 7 prix. Pass PariGo, 4 € par mois (récurrent). Paiement unique : 10 paquets à 0,99 €, Pack PariGo à 1,99 €, écus 500 à 0,99 €, 1 200 à 1,99 €, 3 500 à 4,99 €, 8 000 à 9,99 €. Noter les identifiants `price_…`.
 3. Installer la [CLI Supabase](https://supabase.com/docs/guides/cli), puis dans le dossier `supabase/` :
    - `supabase functions deploy checkout`
    - `supabase functions deploy stripe-webhook --no-verify-jwt`
-   - `supabase secrets set STRIPE_SECRET_KEY=sk_… SITE_URL=https://golettegolette.github.io/parisquest/ STRIPE_PRICE_PASS=price_… STRIPE_PRICE_E500=price_… STRIPE_PRICE_E1200=price_… STRIPE_PRICE_E3500=price_… STRIPE_PRICE_E8000=price_…`
+   - `supabase secrets set STRIPE_SECRET_KEY=sk_… SITE_URL=https://golettegolette.github.io/parisquest/ STRIPE_PRICE_PASS=price_… STRIPE_PRICE_P10=price_… STRIPE_PRICE_PARIGO=price_… STRIPE_PRICE_E500=price_… STRIPE_PRICE_E1200=price_… STRIPE_PRICE_E3500=price_… STRIPE_PRICE_E8000=price_…`
 4. **Stripe → Developers → Webhooks** : point d'arrivée `https://<projet>.supabase.co/functions/v1/stripe-webhook`, événements `checkout.session.completed` et `invoice.paid`. Copier le secret `whsec_…` puis `supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_…`.
 5. Ajouter `"payments": true` dans `config.json` : la boutique bascule sur le vrai paiement.
 

@@ -6,7 +6,7 @@
 -- Tout passe par des fonctions exécutées sur le serveur :
 --   pack_state()        état de la réserve de paquets, solde d'écus, Pass (horloge du serveur)
 --   open_pack()         ouvre un paquet : décompte + tirage des 5 cartes côté serveur
---   open_parigo_pack()  Pack PariGo : 500 écus, 20 cartes, meilleures chances
+--   open_parigo_pack()  Pack PariGo : 20 cartes, meilleures chances (offert chaque jour avec le Pass, sinon acheté)
 --   visit_place()       valide une visite sur place (distance + une fois par jour)
 --   credit_purchase()   crédite un achat Stripe (réservée au webhook, clé service_role)
 -- Les tables sont en lecture seule pour les joueurs (Row Level Security).
@@ -36,6 +36,10 @@ create table if not exists public.players (
 );
 alter table public.players add column if not exists ecus integer not null default 0;
 alter table public.players add column if not exists pass_until timestamptz;
+-- Paquets achetés (hors réserve, sans limite), Packs PariGo achetés, dernier Pack PariGo offert par le Pass
+alter table public.players add column if not exists bonus_packs integer not null default 0 check (bonus_packs >= 0);
+alter table public.players add column if not exists parigo_packs integer not null default 0 check (parigo_packs >= 0);
+alter table public.players add column if not exists parigo_free_on date;
 
 -- ---------- Collection ----------
 create table if not exists public.user_cards (
@@ -116,6 +120,8 @@ returns jsonb language sql stable as $$
     'packs', p.packs, 'cap', 10,
     'next_at', case when p.packs >= 10 then null else p.anchor + make_interval(secs => case when p.pass_until > now() then 120 else 300 end) end,
     'ecus', p.ecus, 'pass_until', p.pass_until,
+    'bonus_packs', p.bonus_packs, 'parigo_packs', p.parigo_packs,
+    'parigo_free', (p.pass_until > now() and p.parigo_free_on is distinct from (now() at time zone 'Europe/Paris')::date),
     'server_now', now())
 $$;
 
@@ -134,10 +140,16 @@ declare
   p public.players; r double precision; t smallint; pid text; is_new boolean; drawn jsonb := '[]'::jsonb; i integer;
 begin
   p := public._pq_player();
-  if p.packs < 1 then raise exception 'aucun paquet disponible' using errcode = 'P0001'; end if;
-  if p.packs >= 10 then p.anchor := now(); end if;
-  p.packs := p.packs - 1;
-  update public.players set packs = p.packs, anchor = p.anchor where user_id = p.user_id;
+  -- la réserve gratuite d'abord (le chrono repart plus tôt), puis les paquets achetés
+  if p.packs >= 1 then
+    if p.packs >= 10 then p.anchor := now(); end if;
+    p.packs := p.packs - 1;
+  elsif p.bonus_packs >= 1 then
+    p.bonus_packs := p.bonus_packs - 1;
+  else
+    raise exception 'aucun paquet disponible' using errcode = 'P0001';
+  end if;
+  update public.players set packs = p.packs, anchor = p.anchor, bonus_packs = p.bonus_packs where user_id = p.user_id;
 
   for i in 1..5 loop
     r := random();
@@ -186,16 +198,21 @@ begin
 end $$;
 
 -- ---------- Boutique ----------
--- Pack PariGo : 500 écus, 20 cartes. Chances : Légendaire 3 %, Épique 9 %, Rare 18 %, Peu commune 30 %, Commune 40 %.
--- Au moins une Épique (ou mieux) garantie.
+-- Pack PariGo : 20 cartes. Chances : Légendaire 3 %, Épique 9 %, Rare 18 %, Peu commune 30 %, Commune 40 %.
+-- Au moins une Épique (ou mieux) garantie. Un offert par jour avec le Pass PariGo, sinon acheté 1,99 € (stock).
 create or replace function public.open_parigo_pack()
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare
   p public.players; r double precision; t smallint; pid text; is_new boolean; drawn jsonb := '[]'::jsonb; i integer; best smallint := 0;
 begin
   p := public._pq_player();
-  if p.ecus < 500 then raise exception 'il faut 500 écus' using errcode = 'P0001'; end if;
-  p.ecus := p.ecus - 500;
+  if p.pass_until > now() and p.parigo_free_on is distinct from (now() at time zone 'Europe/Paris')::date then
+    p.parigo_free_on := (now() at time zone 'Europe/Paris')::date;     -- Pack du jour offert par le Pass
+  elsif p.parigo_packs >= 1 then
+    p.parigo_packs := p.parigo_packs - 1;
+  else
+    raise exception 'aucun pack PariGo disponible' using errcode = 'P0001';
+  end if;
   for i in 1..20 loop
     r := random();
     t := case when r < 0.03 then 4 when r < 0.12 then 3 when r < 0.30 then 2 when r < 0.60 then 1 else 0 end;
@@ -208,7 +225,7 @@ begin
     drawn := drawn || jsonb_build_object('id', pid, 'tier', t, 'new', is_new);
     if not is_new then p.ecus := p.ecus + 5; end if;
   end loop;
-  update public.players set ecus = p.ecus where user_id = p.user_id;
+  update public.players set ecus = p.ecus, parigo_packs = p.parigo_packs, parigo_free_on = p.parigo_free_on where user_id = p.user_id;
   insert into public.pack_log (user_id, cards) values (p.user_id, jsonb_build_object('parigo', true, 'cards', drawn));
   return public._pq_state_json(p) || jsonb_build_object('cards', drawn);
 end $$;
@@ -222,27 +239,32 @@ create table if not exists public.purchases (
   pass_until timestamptz,
   created_at timestamptz not null default now()
 );
+alter table public.purchases add column if not exists packs integer not null default 0;
+alter table public.purchases add column if not exists parigo integer not null default 0;
 alter table public.purchases enable row level security;
 drop policy if exists "mes achats" on public.purchases;
 create policy "mes achats" on public.purchases for select using (auth.uid() = user_id);
 revoke insert, update, delete, truncate on public.purchases from anon, authenticated;
 
-create or replace function public.credit_purchase(p_user uuid, p_ref text, p_ecus integer, p_pass_until timestamptz default null)
+drop function if exists public.credit_purchase(uuid, text, integer, timestamptz);
+create or replace function public.credit_purchase(p_user uuid, p_ref text, p_ecus integer default 0, p_pass_until timestamptz default null, p_packs integer default 0, p_parigo integer default 0)
 returns boolean language plpgsql security definer set search_path = public as $$
 declare inserted boolean;
 begin
-  insert into public.purchases (ref, user_id, ecus, pass_until) values (p_ref, p_user, coalesce(p_ecus, 0), p_pass_until)
+  insert into public.purchases (ref, user_id, ecus, pass_until, packs, parigo) values (p_ref, p_user, coalesce(p_ecus, 0), p_pass_until, coalesce(p_packs, 0), coalesce(p_parigo, 0))
     on conflict (ref) do nothing returning true into inserted;
   if inserted is null then return false; end if;           -- déjà crédité
   insert into public.players (user_id) values (p_user) on conflict (user_id) do nothing;
   update public.players
      set ecus = ecus + greatest(coalesce(p_ecus, 0), 0),
+         bonus_packs = bonus_packs + greatest(coalesce(p_packs, 0), 0),
+         parigo_packs = parigo_packs + greatest(coalesce(p_parigo, 0), 0),
          pass_until = case when p_pass_until is null then pass_until else greatest(coalesce(pass_until, now()), p_pass_until) end
    where user_id = p_user;
   return true;
 end $$;
-revoke execute on function public.credit_purchase(uuid, text, integer, timestamptz) from public, anon, authenticated;
-grant execute on function public.credit_purchase(uuid, text, integer, timestamptz) to service_role;
+revoke execute on function public.credit_purchase(uuid, text, integer, timestamptz, integer, integer) from public, anon, authenticated;
+grant execute on function public.credit_purchase(uuid, text, integer, timestamptz, integer, integer) to service_role;
 
 -- Seules les fonctions publiques sont appelables par les joueurs connectés.
 revoke execute on function public._pq_accrue(public.players), public._pq_player(), public._pq_state_json(public.players) from public, anon, authenticated;

@@ -5,7 +5,11 @@
 //   événements : checkout.session.completed, invoice.paid
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
-const ECUS: Record<string, number> = { e500: 500, e1200: 1200, e3500: 3500, e8000: 8000 };
+// Ce que crédite chaque offre à paiement unique
+const GOODS: Record<string, { ecus?: number; packs?: number; parigo?: number }> = {
+  e500: { ecus: 500 }, e1200: { ecus: 1200 }, e3500: { ecus: 3500 }, e8000: { ecus: 8000 },
+  p10: { packs: 10 }, parigo: { parigo: 1 },
+};
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 const enc = new TextEncoder();
 
@@ -28,9 +32,10 @@ async function stripe(path: string) {
 }
 // Fin de période d'un abonnement (champ déplacé sur les lignes dans les versions récentes de l'API)
 const periodEnd = (sub: any) => sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end;
-async function credit(user: string, ref: string, ecus: number, passUntilSec?: number) {
+async function credit(user: string, ref: string, g: { ecus?: number; packs?: number; parigo?: number }, passUntilSec?: number) {
   const { error } = await admin.rpc("credit_purchase", {
-    p_user: user, p_ref: ref, p_ecus: ecus, p_pass_until: passUntilSec ? new Date(passUntilSec * 1000).toISOString() : null,
+    p_user: user, p_ref: ref, p_ecus: g.ecus ?? 0, p_packs: g.packs ?? 0, p_parigo: g.parigo ?? 0,
+    p_pass_until: passUntilSec ? new Date(passUntilSec * 1000).toISOString() : null,
   });
   if (error) throw new Error(error.message);
 }
@@ -45,11 +50,11 @@ Deno.serve(async (req) => {
       const user = s.client_reference_id ?? s.metadata?.user_id;
       if (!user) return new Response("sans joueur", { status: 200 });
       if (s.mode === "payment" && s.payment_status === "paid") {
-        const n = ECUS[s.metadata?.sku];
-        if (n) await credit(user, s.id, n);
+        const g = GOODS[s.metadata?.sku];
+        if (g) await credit(user, s.id, g);
       } else if (s.mode === "subscription" && s.subscription) {
         const sub = await stripe(`subscriptions/${s.subscription}`);
-        await credit(user, s.id, 0, periodEnd(sub));
+        await credit(user, s.id, {}, periodEnd(sub));
       }
     } else if (ev.type === "invoice.paid") {
       // Renouvellement mensuel du Pass
@@ -58,7 +63,7 @@ Deno.serve(async (req) => {
       if (subId) {
         const sub = await stripe(`subscriptions/${subId}`);
         const user = sub.metadata?.user_id;
-        if (user) await credit(user, inv.id, 0, periodEnd(sub));
+        if (user) await credit(user, inv.id, {}, periodEnd(sub));
       }
     }
     return new Response("ok", { status: 200 });
