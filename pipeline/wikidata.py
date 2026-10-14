@@ -102,7 +102,7 @@ MATCH = {
     "lieuculture": ["decouverte", "theatre"], "monument": ["monde"], "edifice": ["monde"],
 }
 # types qui ne créent pas de carte s'ils ne trouvent pas de correspondance
-ENRICH_ONLY = {"voie", "station", "escalier", "plaque", "arbre"}
+ENRICH_ONLY = {"voie", "station", "escalier", "plaque", "arbre", "voieprivee", "passage"}  # voies privées et passages : jamais de nouvelle carte
 
 NEW_KINDS = {
     # code : (famille, libellé, illustration, rayon de capture)
@@ -123,12 +123,11 @@ NEW_KINDS = {
     "magasin": ("quartier", "Commerce", "awning", 40),
     "loisir": ("quartier", "Loisirs", "ball", 80),
     "fantome": ("transport", "Station fantôme", "station", 60),
-    "voieprivee": ("rues", "Voie privée", "plaque", 35),
 }
 # type Wikidata -> type de carte existant quand aucune correspondance n'est trouvée
 CREATE_AS = {"parc": "parc", "jpart": "jpart", "culte": "culte", "musee": "musee", "biblio": "biblio", "conserv": "conserv",
              "theatre": "theatre", "cimetiere": "cimetiere", "mairie": "mairie", "fontaine": "fontaine", "piscine": "piscine",
-             "bains": "bains", "sport": "sport", "marchesp": "marchesp", "vestige": "vestige", "passage": "voieprivee",
+             "bains": "bains", "sport": "sport", "marchesp": "marchesp", "vestige": "vestige",
              "funiculaire": "station"}
 
 STOP = set("le la les l de du des d et a au aux en sur sous saint sainte st ste paris parisien parisienne".split())

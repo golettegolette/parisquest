@@ -228,7 +228,6 @@ KINDS = {
     "baignade": ("eau", "Baignade", "pool", 80),
     "bains": ("eau", "Bains-douches", "pool", 40),
     "rue": ("rues", "Voie", "plaque", 35),
-    "escalier": ("rues", "Escalier", "stairs", 35),
     "plaque": ("memoire", "Plaque", "memorial", 25),
     "femme": ("memoire", "Femme illustre", "cameo", 40),
     "vestige": ("patrimoine", "Vestige", "amphora", 40),
@@ -457,7 +456,8 @@ def nearest_street(lat, lon):
 
 
 # ---------- 6. Escaliers (regroupés par proximité) ----------
-esc = load("plan-de-voirie-voies-en-escalier.json")
+# Retirés du jeu le 14/10/2026 (décision de Timothée) : les escaliers restaient seuls en points dans la famille Rues.
+esc = []
 pts_esc = []
 for r in esc:
     la, lo = pt(r)
@@ -735,7 +735,6 @@ COLS = [
     ("eau", "Bains-douches", "Les bains-douches municipaux", sel("bains")),
     ("rues", "Rues médiévales", "Voies nommées avant le XVIᵉ siècle", [items.index(it) for it in rues if it.get("_si") and it["_si"] <= 15]),
     ("rues", "Hameaux, sentes et belvédères", "Les types de voies les plus rares", [items.index(it) for it in rues if it.get("_ty") in ("belvédère", "hameau", "sente", "balcon", "péristyle", "terrasse", "placette", "ruelle", "sentier")]),
-    ("rues", "Escaliers de Montmartre", "Toutes les voies en escalier du 18ᵉ", sel("escalier", lambda it: it.get("r") == "18")),
     ("memoire", "Femmes de sciences", "Scientifiques illustres", sel("femme", lambda it: it["x"].get("th") == "Scientifiques")),
     ("memoire", "Femmes de lettres", "Écrivaines illustres", sel("femme", lambda it: it["x"].get("th") == "Femmes de lettres")),
     ("memoire", "Sportives", "Championnes illustres", sel("femme", lambda it: it["x"].get("th") == "Sportives")),

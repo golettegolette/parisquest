@@ -1,5 +1,5 @@
 // Parisquest : cache hors ligne de l'application et des données (réseau d'abord, cache en secours).
-const CACHE = "parisquest-202610141435";
+const CACHE = "parisquest-202610141453";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./data/places.json", "./data/map.json", "./data/streets.json"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

@@ -1,6 +1,6 @@
 # Parisquest
 
-Collectionnez Paris, lieu par lieu. Parisquest transforme 18 000 lieux réels de la capitale (arbres remarquables, fontaines, plaques commémoratives, monuments, stations, passages couverts, cafés historiques…) en cartes à collectionner. Pour capturer une carte, il faut se rendre sur place : le téléphone vérifie que vous êtes à portée grâce au GPS.
+Collectionnez Paris, lieu par lieu. Parisquest transforme près de 18 000 lieux réels de la capitale (arbres remarquables, fontaines, plaques commémoratives, monuments, stations, passages couverts, cafés historiques…) en cartes à collectionner. Pour capturer une carte, il faut se rendre sur place : le téléphone vérifie que vous êtes à portée grâce au GPS.
 
 ## Jouer
 
@@ -23,7 +23,7 @@ La progression est enregistrée dans le navigateur du téléphone. La position d
 | Chemin | Rôle |
 |---|---|
 | `index.html` | le jeu complet (une seule page) |
-| `data/places.json` | les 18 288 lieux, familles, types et collections |
+| `data/places.json` | les 17 919 lieux, familles, types et collections |
 | `data/map.json` | contours des parcs, arrondissements, Seine et biens UNESCO |
 | `data/streets.json` | emprises des voies (plan de secours si le fond de carte ne charge pas) |
 | `manifest.webmanifest`, `sw.js`, `icons/` | installation sur l'écran d'accueil et usage hors ligne |
