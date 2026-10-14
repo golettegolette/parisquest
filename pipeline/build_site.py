@@ -15,7 +15,7 @@ if CONF.exists():
     c = json.loads(CONF.read_text())
     if c.get("url") and c.get("anonKey"):
         SUPABASE = ('\n<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>\n'
-                    f'<script>window.PQ_SUPABASE = {json.dumps({"url": c["url"], "anonKey": c["anonKey"]})};</script>')
+                    f'<script>window.PQ_SUPABASE = {json.dumps({"url": c["url"], "anonKey": c["anonKey"], "payments": bool(c.get("payments"))})};</script>')
 ML_VER = "4.7.1"
 
 index = f"""<!doctype html>

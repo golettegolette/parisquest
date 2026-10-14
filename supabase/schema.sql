@@ -3,10 +3,12 @@
 -- À exécuter une fois dans Supabase : SQL Editor → New query → coller → Run.
 --
 -- Principe : le téléphone n'écrit jamais directement dans la base.
--- Tout passe par trois fonctions exécutées sur le serveur :
---   pack_state()   état de la réserve de paquets (horloge du serveur)
---   open_pack()    ouvre un paquet : décompte + tirage des 5 cartes côté serveur
---   visit_place()  valide une visite sur place (distance + une fois par jour)
+-- Tout passe par des fonctions exécutées sur le serveur :
+--   pack_state()        état de la réserve de paquets, solde d'écus, Pass (horloge du serveur)
+--   open_pack()         ouvre un paquet : décompte + tirage des 5 cartes côté serveur
+--   open_parigo_pack()  Pack PariGo : 500 écus, 20 cartes, meilleures chances
+--   visit_place()       valide une visite sur place (distance + une fois par jour)
+--   credit_purchase()   crédite un achat Stripe (réservée au webhook, clé service_role)
 -- Les tables sont en lecture seule pour les joueurs (Row Level Security).
 -- =====================================================================
 
@@ -28,8 +30,12 @@ create table if not exists public.players (
   user_id    uuid primary key references auth.users (id) on delete cascade,
   packs      smallint not null default 5 check (packs between 0 and 10),
   anchor     timestamptz not null default now(),
+  ecus       integer not null default 0 check (ecus >= 0),     -- solde d'écus (achats + gains), jamais négatif
+  pass_until timestamptz,                                       -- Pass PariGo actif jusqu'à cette date
   created_at timestamptz not null default now()
 );
+alter table public.players add column if not exists ecus integer not null default 0;
+alter table public.players add column if not exists pass_until timestamptz;
 
 -- ---------- Collection ----------
 create table if not exists public.user_cards (
@@ -70,21 +76,21 @@ create policy "mes paquets" on public.pack_log for select using (auth.uid() = us
 revoke insert, update, delete, truncate on public.places, public.players, public.user_cards, public.pack_log from anon, authenticated;
 
 -- ---------- Règles des paquets ----------
--- Un paquet toutes les 300 s, 10 au maximum, 5 offerts à l'inscription.
+-- Un paquet toutes les 300 s (120 s avec le Pass PariGo), 10 au maximum, 5 offerts à l'inscription.
 -- Le compteur ne tourne pas quand la réserve est pleine : il repart de zéro au premier paquet ouvert.
 create or replace function public._pq_accrue(p public.players)
 returns public.players language plpgsql as $$
-declare k integer;
+declare k integer; per integer := case when p.pass_until > now() then 120 else 300 end;
 begin
   if p.packs >= 10 then
     p.anchor := now();
     return p;
   end if;
-  k := floor(extract(epoch from (now() - p.anchor)) / 300)::integer;
+  k := floor(extract(epoch from (now() - p.anchor)) / per)::integer;
   if k > 0 then
     p.packs := least(10, p.packs + k);
     if p.packs >= 10 then p.anchor := now();
-    else p.anchor := p.anchor + make_interval(secs => k * 300);
+    else p.anchor := p.anchor + make_interval(secs => k * per);
     end if;
   end if;
   return p;
@@ -108,7 +114,8 @@ create or replace function public._pq_state_json(p public.players)
 returns jsonb language sql stable as $$
   select jsonb_build_object(
     'packs', p.packs, 'cap', 10,
-    'next_at', case when p.packs >= 10 then null else p.anchor + interval '300 seconds' end,
+    'next_at', case when p.packs >= 10 then null else p.anchor + make_interval(secs => case when p.pass_until > now() then 120 else 300 end) end,
+    'ecus', p.ecus, 'pass_until', p.pass_until,
     'server_now', now())
 $$;
 
@@ -140,8 +147,10 @@ begin
       on conflict (user_id, place_id) do update set copies = public.user_cards.copies + 1
       returning (xmax = 0) into is_new;
     drawn := drawn || jsonb_build_object('id', pid, 'tier', t, 'new', is_new);
+    if not is_new then p.ecus := p.ecus + 5; end if;     -- doublon : +5 écus
   end loop;
 
+  update public.players set ecus = p.ecus where user_id = p.user_id;
   insert into public.pack_log (user_id, cards) values (p.user_id, drawn);
   return public._pq_state_json(p) || jsonb_build_object('cards', drawn);
 end $$;
@@ -172,10 +181,70 @@ begin
          last_visit = today
    where user_id = uid and place_id = p_id
    returning * into c;
+  update public.players set ecus = ecus + 10 where user_id = uid;   -- visite : +10 écus
   return jsonb_build_object('level', c.level, 'visits', c.visits, 'last_visit', c.last_visit);
 end $$;
 
--- Seules les trois fonctions publiques sont appelables par les joueurs connectés.
+-- ---------- Boutique ----------
+-- Pack PariGo : 500 écus, 20 cartes. Chances : Légendaire 3 %, Épique 9 %, Rare 18 %, Peu commune 30 %, Commune 40 %.
+-- Au moins une Épique (ou mieux) garantie.
+create or replace function public.open_parigo_pack()
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare
+  p public.players; r double precision; t smallint; pid text; is_new boolean; drawn jsonb := '[]'::jsonb; i integer; best smallint := 0;
+begin
+  p := public._pq_player();
+  if p.ecus < 500 then raise exception 'il faut 500 écus' using errcode = 'P0001'; end if;
+  p.ecus := p.ecus - 500;
+  for i in 1..20 loop
+    r := random();
+    t := case when r < 0.03 then 4 when r < 0.12 then 3 when r < 0.30 then 2 when r < 0.60 then 1 else 0 end;
+    if i = 20 and best < 3 and t < 3 then t := 3; end if;      -- garantie
+    best := greatest(best, t);
+    select id into pid from public.places where tier = t order by random() limit 1;
+    insert into public.user_cards (user_id, place_id) values (p.user_id, pid)
+      on conflict (user_id, place_id) do update set copies = public.user_cards.copies + 1
+      returning (xmax = 0) into is_new;
+    drawn := drawn || jsonb_build_object('id', pid, 'tier', t, 'new', is_new);
+    if not is_new then p.ecus := p.ecus + 5; end if;
+  end loop;
+  update public.players set ecus = p.ecus where user_id = p.user_id;
+  insert into public.pack_log (user_id, cards) values (p.user_id, jsonb_build_object('parigo', true, 'cards', drawn));
+  return public._pq_state_json(p) || jsonb_build_object('cards', drawn);
+end $$;
+
+-- Achats en euros : appelée uniquement par le webhook Stripe (clé service_role).
+-- Idempotente : un même paiement (p_ref) ne crédite qu'une fois, même si Stripe renvoie l'événement.
+create table if not exists public.purchases (
+  ref        text primary key,             -- identifiant Stripe (session ou facture)
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  ecus       integer not null default 0,
+  pass_until timestamptz,
+  created_at timestamptz not null default now()
+);
+alter table public.purchases enable row level security;
+drop policy if exists "mes achats" on public.purchases;
+create policy "mes achats" on public.purchases for select using (auth.uid() = user_id);
+revoke insert, update, delete, truncate on public.purchases from anon, authenticated;
+
+create or replace function public.credit_purchase(p_user uuid, p_ref text, p_ecus integer, p_pass_until timestamptz default null)
+returns boolean language plpgsql security definer set search_path = public as $$
+declare inserted boolean;
+begin
+  insert into public.purchases (ref, user_id, ecus, pass_until) values (p_ref, p_user, coalesce(p_ecus, 0), p_pass_until)
+    on conflict (ref) do nothing returning true into inserted;
+  if inserted is null then return false; end if;           -- déjà crédité
+  insert into public.players (user_id) values (p_user) on conflict (user_id) do nothing;
+  update public.players
+     set ecus = ecus + greatest(coalesce(p_ecus, 0), 0),
+         pass_until = case when p_pass_until is null then pass_until else greatest(coalesce(pass_until, now()), p_pass_until) end
+   where user_id = p_user;
+  return true;
+end $$;
+revoke execute on function public.credit_purchase(uuid, text, integer, timestamptz) from public, anon, authenticated;
+grant execute on function public.credit_purchase(uuid, text, integer, timestamptz) to service_role;
+
+-- Seules les fonctions publiques sont appelables par les joueurs connectés.
 revoke execute on function public._pq_accrue(public.players), public._pq_player(), public._pq_state_json(public.players) from public, anon, authenticated;
-revoke execute on function public.pack_state(), public.open_pack(), public.visit_place(text, double precision, double precision, real) from public, anon;
-grant execute on function public.pack_state(), public.open_pack(), public.visit_place(text, double precision, double precision, real) to authenticated;
+revoke execute on function public.pack_state(), public.open_pack(), public.open_parigo_pack(), public.visit_place(text, double precision, double precision, real) from public, anon;
+grant execute on function public.pack_state(), public.open_pack(), public.open_parigo_pack(), public.visit_place(text, double precision, double precision, real) to authenticated;

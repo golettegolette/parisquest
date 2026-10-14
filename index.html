@@ -167,7 +167,8 @@ sup { font-size: .62em; line-height: 0; }
 .filters { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
 .filters input, .filters select, .field { font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 7px; border: 1.5px solid var(--joint); background: var(--white); color: var(--ink); min-width: 0; width: 100%; box-sizing: border-box; }
 .filters input[type=search] { grid-column: 1 / -1; }
-.locked .face { filter: grayscale(.85); opacity: .55; }
+.locked .face-in { filter: grayscale(.9); opacity: .55; }
+.locked .face { opacity: .9; }
 .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
 .stat { background: var(--stone-2); border-radius: 8px; padding: 8px 10px; box-shadow: inset 0 0 0 1px var(--joint); }
 .stat b { display: block; font-family: var(--f-plaque); font-size: 22px; color: var(--navy); font-variant-numeric: tabular-nums; line-height: 1.1; }
@@ -356,6 +357,88 @@ sup { font-size: .62em; line-height: 0; }
 .reveal { animation: reveal .7s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes reveal { from { transform: translateY(24px) scale(.82) rotateY(70deg); opacity: 0; } to { transform: none; opacity: 1; } }
 .glow .face { box-shadow: 0 0 0 .1em var(--glow), 0 0 1.6em .3em var(--glow); }
+/* Rareté : cadre de couleur, étoiles, reflets pour Épique, feuille d'or animée pour Légendaire */
+.face-in { position: relative; }
+.card.r1 .face { background: linear-gradient(140deg, #5FA383, #2D6448 45%, #3F7D62); }
+.card.r2 .face { background: linear-gradient(140deg, #7FA8E8, #2D63B0 40%, #1E4C8F 75%, #4E82D0); }
+.card.r3 .face { background: linear-gradient(140deg, #C792DA, #7A3F8F 40%, #5B2C6E 70%, #A66BBE); box-shadow: 0 0 .7em rgba(122,63,143,.55), 0 .15em .5em rgba(10,16,30,.25); }
+.card.r4 .face { background: linear-gradient(120deg, #8C6418, #E9C46A 22%, #FFF3C4 35%, #C79A3A 50%, #FFE7A0 66%, #A97B22 82%, #E9C46A); background-size: 260% 260%; animation: foil 4s linear infinite; box-shadow: 0 0 1em rgba(233,196,106,.75), 0 .15em .5em rgba(10,16,30,.25); }
+.card.r4 .face-in { box-shadow: inset 0 0 0 .12em #F7DE95; }
+.card.r3 .face-in::after, .card.r4 .face-in::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.26) 45%, rgba(255,255,255,.05) 52%, transparent 62%); background-size: 260% 100%; animation: sheen 3.6s ease-in-out infinite; mix-blend-mode: screen; z-index: 3; }
+.card.r4 .face-in::after { background: linear-gradient(110deg, transparent 28%, rgba(255,240,190,.45) 44%, rgba(255,255,255,.12) 52%, transparent 64%); background-size: 240% 100%; animation-duration: 2.6s; }
+.stars { letter-spacing: .02em; margin-right: .3em; }
+.card.r4 .c-band { background: linear-gradient(90deg, #8C6418, #E9C46A, #8C6418) !important; color: #2B1E05; }
+@keyframes foil { 0% { background-position: 0% 50%; } 100% { background-position: 260% 50%; } }
+@keyframes sheen { 0%, 15% { background-position: 130% 0; } 60%, 100% { background-position: -130% 0; } }
+
+/* Ouverture de paquet */
+.opener { position: fixed; inset: 0; z-index: 40; background: radial-gradient(ellipse at 50% 40%, #233A60 0%, #0E1522 70%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px)); overflow: hidden; user-select: none; -webkit-user-select: none; }
+.op-stage { position: relative; width: min(300px, 72vw, calc((100vh - 230px) * 5 / 7)); aspect-ratio: 5 / 7; }
+.op-title { color: var(--white); text-align: center; min-height: 52px; }
+.op-title .k { font-family: var(--f-plaque); font-size: 13px; letter-spacing: .16em; text-transform: uppercase; opacity: .75; }
+.op-title .t { font-family: var(--f-plaque); font-size: 28px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; line-height: 1.05; }
+.op-row { display: flex; align-items: center; gap: 12px; }
+.op-arrow { width: 46px; height: 46px; border-radius: 50%; border: 0; background: rgba(246,242,232,.12); color: var(--white); font-size: 22px; box-shadow: inset 0 0 0 1.5px rgba(246,242,232,.35); }
+.op-arrow:disabled { opacity: .25; }
+.op-count { color: var(--white); font-family: var(--f-plaque); letter-spacing: .1em; font-size: 15px; min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
+.op-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.bpack { position: absolute; inset: 0; animation: bpIn .32s cubic-bezier(.2,1.4,.4,1) both; }
+.bp-top, .bp-body { position: absolute; left: 0; right: 0; background: linear-gradient(135deg, #2D63B0, #172B4D 45%, #1F4A36 100%); box-shadow: inset 0 0 0 3px #F6F2E8, 0 10px 30px rgba(0,0,0,.45); }
+.bp-top { top: 0; height: 16%; border-radius: 12px 12px 4px 4px; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 6px, transparent 6px 12px), linear-gradient(135deg, #2D63B0, #172B4D); }
+.bp-body { top: 15%; bottom: 0; border-radius: 4px 4px 14px 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--white); font-family: var(--f-plaque); text-transform: uppercase; overflow: hidden; }
+.bp-body::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,.25) 48%, transparent 60%); background-size: 250% 100%; animation: sheen 1.4s ease-in-out infinite; }
+.bp-body small { font-size: 13px; letter-spacing: .2em; opacity: .85; }
+.bp-body b { font-size: 64px; line-height: .9; letter-spacing: .03em; }
+.bp-body span { font-size: 15px; letter-spacing: .12em; padding: 3px 10px; border-radius: 4px; background: rgba(246,242,232,.15); }
+.bpack.parigo .bp-top, .bpack.parigo .bp-body { background: linear-gradient(135deg, #E9C46A, #8C6418 45%, #172B4D 100%); }
+.bpack.shake { animation: bpShake .26s linear both; }
+.bpack.tear .bp-top { animation: bpTop .38s cubic-bezier(.3,.6,.4,1) forwards; }
+.bpack.tear .bp-body { animation: bpBody .38s ease-in forwards; }
+@keyframes bpIn { from { transform: translateY(40px) scale(.7) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes bpShake { 0%, 100% { transform: none; } 20% { transform: rotate(-3deg) translateX(-4px); } 40% { transform: rotate(3deg) translateX(4px); } 60% { transform: rotate(-2deg) translateX(-3px); } 80% { transform: rotate(2deg) translateX(3px); } }
+@keyframes bpTop { to { transform: translate(60px, -120px) rotate(28deg); opacity: 0; } }
+@keyframes bpBody { to { transform: translateY(70vh); opacity: 0; } }
+.ostack { position: absolute; inset: 0; }
+.ostack .under { position: absolute; inset: 0; border-radius: 9px; background: var(--green); box-shadow: inset 0 0 0 3px var(--navy), 0 4px 10px rgba(0,0,0,.35); }
+.ocard { position: absolute; inset: 0; perspective: 1400px; cursor: pointer; animation: ocIn .22s ease-out both; }
+.ocard .oflip { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .42s cubic-bezier(.3,.7,.3,1); transform: rotateY(180deg); }
+.ocard.up .oflip { transform: none; }
+.ocard .pface { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.ocard .pcover { transform: rotateY(180deg); }
+.ocard.leave { animation: ocOut .2s ease-in forwards; }
+.ocard.back { animation: ocBack .2s ease-out both; }
+@keyframes ocIn { from { transform: translateY(14px) scale(.96); } to { transform: none; } }
+@keyframes ocOut { to { transform: translateX(-60%) rotate(-10deg); opacity: 0; } }
+@keyframes ocBack { from { transform: translateX(-40%) rotate(-8deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.ocard .ptag { top: -11px; font-size: 12px; }
+.ocard.up.t4 { animation: legend .5s ease-out; }
+@keyframes legend { 0% { transform: scale(1); } 35% { transform: scale(1.08) rotate(-1deg); } 100% { transform: scale(1); } }
+.oflash { position: absolute; inset: -40%; pointer-events: none; border-radius: 50%; background: radial-gradient(circle, rgba(255,243,196,.95) 0%, rgba(233,196,106,.6) 25%, transparent 60%); animation: flash .6s ease-out forwards; z-index: 5; }
+.oflash.epic { background: radial-gradient(circle, rgba(220,180,240,.85) 0%, rgba(122,63,143,.45) 25%, transparent 60%); }
+@keyframes flash { from { opacity: 1; transform: scale(.4); } to { opacity: 0; transform: scale(1.3); } }
+.spark { position: absolute; left: 50%; top: 45%; width: 7px; height: 7px; border-radius: 50%; background: var(--sc, #FFE7A0); box-shadow: 0 0 8px 2px var(--sc, #FFE7A0); pointer-events: none; z-index: 6; animation: spark var(--sd, .8s) cubic-bezier(.15,.7,.3,1) forwards; }
+.spark.star { width: 10px; height: 10px; border-radius: 0; clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%); box-shadow: none; }
+@keyframes spark { 0% { transform: translate(-50%, -50%) scale(.4); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.1) rotate(200deg); opacity: 0; } }
+.op-summary { width: min(860px, 100%); max-height: calc(100vh - 170px); overflow-y: auto; padding: 12px 4px; }
+.tier-label { font-family: var(--f-plaque); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+
+/* Boutique */
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.offer { border-radius: 10px; padding: 14px; background: var(--white); box-shadow: inset 0 0 0 1.5px var(--joint); display: flex; flex-direction: column; gap: 6px; }
+.offer b { font-family: var(--f-plaque); font-size: 22px; color: var(--navy); line-height: 1.05; }
+.offer small { color: var(--ink-2); font-size: 12.5px; }
+.offer .price { font-family: var(--f-plaque); font-size: 18px; font-weight: 700; color: var(--green-2); }
+.offer.hl { box-shadow: inset 0 0 0 2px var(--r4); }
+.premium { border-radius: 12px; padding: 18px; color: var(--white); background: linear-gradient(135deg, #172B4D, #1F4A36 60%, #8C6418); box-shadow: 0 0 0 3px var(--r4), inset 0 0 0 1.5px var(--white); display: flex; flex-direction: column; gap: 8px; margin: 3px; }
+.premium h3 { color: #F7DE95; margin: 0; }
+.premium .big { font-family: var(--f-plaque); font-size: 30px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; line-height: 1; }
+.premium ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.5; }
+.odds { display: grid; grid-template-columns: auto repeat(5, minmax(0, 1fr)); gap: 4px 6px; font-size: 12.5px; align-items: center; }
+.odds span { text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.odds .h { font-family: var(--f-plaque); font-weight: 600; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--white); border-radius: 4px; padding: 2px 0; }
+.legal { font-size: 11.5px; line-height: 1.5; color: var(--ink-2); }
+.badge-pass { display: inline-block; font-family: var(--f-plaque); font-weight: 700; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #2B1E05; background: linear-gradient(90deg, #E9C46A, #FFF3C4, #E9C46A); padding: 2px 7px; border-radius: 4px; vertical-align: 2px; }
+@media (prefers-reduced-motion: reduce) { .card.r4 .face, .card.r3 .face-in::after, .card.r4 .face-in::after, .bp-body::after { animation: none; } }
 .toast { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 70px); transform: translateX(-50%); z-index: 30; max-width: min(440px, calc(100vw - 32px)); background: var(--ink); color: var(--white); padding: 10px 14px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.3); font-size: 14px; line-height: 1.35; }
 @media (prefers-reduced-motion: reduce) { .card .flip { transition: none; } .reveal { animation: none; } }
 </style>
@@ -368,7 +451,7 @@ sup { font-size: .62em; line-height: 0; }
     <div class="counters">
       <div class="counter"><b id="cntCards">0</b><span>cartes</span></div>
       <div class="counter"><b id="cntPacks">0</b><span id="cntNext">paquets</span></div>
-      <div class="counter"><b id="cntEcus">0</b><span>écus</span></div>
+      <button class="counter" id="cntEcusBtn" style="border:0;font:inherit" aria-label="Boutique"><b id="cntEcus">0</b><span>écus</span></button>
     </div>
   </header>
 
@@ -411,6 +494,12 @@ sup { font-size: .62em; line-height: 0; }
 </nav>
 </div>
 
+<div class="opener" id="opener" hidden role="dialog" aria-modal="true" aria-label="Ouverture du paquet">
+  <div class="op-title" id="opTitle"></div>
+  <div class="op-stage" id="opStage"></div>
+  <div class="op-row" id="opNav"><button class="op-arrow" id="opPrev" aria-label="Carte précédente">←</button><span class="op-count" id="opCount"></span><button class="op-arrow" id="opNext" aria-label="Carte suivante">→</button></div>
+  <div class="op-actions"><button class="btn light" id="opAll">Tout voir</button><button class="btn" id="opClose">Fermer</button></div>
+</div>
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-box">
     <div class="modal-msg" id="modalMsg"></div>
@@ -451,7 +540,10 @@ const TIER_VAR = ["--r0", "--r1", "--r2", "--r3", "--r4"];
 const REWARD = [10, 15, 25, 40, 60];
 const MAX_LEVEL = 5;
 /* Paquets : 5 cartes, un paquet toutes les 5 minutes, 10 en réserve au maximum, 5 offerts au départ. */
-const PACK_SIZE = 5, PACK_PERIOD = 300000, PACK_CAP = 10, PACK_START = 5;
+const PACK_SIZE = 5, PACK_PERIOD = 300000, PASS_PERIOD = 120000, PACK_CAP = 10, PACK_START = 5;
+/* Pass PariGo : un paquet toutes les 2 minutes. Pack PariGo : 20 cartes, meilleures chances, une Épique ou mieux garantie. */
+const PARIGO_SIZE = 20, PARIGO_PRICE = 500, PARIGO_ODDS = [.40, .30, .18, .09, .03];
+const ECU_OFFERS = [{ id: "e500", ecus: 500, eur: "0,99 €" }, { id: "e1200", ecus: 1200, eur: "1,99 €", bonus: "+20 %" }, { id: "e3500", ecus: 3500, eur: "4,99 €", bonus: "+40 %", hl: true }, { id: "e8000", ecus: 8000, eur: "9,99 €", bonus: "+60 %" }];
 const TIER_ODDS = [.60, .25, .10, .04, .01]; // chance par carte : Commune → Légendaire (identique côté serveur)
 const CONIFERS = new Set(["Pinus", "Taxus", "Araucaria", "Taxodium", "Cedrus", "Sequoia", "Sequoiadendron", "Abies", "Picea", "Cupressus", "Metasequoia", "Larix", "Calocedrus", "Cryptomeria", "Thuja", "Juniperus", "Pseudotsuga", "Cephalotaxus", "Chamaecyparis", "Torreya"]);
 const DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
@@ -467,7 +559,9 @@ const HOSTED = !!window.PQ_HOSTED;
 /* Serveur (Supabase) : quand il est branché, les paquets, le tirage et la collection vivent côté serveur. */
 const SB_CONF = window.PQ_SUPABASE && window.PQ_SUPABASE.url ? window.PQ_SUPABASE : null;
 const TEST_ALLOWED = !SB_CONF && (!HOSTED || /[?&]test\b/.test(location.search));
-const DEFAULT_STATE = () => ({ pos: { lat: 48.8600, lon: 2.3565 }, owned: {}, packs: { n: PACK_START, anchor: Date.now(), seen: Date.now() }, scouts: [], dayOffset: 0, done: {}, hidden: {}, test: !HOSTED, profile: { name: "", show: [], since: Date.now() }, stats: { packs: 0, won: 0, lost: 0 }, settings: { unowned: true, hiacc: true }, achSeen: {}, deck: [] });
+const passActive = () => SB_CONF ? !!(ui.server && ui.server.passUntil && ui.server.passUntil > Date.now() + ui.clockOffset) : S.pass && S.pass.until > Date.now();
+const packPeriod = () => passActive() ? PASS_PERIOD : PACK_PERIOD;
+const DEFAULT_STATE = () => ({ pos: { lat: 48.8600, lon: 2.3565 }, owned: {}, packs: { n: PACK_START, anchor: Date.now(), seen: Date.now() }, scouts: [], dayOffset: 0, done: {}, hidden: {}, test: !HOSTED, profile: { name: "", show: [], since: Date.now() }, stats: { packs: 0, won: 0, lost: 0 }, settings: { unowned: true, hiacc: true, sound: true }, wallet: { bought: 0, spent: 0 }, pass: { until: 0 }, achSeen: {}, deck: [] });
 function load() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -482,7 +576,7 @@ let S = load();
 if (!TEST_ALLOWED) { S.test = false; S.dayOffset = 0; }
 if (!HOSTED) S.test = true;
 S.scouts = [];
-{ const d = DEFAULT_STATE(); for (const k of ["profile", "stats", "settings"]) S[k] = Object.assign(d[k], S[k] || {}); S.achSeen = S.achSeen || {}; S.deck = S.deck || []; }
+{ const d = DEFAULT_STATE(); for (const k of ["profile", "stats", "settings", "wallet", "pass"]) S[k] = Object.assign(d[k], S[k] || {}); S.achSeen = S.achSeen || {}; S.deck = S.deck || []; }
 const ui = { sel: null, cycle: 0, mobile: "map", view: "collection", fam: null, shown: 48, resetArmed: false, gpsWatch: null, ready: false, gps: "off", acc: null, firstFix: true, user: null, server: null, clockOffset: 0, opening: false, visiting: false, lastRefresh: 0 };
 /* Jour de jeu (date de Paris). Avec le serveur, on suit son horloge, pas celle du téléphone. */
 const todayKey = () => new Date(Date.now() + (SB_CONF ? ui.clockOffset : S.dayOffset * 86400000)).toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" });
@@ -676,7 +770,7 @@ function cardFront(it, o) {
     <div class="c-latin">${esc(it.s || "")}</div>
     <div class="c-art">${artSVG(it)}${HOSTED && it.ph ? `<img src="${esc(photoThumb(it.ph))}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<div class="pips" aria-label="Niveau ${lvl}">${pips}</div>${badge ? `<span class="lab">${esc(badge)}</span>` : ""}${o && o.copies > 1 ? `<span class="copies">×${o.copies}</span>` : ""}</div>
     <div class="c-stats" style="--n:${Math.max(1, fs.length)}">${fs.map(([l, v]) => `<div><small>${esc(l)}</small><b class="${String(v).length > 9 ? "long" : ""}">${esc(v)}</b></div>`).join("")}</div>
-    <div class="c-band" style="background:var(${TIER_VAR[tier]})"><b>${TIERS[tier]}</b><span>${esc(it.site || "")}</span></div>
+    <div class="c-band" style="background:var(${TIER_VAR[tier]})"><b><span class="stars">${"★".repeat(tier + 1)}</span>${TIERS[tier]}</b><span>${esc(it.site || "")}</span></div>
   </div></div>`;
 }
 function cardBack(it) {
@@ -690,7 +784,8 @@ function cardBack(it) {
   </div></div>`;
 }
 function cardHTML(it, { flippable = false, extraClass = "" } = {}) {
-  return `<div class="card ${extraClass}"><div class="flip">${cardFront(it, S.owned[it.i])}${flippable ? cardBack(it) : ""}</div></div>`;
+  const o = S.owned[it.i];
+  return `<div class="card r${o ? o.tier : it.t} ${extraClass}"><div class="flip">${cardFront(it, o)}${flippable ? cardBack(it) : ""}</div></div>`;
 }
 
 /* ---------- Carte (canvas) ---------- */
@@ -1016,12 +1111,16 @@ async function visitCard(id) {
     : { kicker: "Visite du jour", title: `Niveau ${o.lvl}`, sub: o.lvl >= MAX_LEVEL ? "Niveau maximum atteint." : "Revenez un autre jour pour monter encore." }, am);
 }
 /* Écus : calculés à partir de la collection (rareté, doublons, niveaux, collections complètes), jamais stockés. */
-function ecus() {
+/* Écus gagnés : +5 par doublon, +10 par visite, +50 par série complète, succès. Solde = gagnés + achetés - dépensés. */
+function ecusEarned() {
   let e = 0;
-  for (const id in S.owned) { const o = S.owned[id]; if (!BYID.has(id)) continue; e += REWARD[o.tier] || 10; e += ((o.copies || 1) - 1) * 5; e += (o.vis ? 10 : 0) + ((o.lvl || 1) - 1) * 10; }
+  for (const id in S.owned) { const o = S.owned[id]; if (!BYID.has(id)) continue; e += ((o.copies || 1) - 1) * 5; e += (o.vis || 0) * 10; }
   for (let c = 0; c < COLS.length; c++) if (S.done[c]) e += 50;
-  e += achEcus();
-  return e;
+  return e + achEcus();
+}
+function ecus() {
+  if (SB_CONF && ui.server && ui.server.ecus != null) return ui.server.ecus;
+  return ecusEarned() + (S.wallet.bought || 0) - (S.wallet.spent || 0);
 }
 function checkCollections(it) {
   const msgs = [];
@@ -1115,17 +1214,17 @@ function localAccrue() {
   if (now < P.seen) now = P.seen; // horloge reculée : aucun paquet recrédité
   P.seen = now;
   if (P.n >= PACK_CAP) { P.anchor = now; return; }
-  const k = Math.floor((now - P.anchor) / PACK_PERIOD);
-  if (k > 0) { P.n = Math.min(PACK_CAP, P.n + k); P.anchor = P.n >= PACK_CAP ? now : P.anchor + k * PACK_PERIOD; }
+  const per = packPeriod(), k = Math.floor((now - P.anchor) / per);
+  if (k > 0) { P.n = Math.min(PACK_CAP, P.n + k); P.anchor = P.n >= PACK_CAP ? now : P.anchor + k * per; }
 }
 function packInfo() {
   if (SB_CONF) { const st = ui.server; return st ? { n: st.packs, nextAt: st.nextAt == null ? null : st.nextAt - ui.clockOffset } : { n: 0, nextAt: null, off: true }; }
-  localAccrue(); return { n: S.packs.n, nextAt: S.packs.n >= PACK_CAP ? null : S.packs.anchor + PACK_PERIOD };
+  localAccrue(); return { n: S.packs.n, nextAt: S.packs.n >= PACK_CAP ? null : S.packs.anchor + packPeriod() };
 }
 const mmss = ms => { const t = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
 const nextText = pi => pi.off ? "Connectez-vous pour recevoir vos paquets." : pi.nextAt == null ? "Réserve pleine : ouvrez un paquet pour relancer le compteur." : `Prochain paquet dans ${mmss(pi.nextAt - Date.now())}`;
 const stackHTML = n => Array.from({ length: PACK_CAP }, (_, i) => `<i class="${i < n ? "on" : ""}"></i>`).join("");
-function applyServerState(js) { ui.server = { packs: js.packs, nextAt: js.next_at ? Date.parse(js.next_at) : null }; ui.clockOffset = Date.parse(js.server_now) - Date.now(); }
+function applyServerState(js) { ui.server = { packs: js.packs, nextAt: js.next_at ? Date.parse(js.next_at) : null, ecus: js.ecus, passUntil: js.pass_until ? Date.parse(js.pass_until) : 0 }; ui.clockOffset = Date.parse(js.server_now) - Date.now(); }
 async function openPack() {
   if (ui.opening || !ui.ready) return;
   ui.opening = true;
@@ -1153,9 +1252,156 @@ async function openPack() {
     S.stats.packs += 1;
     const msgs = []; for (const c of cards) msgs.push(...checkCollections(c.it));
     msgs.push(...checkAchievements());
-    save(); refreshAll(); showPack(cards, msgs);
+    save(); refreshAll(); openBooster(cards, msgs, "standard");
   } finally { ui.opening = false; }
 }
+/* Pack PariGo : 500 écus, 20 cartes, tirage avec PARIGO_ODDS, au moins une Épique garantie. */
+const drawTierWith = odds => { const r = rnd(); let acc = 0; for (let t = 4; t >= 0; t--) { acc += odds[t]; if (r < acc) return t; } return 0; };
+async function buyParigoPack() {
+  if (ui.opening || !ui.ready) return;
+  if (SB_CONF) {
+    if (!SB || !ui.user) { toast("Connectez-vous d'abord (onglet Paquets)."); return; }
+    ui.opening = true;
+    try {
+      const { data, error } = await SB.rpc("open_parigo_pack");
+      if (error) { toast(/écus/i.test(error.message) ? `Il faut ${PARIGO_PRICE} écus.` : "Le serveur n'a pas répondu. Réessayez."); return; }
+      applyServerState(data);
+      const cards = [];
+      for (const c of data.cards) { const it = BYID.get(c.id); if (!it) continue; const o = S.owned[it.i]; if (o) o.copies = (o.copies || 1) + 1; else S.owned[it.i] = { tier: it.t, lvl: 1, copies: 1, vis: 0, last: null, at: Date.now() }; cards.push({ it, isNew: c.new }); }
+      S.stats.packs += 1; const msgs = []; for (const c of cards) msgs.push(...checkCollections(c.it)); msgs.push(...checkAchievements());
+      save(); refreshAll(); openBooster(cards, msgs, "parigo");
+    } finally { ui.opening = false; }
+    return;
+  }
+  if (ecus() < PARIGO_PRICE) { toast(`Il faut ${PARIGO_PRICE} écus. Votre solde : ${nf(ecus())}.`); return; }
+  ui.opening = true;
+  try {
+    S.wallet.spent += PARIGO_PRICE;
+    const drawn = [];
+    for (let k = 0; k < PARIGO_SIZE; k++) { const pool = TIER_POOL[drawTierWith(PARIGO_ODDS)]; const it = ITEMS[pool[Math.floor(rnd() * pool.length)]]; drawn.push(it); }
+    if (!drawn.some(it => it.t >= 3)) { const pool = TIER_POOL[3]; drawn[drawn.length - 1] = ITEMS[pool[Math.floor(rnd() * pool.length)]]; }
+    const cards = [];
+    for (const it of drawn) { const isNew = !S.owned[it.i]; const o = S.owned[it.i]; if (o) o.copies = (o.copies || 1) + 1; else S.owned[it.i] = { tier: it.t, lvl: 1, copies: 1, vis: 0, last: null, at: Date.now() }; cards.push({ it, isNew }); }
+    S.stats.packs += 1;
+    const msgs = []; for (const c of cards) msgs.push(...checkCollections(c.it));
+    msgs.push(...checkAchievements());
+    save(); refreshAll(); openBooster(cards, msgs, "parigo");
+  } finally { ui.opening = false; }
+}
+
+/* ---------- Ouverture animée ----------
+   Booster qui tremble et se déchire (son), puis pile de cartes face cachée, de la moins rare à la plus rare.
+   Toucher la carte ou flèche droite / espace : retourner, puis passer à la suivante. Flèche gauche : revenir. */
+let AC = null;
+function audio() { if (!S.settings.sound) return null; try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === "suspended") AC.resume(); return AC; } catch (e) { return null; } }
+function noise(a, dur, { type = "bandpass", f0 = 3000, f1 = 900, q = .8, vol = .5, crackle = 0 } = {}) {
+  const t = a.currentTime, n = Math.floor(a.sampleRate * dur), b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) { const env = Math.pow(1 - i / n, 1.4); d[i] = (Math.random() * 2 - 1) * env * (crackle && Math.random() < crackle ? 2.2 : 1); }
+  const src = a.createBufferSource(); src.buffer = b;
+  const fl = a.createBiquadFilter(); fl.type = type; fl.Q.value = q; fl.frequency.setValueAtTime(f0, t); fl.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  const g = a.createGain(); g.gain.value = vol; src.connect(fl).connect(g).connect(a.destination); src.start(t);
+}
+function tone(a, freq, at, dur, { type = "triangle", vol = .16, to = null } = {}) {
+  const t = a.currentTime + at, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t); if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .006); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + .02);
+}
+const SND = {
+  shake() { const a = audio(); if (a) noise(a, .18, { type: "highpass", f0: 1800, f1: 2400, vol: .12, crackle: .08 }); },
+  tear() { const a = audio(); if (!a) return; noise(a, .34, { f0: 4200, f1: 700, q: .7, vol: .55, crackle: .12 }); tone(a, 520, .02, .14, { type: "sine", vol: .3, to: 130 }); },
+  flip() { const a = audio(); if (a) noise(a, .07, { type: "highpass", f0: 2500, f1: 4000, vol: .22 }); },
+  reveal(t) {
+    const a = audio(); if (!a) return;
+    if (t === 1) tone(a, 880, 0, .35);
+    if (t === 2) { tone(a, 880, 0, .4); tone(a, 1320, .07, .5); }
+    if (t === 3) [784, 988, 1319, 1568].forEach((f, i) => tone(a, f, i * .06, .6, { vol: .15 }));
+    if (t === 4) { tone(a, 110, 0, .45, { type: "sine", vol: .35, to: 70 }); [1047, 1319, 1568, 2093, 2637, 3136].forEach((f, i) => tone(a, f, .04 + i * .05, .7, { vol: .13 })); noise(a, .8, { type: "highpass", f0: 6000, f1: 9000, vol: .09, crackle: .3 }); }
+  },
+};
+function sparks(n, colors, spread = 220) {
+  const st = $("opStage");
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement("span"); el.className = "spark" + (i % 3 === 0 ? " star" : "");
+    const ang = rnd() * Math.PI * 2, dist = spread * (.45 + rnd() * .75);
+    el.style.setProperty("--dx", `${Math.cos(ang) * dist}px`); el.style.setProperty("--dy", `${Math.sin(ang) * dist}px`);
+    el.style.setProperty("--sc", colors[i % colors.length]); el.style.setProperty("--sd", `${.55 + rnd() * .45}s`);
+    st.appendChild(el); setTimeout(() => el.remove(), 1100);
+  }
+}
+const OP = { cards: [], idx: 0, up: [], msgs: [], phase: "", kind: "" };
+function openBooster(cards, msgs, kind) {
+  OP.cards = cards.map((c, k) => ({ ...c, k })).sort((a, b) => a.it.t - b.it.t || (b.isNew - a.isNew) || a.k - b.k);
+  OP.idx = 0; OP.up = OP.cards.map(() => false); OP.msgs = msgs; OP.kind = kind; OP.phase = "booster";
+  $("opener").hidden = false; $("opNav").hidden = true; $("opAll").hidden = true;
+  $("opTitle").innerHTML = `<div class="k">${kind === "parigo" ? "Pack PariGo" : "Paquet"}</div><div class="t">${OP.cards.length} cartes</div>`;
+  $("opStage").innerHTML = `<div class="bpack${kind === "parigo" ? " parigo" : ""}" id="bpack"><div class="bp-top"></div><div class="bp-body"><small>Paris</small><b>PQ</b><span>${kind === "parigo" ? "PariGo · 20 cartes" : "5 cartes"}</span></div></div>`;
+  const bp = $("bpack");
+  clearTimeout(OP.t1); clearTimeout(OP.t2); clearTimeout(OP.t3);
+  OP.t1 = setTimeout(() => { bp.classList.add("shake"); SND.shake(); }, 300);
+  OP.t2 = setTimeout(() => { bp.classList.remove("shake"); bp.classList.add("tear"); SND.tear(); }, 580);
+  OP.t3 = setTimeout(showStack, 900);
+  $("opClose").focus();
+}
+function showStack() {
+  if (OP.phase !== "booster") return;
+  clearTimeout(OP.t1); clearTimeout(OP.t2); clearTimeout(OP.t3);
+  OP.phase = "stack"; $("opNav").hidden = false; $("opAll").hidden = false; drawOp("in");
+}
+function drawOp(anim) {
+  const n = OP.cards.length, c = OP.cards[OP.idx], up = OP.up[OP.idx], left = n - OP.idx - 1;
+  const under = Array.from({ length: Math.min(4, left) }, (_, i) => `<div class="under" style="transform:translate(${(i + 1) * 4}px, ${(i + 1) * 5}px) rotate(${(i + 1) * 1.2}deg);z-index:${-i - 1}"></div>`).join("");
+  $("opStage").innerHTML = `<div class="ostack">${under}<div class="ocard${up ? " up" : ""} t${c.it.t}${anim === "back" ? " back" : ""}" id="ocard"><div class="oflip"><div class="pface pcover">${coverHTML()}</div><div class="pface pfront"><span class="ptag${c.isNew ? " new" : ""}">${c.isNew ? "Nouvelle" : "Doublon"}</span>${cardHTML(c.it)}</div></div></div></div>`;
+  $("ocard").onclick = opStep;
+  $("opCount").textContent = `${OP.idx + 1} / ${n}`;
+  $("opPrev").disabled = OP.idx === 0;
+  $("opTitle").innerHTML = up ? `<div class="k">${esc(KINDS[c.it.k].l)} · ${c.isNew ? "nouvelle carte" : "doublon"}</div><div class="t tier-label" style="color:${c.it.t === 4 ? "#F7DE95" : c.it.t ? lighten(getTierColor(c.it.t)) : "#F6F2E8"}"><span style="display:block;font-size:.55em;letter-spacing:.2em">${"★".repeat(c.it.t + 1)}</span>${TIERS[c.it.t]}</div>` : `<div class="k">${OP.kind === "parigo" ? "Pack PariGo" : "Paquet"}</div><div class="t">Touchez pour retourner</div>`;
+}
+const lighten = hex => { const n = parseInt(hex.slice(1), 16), f = c => Math.min(255, Math.round(c + (255 - c) * .45)); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; };
+function revealCurrent() {
+  const c = OP.cards[OP.idx]; OP.up[OP.idx] = true;
+  const el = $("ocard"); el.classList.add("up"); SND.flip();
+  setTimeout(() => {
+    if (OP.phase !== "stack" || OP.cards[OP.idx] !== c) return;
+    drawOp(); SND.reveal(c.it.t);
+    const st = $("opStage");
+    if (c.it.t === 4) { const f = document.createElement("div"); f.className = "oflash"; st.appendChild(f); setTimeout(() => f.remove(), 700); sparks(34, ["#FFE7A0", "#E9C46A", "#FFFFFF", "#FFF3C4"], 260); if (navigator.vibrate) try { navigator.vibrate([30, 40, 60]); } catch (e) {} }
+    else if (c.it.t === 3) { const f = document.createElement("div"); f.className = "oflash epic"; st.appendChild(f); setTimeout(() => f.remove(), 700); sparks(16, ["#E3C2F0", "#B07CC6", "#FFFFFF"], 200); }
+    else if (c.it.t === 2) sparks(8, ["#BFD3F5", "#FFFFFF"], 150);
+  }, 210);
+}
+function opStep() {
+  if (OP.phase === "booster") { showStack(); return; }
+  if (OP.phase !== "stack") return;
+  if (!OP.up[OP.idx]) { revealCurrent(); return; }
+  if (OP.idx < OP.cards.length - 1) { const el = $("ocard"); el.classList.add("leave"); OP.idx += 1; setTimeout(() => drawOp("in"), 150); }
+  else opSummary();
+}
+function opBack() { if (OP.phase === "summary") { OP.phase = "stack"; $("opNav").hidden = false; $("opAll").hidden = false; drawOp("back"); return; } if (OP.phase === "stack" && OP.idx > 0) { OP.idx -= 1; drawOp("back"); } }
+function opSummary() {
+  OP.phase = "summary"; OP.up = OP.up.map(() => true); $("opNav").hidden = true; $("opAll").hidden = true;
+  const best = Math.max(...OP.cards.map(c => c.it.t)), nNew = OP.cards.filter(c => c.isNew).length;
+  $("opTitle").innerHTML = `<div class="k">${nNew} nouvelle${nNew > 1 ? "s" : ""} · ${OP.cards.length - nNew} doublon${OP.cards.length - nNew > 1 ? "s" : ""}</div><div class="t">Meilleure : ${TIERS[best]}</div>`;
+  $("opStage").innerHTML = ""; $("opStage").style.display = "none";
+  const sum = document.createElement("div"); sum.className = "op-summary"; sum.id = "opSum";
+  sum.innerHTML = `<div class="pack-grid">${OP.cards.map(c => `<button class="pcard open" data-id="${esc(c.it.i)}"><div class="pflip"><div class="pface pfront"><span class="ptag${c.isNew ? " new" : ""}">${c.isNew ? "Nouvelle" : "Doublon"}</span>${cardHTML(c.it)}</div></div></button>`).join("")}</div>`;
+  $("opStage").after(sum);
+  sum.querySelectorAll("[data-id]").forEach(b => b.onclick = () => { closeOpener(); openCard(b.dataset.id); });
+}
+function closeOpener() {
+  $("opener").hidden = true; OP.phase = ""; $("opStage").style.display = ""; const sum = $("opSum"); if (sum) sum.remove();
+  clearTimeout(OP.t1); clearTimeout(OP.t2); clearTimeout(OP.t3);
+  if (OP.msgs.length) { const m = OP.msgs; toast(m.length > 3 ? `${m.slice(0, 2).join(" · ")} · et ${m.length - 2} autres récompenses` : m.join(" · ")); OP.msgs = []; }
+}
+$("opNext").onclick = opStep; $("opPrev").onclick = opBack; $("opClose").onclick = closeOpener;
+$("opAll").onclick = () => { if (OP.phase === "booster") showStack(); opSummary(); };
+$("opener").addEventListener("click", e => { if (OP.phase === "booster" && e.target.closest("#opStage")) showStack(); });
+document.addEventListener("keydown", e => {
+  if ($("opener").hidden) return;
+  if (e.key === "ArrowRight" || e.key === " " || e.key === "Enter") { e.preventDefault(); opStep(); }
+  else if (e.key === "ArrowLeft") { e.preventDefault(); opBack(); }
+  else if (e.key === "Escape") closeOpener();
+});
 function renderPacks() {
   if (!ui.ready) return;
   const pi = packInfo(); ui.lastN = pi.n;
@@ -1165,12 +1411,14 @@ function renderPacks() {
   else account = `<p class="credits">Démo locale : le compteur tourne dans ce navigateur et n'est pas protégé. Une fois le serveur branché, il sera impossible à tromper.</p>`;
   $("viewPacks").innerHTML = `
     <h2>Paquets</h2>
-    <p class="lede">Un paquet de ${PACK_SIZE} cartes toutes les 5 minutes, jusqu'à ${PACK_CAP} en réserve. Chaque carte est un lieu de Paris tiré au hasard ; allez-y pour la faire monter de niveau.</p>
+    <p class="lede">${passActive() ? `<span class="badge-pass">Pass PariGo</span> ` : ""}Un paquet de ${PACK_SIZE} cartes toutes les ${packPeriod() / 60000} minutes, jusqu'à ${PACK_CAP} en réserve. Chaque carte est un lieu de Paris tiré au hasard ; allez-y pour la faire monter de niveau.</p>
     ${SB_CONF && !ui.user ? account : `
     <button class="booster" id="packBtn" ${pi.n < 1 ? "disabled" : ""}><span class="k">Réserve</span><span class="t"><span id="packN">${pi.n}</span> / ${PACK_CAP}</span><span class="stack" id="packStack">${stackHTML(pi.n)}</span><span class="pack-next" id="packNext">${nextText(pi)}</span><span class="btn cta">${pi.n ? "Ouvrir un paquet" : "Patience"}</span></button>
     <div class="panel"><h3>Chances par carte</h3><div class="tiers">${TIERS.map((n, i) => `<div class="tier" style="background:var(${TIER_VAR[i]})"><b>${String(TIER_ODDS[i] * 100).replace(".", ",")} %</b><span>${n}</span></div>`).join("")}</div></div>
+    <button class="mini-btn" id="toShop" style="align-self:flex-start">Boutique : Pass et Pack PariGo</button>
     ${account}`}`;
   if ($("packBtn")) $("packBtn").onclick = openPack;
+  if ($("toShop")) $("toShop").onclick = () => setMobile("shop");
   if ($("loginBtn")) $("loginBtn").onclick = async () => {
     const email = $("loginEmail").value.trim(); if (!/^\S+@\S+\.\S+$/.test(email)) { toast("Adresse e-mail invalide."); return; }
     $("loginBtn").disabled = true;
@@ -1223,6 +1471,7 @@ async function syncServer() {
   S.owned = owned; recomputeDone(); save();
   await refreshServer(); refreshAll();
 }
+if (/[?&]achat=ok\b/.test(location.search)) { setTimeout(() => toast("Paiement reçu. Vos écus ou votre Pass arrivent dans quelques secondes."), 1500); setTimeout(() => refreshServer(), 4000); setTimeout(() => refreshServer(), 10000); }
 async function refreshServer() {
   if (!SB || !ui.user) return;
   const { data, error } = await SB.rpc("pack_state");
@@ -1246,7 +1495,8 @@ const SECTIONS = [
   { id: "battle", name: "Bataille", sub: "Deck de 5 cartes, 5 terrains" },
   { id: "achievements", name: "Succès", sub: "Objectifs et récompenses" },
   { id: "leaderboard", name: "Classement", sub: "Les meilleurs collectionneurs", srv: true },
-  { id: "settings", name: "Paramètres", sub: "Carte, GPS, sauvegarde, crédits" },
+  { id: "shop", name: "Boutique", sub: "Écus, Pass et Pack PariGo" },
+  { id: "settings", name: "Paramètres", sub: "Carte, GPS, son, sauvegarde, crédits" },
 ];
 const SEC = Object.fromEntries(SECTIONS.map(x => [x.id, x]));
 const viewEl = id => id === "collection" ? $("viewCollection") : id === "packs" ? $("viewPacks") : $("view-" + id);
@@ -1256,7 +1506,7 @@ const viewEl = id => id === "collection" ? $("viewCollection") : id === "packs" 
 })();
 const RENDER = {
   collection: () => renderCollection(), packs: () => renderPacks(), menu: renderMenu, catalog: renderCatalog, battle: renderBattle,
-  achievements: renderAchievements, profile: renderProfile, settings: renderSettings,
+  achievements: renderAchievements, profile: renderProfile, settings: renderSettings, shop: renderShop,
   trades: () => renderServerView("trades"), market: () => renderServerView("market"), leaderboard: () => renderServerView("leaderboard"),
   friends: () => renderServerView("friends"), messages: () => renderServerView("messages"), guild: () => renderServerView("guild"),
 };
@@ -1330,7 +1580,7 @@ const ACH = [
   { id: "sets", name: "Séries complètes", desc: "Collections terminées", steps: [1, 5, 15, 38], v: s => s.done },
   { id: "won", name: "Combattant", desc: "Batailles gagnées", steps: [1, 10, 50, 200], v: s => S.stats.won },
 ];
-const ACH_REWARD = [25, 75, 200, 500];
+const ACH_REWARD = [10, 25, 60, 150];
 function achLevels(st = collStats()) { return ACH.map(a => { const v = a.v(st); const lvl = a.steps.filter(x => v >= x).length; return { a, v, lvl }; }); }
 function achEcus() { let e = 0; for (const { lvl } of achLevels()) for (let i = 0; i < lvl; i++) e += ACH_REWARD[i]; return e; }
 function checkAchievements() {
@@ -1357,7 +1607,7 @@ function renderProfile() {
   const name = S.profile.name || "Joueur anonyme";
   viewEl("profile").innerHTML = `<h2>Profil</h2>
     <div class="panel"><h3>Pseudo</h3><div class="btn-row"><input class="field" id="pName" maxlength="24" value="${esc(S.profile.name)}" placeholder="Votre pseudo" style="flex:1 1 180px"><button class="mini-btn" id="pSave">Enregistrer</button></div>
-      <p class="lede" style="font-size:13px;margin-top:6px">${esc(name)} · membre depuis le ${since}${SB_CONF ? "" : " · le pseudo deviendra public avec le serveur"}</p></div>
+      <p class="lede" style="font-size:13px;margin-top:6px">${passActive() ? `<span class="badge-pass">PariGo</span> ` : ""}${esc(name)} · membre depuis le ${since}${SB_CONF ? "" : " · le pseudo deviendra public avec le serveur"}</p></div>
     <div class="panel"><h3>Vitrine</h3><p class="lede" style="font-size:13px;margin-bottom:10px">Vos 3 plus belles cartes, visibles par vos amis.</p>
       <div class="showcase">${[0, 1, 2].map(i => { const id = show[i]; return id ? `<button class="slot full" data-slot="${i}" aria-label="Changer">${cardHTML(BYID.get(id))}</button>` : `<button class="slot" data-slot="${i}">Choisir</button>`; }).join("")}</div>
       <div id="showPick"></div></div>
@@ -1457,13 +1707,15 @@ function renderSettings() {
   viewEl("settings").innerHTML = `<h2>Paramètres</h2>
     <div class="panel"><h3>Carte et position</h3>
       ${row("setUnowned", "Afficher les lieux pas encore possédés", !!S.settings.unowned)}
-      ${row("setHiacc", "GPS haute précision (plus précis, consomme plus)", S.settings.hiacc !== false)}</div>
+      ${row("setHiacc", "GPS haute précision (plus précis, consomme plus)", S.settings.hiacc !== false)}
+      ${row("setSound", "Sons à l'ouverture des paquets", S.settings.sound !== false)}</div>
     <div class="panel"><h3>Compte</h3>${SB_CONF ? (ui.user ? `<div class="acct"><span>Connecté : ${esc(ui.user.email || "")}</span><button class="mini-btn ghost" id="setLogout">Se déconnecter</button></div>` : `<p class="lede" style="font-size:14px">Non connecté. La connexion se fait depuis l'onglet Paquets.</p>`)
       : `<p class="lede" style="font-size:14px">Démo locale : la progression est enregistrée dans ce navigateur. Les comptes arriveront avec le serveur.</p>
       ${HOSTED ? `<div class="btn-row" style="margin-top:8px"><button class="mini-btn ghost" id="setExport">Exporter ma sauvegarde</button><label class="mini-btn ghost" style="cursor:pointer">Importer<input type="file" id="setImport" accept="application/json" hidden></label></div>` : ""}
       <div class="reset-row" style="margin-top:10px"><button class="mini-btn ghost" id="resetBtn">${ui.resetArmed ? "Confirmer la remise à zéro" : "Remettre à zéro"}</button>${ui.resetArmed ? `<button class="mini-btn ghost" id="resetCancel">Annuler</button>` : ""}</div>`}</div>
     <div class="panel"><h3>À propos</h3><p class="credits">Parisquest, collectionnez Paris. Données : <a href="https://opendata.paris.fr" target="_blank" rel="noopener">Ville de Paris</a> (ODbL), <a href="https://data.iledefrance-mobilites.fr" target="_blank" rel="noopener">Île-de-France Mobilités</a>, <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a>, photos <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a> et Ville de Paris.${ML ? ` Fond de carte <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a>.` : ""} Votre position n'est jamais enregistrée.</p></div>`;
   $("setUnowned").onclick = () => { S.settings.unowned = !S.settings.unowned; save(); renderSettings(); render(); };
+  $("setSound").onclick = () => { S.settings.sound = S.settings.sound === false; save(); renderSettings(); };
   $("setHiacc").onclick = () => { S.settings.hiacc = S.settings.hiacc === false; save(); renderSettings(); if (ui.gpsWatch != null) { stopGPS(); startGPS(); } };
   if ($("setLogout")) $("setLogout").onclick = () => SB.auth.signOut();
   if ($("setExport")) $("setExport").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(S)], { type: "application/json" })); a.download = `parisquest-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
@@ -1476,10 +1728,50 @@ function renderSettings() {
   if (ui.resetArmed && $("resetCancel")) $("resetCancel").onclick = () => { ui.resetArmed = false; renderSettings(); };
 }
 
+/* ----- Boutique -----
+   Paiement réel : Stripe (Checkout + webhook) via le serveur. Tant que ce n'est pas branché, les achats en euros
+   ne sont possibles qu'en mode test (simulation, aucun paiement). */
+const PAY_READY = !!(SB_CONF && SB_CONF.payments);
+const DEMO_BUY = !SB_CONF && TEST_ALLOWED;
+async function checkout(sku) {
+  if (PAY_READY) {
+    if (!ui.user) { toast("Connectez-vous d'abord (onglet Paquets)."); return; }
+    const { data, error } = await SB.functions.invoke("checkout", { body: { sku, return_url: location.origin + location.pathname } });
+    if (error || !data || !data.url) { toast("Paiement indisponible pour le moment."); return; }
+    location.href = data.url; return;
+  }
+  if (!DEMO_BUY) { toast("Les achats ouvriront au lancement du jeu."); return; }
+  if (sku === "pass") { S.pass.until = Math.max(Date.now(), S.pass.until || 0) + 30 * 86400000; toast("Démo : Pass PariGo activé pour 30 jours, sans paiement."); }
+  else { const o = ECU_OFFERS.find(x => x.id === sku); if (!o) return; S.wallet.bought += o.ecus; toast(`Démo : +${nf(o.ecus)} écus, sans paiement.`); }
+  save(); refreshAll();
+}
+function renderShop() {
+  if (!ui.ready) return;
+  const pa = passActive(), until = SB_CONF ? (ui.server && ui.server.passUntil) : S.pass.until;
+  const buyLabel = PAY_READY ? "Acheter" : DEMO_BUY ? "Simuler l'achat" : "Bientôt";
+  const oddsRow = (label, odds) => `<span>${label}</span>${odds.map(o => `<span>${String(Math.round(o * 1000) / 10).replace(".", ",")} %</span>`).join("")}`;
+  viewEl("shop").innerHTML = `<h2>Boutique</h2>
+    <p class="lede">Solde : <b>${nf(ecus())} écus</b>${pa ? ` · <span class="badge-pass">Pass PariGo</span>` : ""}</p>
+    <div class="premium"><h3>Pass PariGo</h3><div class="big">4 € / mois</div>
+      <ul><li>Un paquet toutes les <b>2 minutes</b> au lieu de 5</li><li>Badge PariGo sur votre profil</li><li>Sans engagement, résiliable à tout moment</li></ul>
+      ${pa ? `<p style="margin:0;font-size:14px">Actif jusqu'au ${new Date(until).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.</p>` : `<button class="btn" id="buyPass">${PAY_READY ? "S'abonner" : DEMO_BUY ? "Simuler l'abonnement" : "Bientôt disponible"}</button>`}</div>
+    <div class="premium" style="background:linear-gradient(135deg,#8C6418,#172B4D 55%,#2D63B0)"><h3>Pack PariGo</h3><div class="big">${PARIGO_SIZE} cartes · ${PARIGO_PRICE} écus</div>
+      <ul><li>Meilleures chances de cartes rares</li><li>Au moins une Épique ou une Légendaire garantie</li></ul>
+      <div class="odds"><span></span>${TIERS.map((n, i) => `<span class="h" style="background:var(${TIER_VAR[i]})">${n.replace("Peu commune", "Peu com.")}</span>`).join("")}${oddsRow("Paquet", TIER_ODDS)}${oddsRow("PariGo", PARIGO_ODDS)}</div>
+      <button class="btn" id="buyParigo" ${ecus() >= PARIGO_PRICE ? "" : "disabled"}>Ouvrir un Pack PariGo</button>
+      ${ecus() < PARIGO_PRICE ? `<small style="opacity:.85">Il vous manque ${nf(PARIGO_PRICE - ecus())} écus.</small>` : ""}</div>
+    <div class="panel"><h3>Écus</h3><div class="shop-grid">${ECU_OFFERS.map(o => `<div class="offer${o.hl ? " hl" : ""}"><b>${nf(o.ecus)} écus</b><small>${o.bonus ? `${o.bonus} d'écus` : "Pour commencer"}</small><span class="price">${o.eur}</span><button class="mini-btn" data-sku="${o.id}" ${PAY_READY || DEMO_BUY ? "" : "disabled"}>${buyLabel}</button></div>`).join("")}</div>
+      <p class="lede" style="font-size:13px;margin-top:10px">Les écus servent à ouvrir des Packs PariGo et, avec le serveur, à enchérir au Marché.</p></div>
+    <p class="legal">Probabilités affichées pour chaque carte tirée. Les écus et les cartes n'ont aucune valeur monétaire et ne peuvent pas être reconvertis en argent. Paiements sécurisés par Stripe. Achats réservés aux personnes majeures ou autorisées par un parent. Contenu numérique fourni immédiatement : en achetant, vous demandez son exécution immédiate et renoncez au droit de rétractation de 14 jours. ${PAY_READY ? "" : DEMO_BUY ? "Mode test : aucun paiement n'est effectué." : "Les paiements ouvriront au lancement."}</p>`;
+  if ($("buyPass")) $("buyPass").onclick = () => checkout("pass");
+  $("buyParigo").onclick = buyParigoPack;
+  viewEl("shop").querySelectorAll("[data-sku]").forEach(b => b.onclick = () => checkout(b.dataset.sku));
+}
+
 /* ----- Sections qui demandent le serveur ----- */
 const SRV_TEXT = {
   trades: { lede: "Échangez des cartes avec vos amis pour compléter vos séries.", rules: ["Choisissez un ami, les cartes que vous donnez et celles que vous voulez de sa collection.", "Il accepte, refuse ou fait une contre-proposition.", "À l'acceptation, le serveur échange les cartes d'un seul coup : impossible de perdre une carte en route.", "Seuls les exemplaires en double sont échangeables, pour ne jamais vider sa collection par erreur.", "Le niveau et le sceau « Visité » restent attachés au joueur, pas à la carte échangée."] },
-  market: { lede: "Vendez vos doublons, achetez les cartes qui vous manquent.", rules: ["Mettez en vente un exemplaire en double au prix de votre choix, en écus.", "Recherche par famille, rareté, arrondissement ou nom.", "Achat instantané : le serveur transfère la carte et les écus en une seule opération.", "Une annonce expire au bout de 7 jours ; 5 % du prix sont prélevés pour limiter la spéculation.", "Les écus deviennent alors une vraie monnaie, gardée par le serveur."] },
+  market: { lede: "Mettez vos cartes aux enchères, enchérissez sur celles qui vous manquent.", rules: ["Toutes les cartes peuvent être mises en vente, même un exemplaire unique (la carte quitte alors votre collection).", "Prix de départ, durée (1 heure, 24 heures ou 3 jours) et prix d'achat immédiat facultatif.", "Chaque enchère bloque vos écus ; si quelqu'un surenchérit, ils vous sont rendus aussitôt.", "Anti-dernière seconde : une enchère placée dans les 2 dernières minutes prolonge la vente de 2 minutes.", "À la fin, le serveur transfère la carte et les écus en une seule opération ; 5 % du prix sont prélevés.", "Recherche par famille, rareté, arrondissement ou nom, et liste de cartes suivies."] },
   leaderboard: { lede: "Les meilleurs collectionneurs de Paris.", rules: ["Classements : cartes différentes, Légendaires, visites sur place, victoires en bataille.", "Classement de la semaine et classement de tous les temps.", "Classement entre amis et entre guildes.", "Calculé par le serveur à partir des collections réelles : impossible de gonfler son score."] },
   friends: { lede: "Jouez avec vos proches.", rules: ["Ajoutez un ami par son pseudo ou son code ami.", "Voyez sa vitrine, sa collection et ses statistiques.", "Défiez-le en bataille et proposez-lui des échanges.", "Jamais de position partagée : on voit les cartes, pas où se trouve le joueur."] },
   messages: { lede: "Discutez avec vos amis.", rules: ["Messages privés réservés aux amis acceptés.", "Partage d'une carte dans la conversation pour préparer un échange.", "Blocage et signalement en un geste."] },
@@ -1543,6 +1835,7 @@ $("zoomIn").onclick = () => zoomAt(v.W / 2, v.H / 2, 1.7);
 $("zoomOut").onclick = () => zoomAt(v.W / 2, v.H / 2, 1 / 1.7);
 $("meBtn").onclick = () => { if (!S.test && ui.gps !== "ok") startGPS(); centerOn(S.pos.lat, S.pos.lon, 45); };
 $("fitBtn").onclick = fit;
+$("cntEcusBtn").onclick = () => setMobile("shop");
 
 /* ---------- Démarrage ---------- */
 function refreshAll() {
