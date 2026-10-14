@@ -1445,22 +1445,29 @@ function updateNextPack() {
 }
 /* Mini-carte : le plan du quartier autour du lieu, dessiné avec les données du jeu (fonctionne sans réseau). */
 function drawMini(it) {
-  const cv = $("opMiniCv"), c = cv.getContext("2d"), W = cv.width, H = cv.height, s = W / 5.2;
+  /* Vue d'environ 3 km de large : arrondissements numérotés, Seine, parcs, pour situer le lieu dans Paris. */
+  const cv = $("opMiniCv"), c = cv.getContext("2d"), W = cv.width, H = cv.height, s = W / 27;
+  const ox = W / 2 - it.p[0] * s, oy = H / 2 - it.p[1] * s;
   c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = "#A3906B"; c.fillRect(0, 0, W, H);
-  c.setTransform(s, 0, 0, s, W / 2 - it.p[0] * s, H / 2 - it.p[1] * s);
-  c.fillStyle = "#C9B996"; c.fill(ARR_PATH || PARIS);
+  c.setTransform(s, 0, 0, s, ox, oy);
+  c.fillStyle = "#CDBF9F"; c.fill(ARR_PATH || PARIS);
   if (PARK_PATHS) { c.fillStyle = "#97A079"; c.fill(PARK_PATHS.bois); c.fill(PARK_PATHS.park); c.fillStyle = "#A7A68E"; c.fill(PARK_PATHS.cim); }
-  if (STREET_PATH) { c.fillStyle = "#EDE4D0"; c.fill(STREET_PATH); }
-  if (WATER_PATH) { c.fillStyle = "#7E9DB3"; c.fill(WATER_PATH); }
-  if (it.poly) { c.fillStyle = famColor(it) + "55"; c.strokeStyle = famColor(it); c.lineWidth = 3 / s; for (const r of it.poly) { c.beginPath(); c.moveTo(r[0], r[1]); for (let j = 2; j < r.length; j += 2) c.lineTo(r[j], r[j + 1]); c.closePath(); c.fill(); c.stroke(); } }
+  if (STREET_PATH) { c.fillStyle = "rgba(237,228,208,.75)"; c.fill(STREET_PATH); }
+  if (WATER_PATH) { c.fillStyle = "#6F92AB"; c.fill(WATER_PATH); } else { c.strokeStyle = "#6F92AB"; c.lineWidth = 4 / s; c.stroke(SEINE_P); }
+  if (ARR_PATH) { c.strokeStyle = "rgba(23,43,77,.55)"; c.lineWidth = 2.2 / s; c.setLineDash([7 / s, 5 / s]); c.stroke(ARR_PATH); c.setLineDash([]); }
+  if (it.poly) { c.fillStyle = famColor(it) + "77"; c.strokeStyle = famColor(it); c.lineWidth = 3 / s; for (const r of it.poly) { c.beginPath(); c.moveTo(r[0], r[1]); for (let j = 2; j < r.length; j += 2) c.lineTo(r[j], r[j + 1]); c.closePath(); c.fill(); c.stroke(); } }
   c.setTransform(1, 0, 0, 1, 0, 0);
+  c.font = "700 26px 'Barlow Condensed', 'Arial Narrow', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.lineJoin = "round";
+  for (const [n, p] of ARR_P) { const x = p[0] * s + ox, y = p[1] * s + oy; if (x < -20 || y < -20 || x > W + 20 || y > H + 20) continue; c.lineWidth = 5; c.strokeStyle = "rgba(205,191,159,.9)"; c.strokeText(n, x, y); c.fillStyle = "rgba(23,43,77,.8)"; c.fillText(n, x, y); }
+  const P = proj(S.pos.lat, S.pos.lon), px = P[0] * s + ox, py = P[1] * s + oy;
+  if (px > 6 && py > 6 && px < W - 6 && py < H - 6) { c.beginPath(); c.arc(px, py, 8, 0, 6.283); c.fillStyle = "#172B4D"; c.fill(); c.lineWidth = 3; c.strokeStyle = "#F6F2E8"; c.stroke(); }
   const x = W / 2, y = H / 2;
-  c.beginPath(); c.arc(x, y, 30, 0, 6.283); c.fillStyle = "rgba(23,43,77,.18)"; c.fill();
+  c.beginPath(); c.arc(x, y, 26, 0, 6.283); c.fillStyle = "rgba(23,43,77,.2)"; c.fill();
   c.beginPath(); c.moveTo(x, y); c.bezierCurveTo(x - 22, y - 26, x - 15, y - 52, x, y - 52); c.bezierCurveTo(x + 15, y - 52, x + 22, y - 26, x, y); c.fillStyle = famColor(it); c.fill(); c.lineWidth = 4; c.strokeStyle = "#F6F2E8"; c.stroke();
   c.beginPath(); c.arc(x, y - 36, 7, 0, 6.283); c.fillStyle = "#F6F2E8"; c.fill();
-  c.font = "600 22px 'Barlow Condensed', sans-serif"; c.fillStyle = "rgba(23,43,77,.75)"; c.textAlign = "left"; c.fillText("100 m", 16, H - 18);
-  c.fillRect(16, H - 14, 100 / MPU * s, 4);
-  const d = Math.hypot(...[0, 1].map(k => proj(S.pos.lat, S.pos.lon)[k] - it.p[k])) * MPU;
+  c.textAlign = "left"; c.textBaseline = "alphabetic"; c.font = "600 22px 'Barlow Condensed', sans-serif"; c.fillStyle = "rgba(23,43,77,.85)"; c.fillText("500 m", 16, H - 20);
+  c.fillRect(16, H - 14, 500 / MPU * s, 5);
+  const d = Math.hypot(P[0] - it.p[0], P[1] - it.p[1]) * MPU;
   $("opMiniT").innerHTML = it.r ? arrLabel(it.r) : "Paris";
   $("opMiniS").textContent = `${it.site && it.site !== it.n ? it.site + " · " : ""}à ${fmtDist(d)} de vous`;
   $("opMini").onclick = () => { closeOpener(); showOnMap(it.i); };
