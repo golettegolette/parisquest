@@ -18,8 +18,8 @@ for it in pl["items"]:
     if x.get("mpoly") is not None and x["mpoly"] < len(mp.get("monde", [])): rings = mp["monde"][x["mpoly"]]
     for r in rings: pts += [dec(r[j], r[j + 1]) for j in range(0, len(r), 2)]
     ext = max((hav(it["a"], it["o"], a, b) for a, b in pts), default=0)
-    rows.append([it["i"], it["k"], it["t"], round(it["a"], 6), round(it["o"], 6), round(ext + rad, 1)])
+    rows.append([it["i"], it["k"], kd["f"], it["t"], round(it["a"], 6), round(it["o"], 6), round(ext + rad, 1)])
 out = ROOT / "site" / "supabase" / "places.csv"
 with open(out, "w", newline="") as f:
-    w = csv.writer(f); w.writerow(["id", "kind", "tier", "lat", "lon", "reach_m"]); w.writerows(rows)
+    w = csv.writer(f); w.writerow(["id", "kind", "family", "tier", "lat", "lon", "reach_m"]); w.writerows(rows)
 print(len(rows), "lieux →", out, f"{out.stat().st_size / 1e6:.2f} Mo")

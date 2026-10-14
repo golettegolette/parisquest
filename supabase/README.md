@@ -12,8 +12,10 @@ Changer l'heure du téléphone, modifier la page ou rejouer une requête ne chan
 ## Mise en place (15 minutes)
 
 1. Créer un compte sur [supabase.com](https://supabase.com), puis **New project** (région : Paris ou Francfort). Noter le mot de passe de la base.
-2. **SQL Editor → New query** : coller tout `schema.sql`, cliquer **Run**.
-3. **Table Editor → places → Insert → Import data from CSV** : choisir `places.csv`.
+2. **SQL Editor → New query** : coller tout `schema.sql`, cliquer **Run**. Puis une nouvelle requête avec tout `social.sql`, **Run**.
+   Facultatif mais conseillé : **Database → Extensions → pg_cron** activé avant `social.sql`, pour clôturer les enchères chaque minute (sinon elles se clôturent à chaque consultation du Marché).
+3. **Table Editor → places → Insert → Import data from CSV** : choisir `places.csv` (colonnes id, kind, family, tier, lat, lon, reach_m).
+   **Database → Publications → supabase_realtime** : vérifier que `messages` et `guild_messages` y figurent (messages en direct).
 4. **Authentication → URL Configuration** : *Site URL* = `https://golettegolette.github.io/parisquest/`.
 5. **Project Settings → API** : copier *Project URL* et la clé *anon public*, et les envoyer à Claude (cette clé est faite pour être publique ; ne jamais envoyer la clé *service_role*).
 
@@ -35,8 +37,13 @@ Le webhook vérifie la signature de Stripe, et `credit_purchase` ne crédite jam
 ## Fichiers
 
 - `schema.sql` : tables, sécurité (Row Level Security) et les fonctions : `pack_state`, `open_pack`, `open_parigo_pack`, `visit_place`, `credit_purchase` (réservée au webhook).
+- `social.sql` : pseudos, amis et blocages, messages privés, échanges, Marché aux enchères (séquestre des cartes et des écus, surenchère remboursée, anti-dernière seconde, 5 % de commission), classement, guildes, batailles entre amis, signalements. Règles : une carte cédée repart au niveau 1 sans sceau « Visité » ; toutes les cartes sont échangeables et vendables ; pseudo obligatoire et unique.
 - `functions/checkout` et `functions/stripe-webhook` : paiement Stripe Checkout et crédit des achats.
 - `places.csv` : les 17 919 lieux (identifiant, type, rareté, position, rayon de visite). Régénéré par `pipeline/build_server.py`.
+
+## Tests
+
+Tout a été vérifié sur PostgreSQL 16 avec une imitation de l'authentification Supabase, puis de bout en bout avec deux joueurs dans le navigateur : paquets, pseudos, amis, messages, échange accepté (cartes transférées, niveau remis à 1), vente aux enchères, surenchère, achat immédiat, clôtures, classement, guilde, bataille. Écritures directes dans les tables refusées, fonctions internes inaccessibles, enchères simultanées sans perte ni création d'écus, échange devenu impossible annulé sans aucun mouvement.
 
 ## Ce qui reste possible
 

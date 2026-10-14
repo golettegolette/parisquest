@@ -16,12 +16,25 @@
 create table if not exists public.places (
   id       text primary key,
   kind     text not null,
+  family   text not null default '',                          -- famille (nature, eau, rues, memoire…) : terrains de bataille
   tier     smallint not null check (tier between 0 and 4),   -- 0 Commune … 4 Légendaire
   lat      double precision not null,
   lon      double precision not null,
   reach_m  real not null                                     -- rayon de visite (m), emprise comprise
 );
 create index if not exists places_tier_idx on public.places (tier);
+alter table public.places add column if not exists family text not null default '';
+
+-- Journal des visites (objectifs de guilde, statistiques)
+create table if not exists public.visit_log (
+  user_id  uuid not null references auth.users (id) on delete cascade,
+  place_id text not null references public.places (id),
+  day      date not null,
+  primary key (user_id, place_id, day)
+);
+alter table public.visit_log enable row level security;
+drop policy if exists "mes visites" on public.visit_log;
+create policy "mes visites" on public.visit_log for select using (auth.uid() = user_id);
 
 -- ---------- Joueurs : réserve de paquets ----------
 -- packs  : paquets en réserve au moment « anchor »
@@ -77,7 +90,7 @@ create policy "mes cartes" on public.user_cards for select using (auth.uid() = u
 drop policy if exists "mes paquets" on public.pack_log;
 create policy "mes paquets" on public.pack_log for select using (auth.uid() = user_id);
 
-revoke insert, update, delete, truncate on public.places, public.players, public.user_cards, public.pack_log from anon, authenticated;
+revoke insert, update, delete, truncate on public.places, public.players, public.user_cards, public.pack_log, public.visit_log from anon, authenticated;
 
 -- ---------- Règles des paquets ----------
 -- Un paquet toutes les 300 s (120 s avec le Pass PariGo), 10 au maximum, 5 offerts à l'inscription.
@@ -194,6 +207,7 @@ begin
    where user_id = uid and place_id = p_id
    returning * into c;
   update public.players set ecus = ecus + 10 where user_id = uid;   -- visite : +10 écus
+  insert into public.visit_log (user_id, place_id, day) values (uid, p_id, today) on conflict do nothing;
   return jsonb_build_object('level', c.level, 'visits', c.visits, 'last_visit', c.last_visit);
 end $$;
 

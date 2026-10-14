@@ -198,6 +198,36 @@ sup { font-size: .62em; line-height: 0; }
 .verdict { text-align: center; font-family: var(--f-plaque); font-size: 26px; font-weight: 700; text-transform: uppercase; color: var(--navy); letter-spacing: .05em; }
 .rules { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 14px; line-height: 1.5; }
 .rules li { margin: 3px 0; }
+.prow { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--joint); }
+.prow:last-child { border-bottom: 0; }
+.prow strong { color: var(--navy); }
+.prow small { display: block; color: var(--ink-2); font-size: 12.5px; }
+.prow .acts { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+.ubadge { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--r4); color: var(--navy); font-size: 11.5px; font-weight: 700; text-align: center; margin-left: 5px; }
+.tabsrow { display: flex; gap: 6px; flex-wrap: wrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.cchip { display: inline-flex; align-items: center; gap: 5px; border: 0; border-radius: 999px; padding: 3px 9px 3px 6px; background: var(--white); box-shadow: inset 0 0 0 1px var(--joint); font-size: 12.5px; color: var(--ink); }
+.cchip i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.cchip em { font-style: normal; color: var(--r4); font-size: 11px; letter-spacing: -.05em; }
+.bubbles { display: flex; flex-direction: column; gap: 6px; max-height: 52vh; overflow-y: auto; padding: 4px; }
+.bubble { align-self: flex-start; max-width: 80%; padding: 7px 11px; border-radius: 12px 12px 12px 3px; background: var(--white); box-shadow: inset 0 0 0 1px var(--joint); font-size: 14px; line-height: 1.35; overflow-wrap: anywhere; }
+.bubble.me { align-self: flex-end; background: var(--navy); color: var(--white); border-radius: 12px 12px 3px 12px; box-shadow: none; }
+.bubble small { display: block; font-size: 10.5px; opacity: .65; margin-top: 2px; }
+.bubble b { display: block; font-size: 11.5px; color: var(--green-2); }
+.sendrow { display: flex; gap: 8px; margin-top: 8px; }
+.sendrow input { flex: 1; min-width: 0; }
+.mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.mk-item { display: flex; flex-direction: column; gap: 6px; }
+.mk-item .card { cursor: pointer; }
+.mk-info { font-size: 12.5px; color: var(--ink-2); line-height: 1.35; }
+.mk-info b { color: var(--navy); font-family: var(--f-plaque); font-size: 16px; }
+.mk-info .lead { color: var(--green-2); font-weight: 600; }
+.mk-act { display: flex; gap: 5px; }
+.mk-act input { width: 72px; flex: none; padding: 6px 7px; }
+.warn { font-size: 13px; color: #8C3A2B; }
+.lb-table { display: flex; flex-direction: column; gap: 4px; }
+.lb-table .lb-row { box-shadow: inset 0 0 0 1px var(--joint); }
+.lb-table .lb-row.me { box-shadow: inset 0 0 0 2px var(--navy); background: #FFF8E2; }
 .lb-row { display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 8px; background: var(--white); box-shadow: inset 0 0 0 1.5px var(--navy); }
 .lb-row b { font-family: var(--f-plaque); font-size: 18px; color: var(--navy); }
 .toggle-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--joint); font-size: 14px; }
@@ -494,7 +524,7 @@ sup { font-size: .62em; line-height: 0; }
     <button data-tab="map" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/></svg>Carte</button>
     <button data-tab="collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="11" height="15" rx="2"/><path d="M17 6.5 20.5 8 17 19"/></svg>Collection</button>
     <button data-tab="packs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="7" width="12" height="14" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v12"/></svg><span>Paquets<span class="badge" id="packBadge" hidden>0</span></span></button>
-      <button data-tab="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
+      <button data-tab="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Menu<span class="badge" id="menuBadge" hidden>0</span></span></button>
 </nav>
 </div>
 
@@ -1528,7 +1558,8 @@ async function initServer() {
 async function setUser(u) {
   const prev = ui.user && ui.user.id; ui.user = u || null;
   if ((u && u.id) === prev) return;
-  S.owned = {}; S.done = {}; ui.server = null;
+  S.owned = {}; S.done = {}; ui.server = null; SOC.profile = null; SOC.friends = null; SOC.badges = {};
+  if (SOC.chan) { try { SOC.chan.unsubscribe(); } catch (e) {} SOC.chan = null; } if (SOC.gchan) { try { SOC.gchan.unsubscribe(); } catch (e) {} SOC.gchan = null; }
   if (u) await syncServer(); else refreshAll();
 }
 async function syncServer() {
@@ -1542,6 +1573,8 @@ async function syncServer() {
   }
   S.owned = owned; recomputeDone(); save();
   await refreshServer(); refreshAll();
+  if (!SOC.profile) { const { data } = await SB.rpc("my_profile"); SOC.profile = data || {}; if (SOC.profile.pseudo) { S.profile.name = SOC.profile.pseudo; if (SOC.profile.showcase) S.profile.show = SOC.profile.showcase; } }
+  socialPoll();
 }
 if (/[?&]achat=ok\b/.test(location.search)) { setTimeout(() => toast("Paiement reçu. Vos écus ou votre Pass arrivent dans quelques secondes."), 1500); setTimeout(() => refreshServer(), 4000); setTimeout(() => refreshServer(), 10000); }
 async function refreshServer() {
@@ -1574,17 +1607,19 @@ const SEC = Object.fromEntries(SECTIONS.map(x => [x.id, x]));
 const viewEl = id => id === "collection" ? $("viewCollection") : id === "packs" ? $("viewPacks") : $("view-" + id);
 (function buildSections() {
   $("moreViews").outerHTML = ["menu", ...SECTIONS.map(x => x.id).filter(id => id !== "collection" && id !== "packs")].map(id => `<section class="view" id="view-${id}" hidden></section>`).join("");
-  $("sideTabs").innerHTML = SECTIONS.map(x => `<button data-view="${x.id}" class="${x.srv ? "srv" : ""}" aria-pressed="false">${esc(x.name)}</button>`).join("");
+  $("sideTabs").innerHTML = SECTIONS.map(x => `<button data-view="${x.id}" class="${x.srv && !SB_CONF ? "srv" : ""}" aria-pressed="false">${esc(x.name)}</button>`).join("");
 })();
 const RENDER = {
   collection: () => renderCollection(), packs: () => renderPacks(), menu: renderMenu, catalog: renderCatalog, battle: renderBattle,
   achievements: renderAchievements, profile: renderProfile, settings: renderSettings, shop: renderShop,
-  trades: () => renderServerView("trades"), market: () => renderServerView("market"), leaderboard: () => renderServerView("leaderboard"),
-  friends: () => renderServerView("friends"), messages: () => renderServerView("messages"), guild: () => renderServerView("guild"),
+  trades: () => SOCIAL() ? renderTrades() : renderServerView("trades"), market: () => SOCIAL() ? renderMarket() : renderServerView("market"),
+  leaderboard: () => SOCIAL() ? renderLeaderboard() : renderServerView("leaderboard"),
+  friends: () => SOCIAL() ? renderFriends() : renderServerView("friends"), messages: () => SOCIAL() ? renderMessages() : renderServerView("messages"),
+  guild: () => SOCIAL() ? renderGuild() : renderServerView("guild"),
 };
 const srvBadge = `<span class="tagsrv">Serveur requis</span>`;
 function renderMenu() {
-  viewEl("menu").innerHTML = `<h2>Menu</h2><div class="nav-grid">${SECTIONS.map(x => `<button class="nav-tile${x.srv ? " srv" : ""}" data-go="${x.id}"><b>${esc(x.name)}</b><span>${esc(x.sub)}${x.srv ? " · bientôt" : ""}</span></button>`).join("")}</div>`;
+  viewEl("menu").innerHTML = `<h2>Menu</h2><div class="nav-grid">${SECTIONS.map(x => `<button class="nav-tile${x.srv && !SOCIAL() ? " srv" : ""}" data-go="${x.id}"><b>${esc(x.name)}${SOC.badges[x.id] ? `<span class="ubadge">${SOC.badges[x.id]}</span>` : ""}</b><span>${esc(x.sub)}${x.srv && !SOCIAL() ? (SB_CONF ? " · connexion requise" : " · bientôt") : ""}</span></button>`).join("")}</div>`;
   viewEl("menu").querySelectorAll("[data-go]").forEach(b => b.onclick = () => setMobile(b.dataset.go));
 }
 
@@ -1679,7 +1714,7 @@ function renderProfile() {
   const name = S.profile.name || "Joueur anonyme";
   viewEl("profile").innerHTML = `<h2>Profil</h2>
     <div class="panel"><h3>Pseudo</h3><div class="btn-row"><input class="field" id="pName" maxlength="24" value="${esc(S.profile.name)}" placeholder="Votre pseudo" style="flex:1 1 180px"><button class="mini-btn" id="pSave">Enregistrer</button></div>
-      <p class="lede" style="font-size:13px;margin-top:6px">${passActive() ? `<span class="badge-pass">PariGo</span> ` : ""}${esc(name)} · membre depuis le ${since}${SB_CONF ? "" : " · le pseudo deviendra public avec le serveur"}</p></div>
+      <p class="lede" style="font-size:13px;margin-top:6px">${passActive() ? `<span class="badge-pass">PariGo</span> ` : ""}${esc(name)} · membre depuis le ${since}${SB_CONF ? (SOC.profile && SOC.profile.friend_code ? ` · code ami <b>${esc(SOC.profile.friend_code)}</b>` : "") : " · le pseudo deviendra public avec le serveur"}</p></div>
     <div class="panel"><h3>Vitrine</h3><p class="lede" style="font-size:13px;margin-bottom:10px">Vos 3 plus belles cartes, visibles par vos amis.</p>
       <div class="showcase">${[0, 1, 2].map(i => { const id = show[i]; return id ? `<button class="slot full" data-slot="${i}" aria-label="Changer">${cardHTML(BYID.get(id))}</button>` : `<button class="slot" data-slot="${i}">Choisir</button>`; }).join("")}</div>
       <div id="showPick"></div></div>
@@ -1687,7 +1722,11 @@ function renderProfile() {
       ${[[st.cards, "cartes différentes"], [`${(st.cards / ITEMS.length * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`, "de Paris collectionné"], [st.copies, "exemplaires"], [st.visited, "cartes visitées"], [S.stats.packs, "paquets ouverts"], [ecus(), "écus"], [`${S.stats.won} / ${S.stats.won + S.stats.lost}`, "batailles gagnées"], [st.done, "séries complètes"], [achLevels().reduce((n, x) => n + x.lvl, 0), "paliers de succès"], [fav ? FAMS[fav[0]].name : "–", "famille préférée"]]
         .map(([b, sp]) => `<div class="stat"><b>${typeof b === "number" ? nf(b) : esc(b)}</b><span>${sp}</span></div>`).join("")}
     </div><div class="tiers" style="margin-top:10px">${TIERS.map((n, i) => `<div class="tier" style="background:var(${TIER_VAR[i]})"><b>${nf(st.tiers[i])}</b><span>${n}</span></div>`).join("")}</div></div>`;
-  $("pSave").onclick = () => { S.profile.name = $("pName").value.trim().slice(0, 24); save(); renderProfile(); toast("Pseudo enregistré."); };
+  $("pSave").onclick = async () => {
+    const v = $("pName").value.trim().slice(0, 24);
+    if (SOCIAL()) { const [ok, d] = await rpc2("set_pseudo", { p_pseudo: v }); if (!ok) return; SOC.profile = d; }
+    S.profile.name = v; save(); renderProfile(); toast("Pseudo enregistré.");
+  };
   viewEl("profile").querySelectorAll("[data-slot]").forEach(b => b.onclick = () => openShowPicker(+b.dataset.slot));
 }
 function cardPicker(target, onPick, exclude = new Set()) {
@@ -1702,7 +1741,11 @@ function cardPicker(target, onPick, exclude = new Set()) {
 }
 function openShowPicker(slot) {
   if (!Object.keys(S.owned).length) { toast("Ouvrez d'abord des paquets."); return; }
-  cardPicker($("showPick"), id => { const sh = S.profile.show.filter(x => S.owned[x]); sh[slot] = id; S.profile.show = [...new Set(sh.filter(Boolean))].slice(0, 3); save(); renderProfile(); }, new Set(S.profile.show));
+  cardPicker($("showPick"), async id => {
+    const sh = S.profile.show.filter(x => S.owned[x]); sh[slot] = id; const next = [...new Set(sh.filter(Boolean))].slice(0, 3);
+    if (SOCIAL()) { const [ok] = await rpc2("set_showcase", { p_ids: next }); if (!ok) return; }
+    S.profile.show = next; save(); renderProfile();
+  }, new Set(S.profile.show));
 }
 
 /* ----- Bataille ----- */
@@ -1749,7 +1792,7 @@ function renderBattle() {
     <p class="lede">Un deck de 5 cartes, 5 manches. Chaque manche se joue sur un terrain : une carte de la même famille y gagne 30 % de puissance. Gagnez 3 manches sur 5.</p>
     ${owned < 5 ? `<div class="empty">Il faut au moins 5 cartes pour combattre. Ouvrez des paquets.</div>` : `
     <div class="panel"><h3>Adversaire</h3><div class="btn-row">${["Facile", "Normal", "Difficile"].map((n, i) => `<button class="mini-btn${BAT.diff === i ? "" : " ghost"}" data-diff="${i}">${n}</button>`).join("")}</div>
-      <p class="lede" style="font-size:13px;margin-top:8px">Entraînement contre l'ordinateur. Les combats contre vos amis arriveront avec le serveur ${srvBadge}</p></div>
+      <p class="lede" style="font-size:13px;margin-top:8px">${SOCIAL() ? "Entraînement contre l'ordinateur, ou défiez un ami plus bas avec ce même deck." : `Entraînement contre l'ordinateur. Les combats contre vos amis arriveront avec le serveur ${srvBadge}`}</p></div>
     <div class="panel"><h3>Terrains annoncés</h3><div class="terrains">${BAT.terrains.map((f, i) => `<span class="terrain" style="--c:${FAMS[f].color}"><i></i>${i + 1}. ${esc(FAMS[f].name)}</span>`).join("")}</div>
       <div class="btn-row" style="margin-top:10px"><button class="mini-btn ghost" id="batNewT">Autres terrains</button><button class="mini-btn ghost" id="batBest">Deck conseillé</button></div></div>
     <div class="panel"><h3>Votre deck</h3><div class="deck">${[0, 1, 2, 3, 4].map(i => { const it = deck[i], terr = BAT.terrains[i];
@@ -1757,7 +1800,8 @@ function renderBattle() {
         : `<div class="dslot"><span class="n">${i + 1}</span><span><small>Emplacement libre · terrain ${esc(FAMS[terr].name)}</small></span><span></span></div>`; }).join("")}</div>
       ${deck.length < 5 ? `<div id="deckPick"></div>` : ""}
       <button class="btn" id="fightBtn" style="margin-top:12px;width:100%" ${deck.length < 5 ? "disabled" : ""}>Combattre</button></div>
-    ${R ? `<div class="panel"><div class="verdict">${R.won ? "Victoire" : "Défaite"} ${R.w}-${5 - R.w}</div><div class="rounds" style="margin-top:10px">${R.rounds.map(r => `<div class="round"><div class="me ${r.win ? "win" : "lose"}"><b>${r.a}</b><em>${esc(r.me.n)}</em></div><span class="terrain" style="--c:${FAMS[r.terr].color}"><i></i></span><div class="op ${r.win ? "lose" : "win"}"><b>${r.b}</b><em>${esc(r.op.n)}</em></div></div>`).join("")}</div></div>` : ""}
+    ${SOCIAL() ? `<div class="panel" id="pvp"><h3>Contre un ami</h3><div class="empty">Chargement…</div></div>` : ""}
+    ${R ? `<div class="panel"><div class="verdict">${R.won ? "Victoire" : "Défaite"} ${R.w}-${5 - R.w}${R.vs ? ` <small style="display:block;font-size:14px;letter-spacing:.06em">contre ${esc(R.vs)}</small>` : ""}</div><div class="rounds" style="margin-top:10px">${R.rounds.map(r => `<div class="round"><div class="me ${r.win ? "win" : "lose"}"><b>${r.a}</b><em>${esc(r.me.n)}</em></div><span class="terrain" style="--c:${FAMS[r.terr].color}"><i></i></span><div class="op ${r.win ? "lose" : "win"}"><b>${r.b}</b><em>${esc(r.op.n)}</em></div></div>`).join("")}</div></div>` : ""}
     <p class="credits">Puissance = 10 + 15 par cran de rareté + 6 par niveau au-delà du premier + 8 si la carte a été visitée + 2 par doublon (4 au maximum). Bilan : ${S.stats.won} victoire${S.stats.won > 1 ? "s" : ""}, ${S.stats.lost} défaite${S.stats.lost > 1 ? "s" : ""}.</p>`}`;
   const root = viewEl("battle");
   root.querySelectorAll("[data-diff]").forEach(b => b.onclick = () => { BAT.diff = +b.dataset.diff; renderBattle(); });
@@ -1770,6 +1814,7 @@ function renderBattle() {
   if ($("deckPick")) cardPicker($("deckPick"), id => { if (S.deck.length < 5 && !S.deck.includes(id)) { S.deck.push(id); save(); renderBattle(); } }, new Set(S.deck));
   $("fightBtn").onclick = () => { fight(); renderBattle(); if (newTermsAfter) { newTermsAfter = false; BAT.terrains = BAT.terrains; } };
   if (R && $("fightBtn")) $("fightBtn").textContent = "Rejouer (mêmes terrains)";
+  if (SOCIAL()) renderPvp();
 }
 
 /* ----- Paramètres ----- */
@@ -1841,6 +1886,287 @@ function renderShop() {
   $("buyParigo").onclick = () => checkout("parigo");
   if ($("openParigo")) $("openParigo").onclick = buyParigoPack;
   viewEl("shop").querySelectorAll("[data-sku]").forEach(b => b.onclick = () => checkout(b.dataset.sku));
+}
+
+/* ----- Fonctions sociales (serveur) -----
+   Tout passe par les fonctions de supabase/social.sql : le téléphone affiche, le serveur décide. */
+const SOCIAL = () => !!(SB && ui.user);
+const SOC = { profile: null, friends: null, convs: null, threadWith: null, thread: null, trades: null, tradeWith: null, give: [], want: [], friendCards: null, viewFriend: null,
+  market: null, mkTab: "open", mkSel: null, mkQ: "", mkFam: "", mkTier: "", lbKind: "cards", lb: {}, guild: undefined, guildList: null, battle: null, badges: {}, chan: null, gchan: null };
+const capFirst = m => { m = String(m || "Erreur du serveur").replace(/^ERROR:\s*/, ""); return m.charAt(0).toUpperCase() + m.slice(1); };
+async function rpc2(fn, args) {
+  if (!SOCIAL()) { toast("Connectez-vous d'abord (onglet Paquets)."); return [false]; }
+  const { data, error } = await SB.rpc(fn, args || {});
+  if (error) { toast(capFirst(error.message)); if (/carte non disponible|ne possédez pas/.test(error.message)) syncServer(); return [false]; }
+  return [true, data];
+}
+const nameOf = id => (BYID.get(id) || { n: "Carte inconnue" }).n;
+const chipHTML = (id, extra = "") => { const it = BYID.get(id); if (!it) return ""; return `<span class="cchip" style="--c:${famColor(it)}"><i></i>${esc(it.n)} <em>${"★".repeat(it.t + 1)}</em>${extra}</span>`; };
+const timeLeft = ms => { if (ms <= 0) return "terminé"; const m = Math.floor(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60); return h < 24 ? `${h} h ${m % 60} min` : `${Math.floor(h / 24)} j ${h % 24} h`; };
+async function socialGate(id) {
+  if (!SOC.profile) { const [ok, d] = await rpc2("my_profile"); if (!ok) return false; SOC.profile = d || {}; }
+  if (SOC.profile.pseudo) return true;
+  viewEl(id).innerHTML = `<h2>${esc(SEC[id].name)}</h2><div class="panel"><h3>Choisissez votre pseudo</h3>
+    <p class="lede" style="font-size:14px;margin-bottom:10px">Il est obligatoire pour jouer avec les autres et visible par tous. 3 à 20 caractères : lettres, chiffres, point, tiret ou souligné.</p>
+    <div class="btn-row"><input class="field" id="psIn" maxlength="20" placeholder="Pseudo" value="${esc(S.profile.name || "")}" style="flex:1 1 180px"><button class="btn" id="psOk">Valider</button></div></div>`;
+  $("psOk").onclick = async () => { const [ok, d] = await rpc2("set_pseudo", { p_pseudo: $("psIn").value }); if (ok) { SOC.profile = d; S.profile.name = d.pseudo; save(); RENDER[id](); } };
+  return false;
+}
+// Après un échange, une vente ou un achat : on relit la collection et le solde depuis le serveur
+async function afterCardMove() { await syncServer(); }
+// Badges (demandes d'amis, messages non lus, échanges reçus), messages en direct
+async function socialPoll() {
+  if (!SOCIAL()) return;
+  const [a, b, c] = await Promise.all([SB.rpc("friends_list"), SB.rpc("conversations"), SB.rpc("my_trades")]);
+  if (!a.error) SOC.friends = a.data; if (!b.error) SOC.convs = b.data;
+  if (!c.error) {
+    // une de mes propositions acceptée par un ami : la collection a changé, on la relit
+    const acc = c.data.filter(t => t.status === "accepted").map(t => t.id).join(",");
+    if (SOC.accSeen != null && acc !== SOC.accSeen) syncServer();
+    SOC.accSeen = acc; SOC.trades = c.data;
+  }
+  const uid = ui.user.id;
+  SOC.badges = {
+    friends: (SOC.friends && SOC.friends.incoming.length) || 0,
+    messages: (SOC.convs || []).reduce((n, x) => n + (+x.unread || 0), 0),
+    trades: (SOC.trades || []).filter(t => t.status === "open" && t.to === uid).length,
+  };
+  const tot = SOC.badges.friends + SOC.badges.messages + SOC.badges.trades;
+  $("menuBadge").hidden = !tot; $("menuBadge").textContent = tot;
+  if (ui.view === "menu") renderMenu();
+  if (!SOC.chan && SB.channel) {
+    SOC.chan = SB.channel("pq-dm").on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `recipient=eq.${uid}` }, pl => {
+      const m = pl.new;
+      if (ui.view === "messages" && SOC.threadWith === m.sender) { SOC.thread = (SOC.thread || []).concat([m]); drawThread(); SB.rpc("dm_thread", { p_other: m.sender }); }
+      else { const who = ((SOC.friends && SOC.friends.friends) || []).find(f => f.id === m.sender); toast(`Message de ${who ? who.pseudo : "un ami"} : ${m.body.slice(0, 60)}`); socialPoll(); }
+    }).subscribe();
+  }
+}
+setInterval(() => { if (SOCIAL() && !document.hidden) socialPoll(); }, 60000);
+
+/* ----- Amis ----- */
+async function renderFriends() {
+  const el = viewEl("friends"); if (!(await socialGate("friends"))) return;
+  const [ok, d] = await rpc2("friends_list"); if (!ok) return; SOC.friends = d;
+  const fr = d.friends, inc = d.incoming, out = d.outgoing, bl = d.blocked;
+  el.innerHTML = `<h2>Amis</h2>
+    <div class="panel"><h3>Ajouter un ami</h3><p class="lede" style="font-size:14px;margin-bottom:8px">Votre pseudo : <b>${esc(SOC.profile.pseudo)}</b> · votre code ami : <b>${esc(SOC.profile.friend_code)}</b></p>
+      <div class="btn-row"><input class="field" id="frWho" placeholder="Pseudo ou code ami" style="flex:1 1 160px"><button class="btn small" id="frAdd">Ajouter</button></div></div>
+    ${inc.length ? `<div class="panel"><h3>Demandes reçues</h3>${inc.map(x => `<div class="prow"><strong>${esc(x.pseudo)}</strong><span class="acts"><button class="mini-btn" data-acc="${x.id}">Accepter</button><button class="mini-btn ghost" data-ref="${x.id}">Refuser</button></span></div>`).join("")}</div>` : ""}
+    <div class="panel"><h3>Mes amis (${fr.length})</h3>${fr.length ? fr.map(x => `<div class="prow"><span><strong>${esc(x.pseudo)}</strong><small>${nf(x.cards)} cartes${x.defense ? " · deck de défense prêt" : ""}</small>${x.showcase.length ? `<span class="chips" style="margin-top:4px">${x.showcase.map(id => chipHTML(id)).join("")}</span>` : ""}</span>
+        <span class="acts"><button class="mini-btn" data-col="${x.id}">Collection</button><button class="mini-btn" data-msg="${x.id}">Message</button><button class="mini-btn" data-trd="${x.id}">Échange</button>
+        <button class="mini-btn ghost" data-rm="${x.id}">Retirer</button><button class="mini-btn ghost" data-blk="${x.id}">Bloquer</button></span></div>`).join("") : `<div class="empty">Pas encore d'amis. Partagez votre code ami.</div>`}</div>
+    ${SOC.viewFriend ? `<div class="panel" id="frCol"><h3>Collection de ${esc((fr.find(f => f.id === SOC.viewFriend) || {}).pseudo || "")}</h3><div class="empty">Chargement…</div></div>` : ""}
+    ${out.length ? `<div class="panel"><h3>Demandes envoyées</h3>${out.map(x => `<div class="prow"><strong>${esc(x.pseudo)}</strong><span class="acts"><button class="mini-btn ghost" data-rm="${x.id}">Annuler</button></span></div>`).join("")}</div>` : ""}
+    ${bl.length ? `<div class="panel"><h3>Joueurs bloqués</h3>${bl.map(x => `<div class="prow"><strong>${esc(x.pseudo)}</strong><span class="acts"><button class="mini-btn ghost" data-unb="${x.id}">Débloquer</button></span></div>`).join("")}</div>` : ""}`;
+  const act = async (fn, args, msg) => { const [ok2, r] = await rpc2(fn, args); if (ok2) { toast(msg || capFirst(r)); renderFriends(); socialPoll(); } };
+  $("frAdd").onclick = () => act("friend_request", { p_who: $("frWho").value });
+  el.querySelectorAll("[data-acc]").forEach(b => b.onclick = () => act("friend_respond", { p_other: b.dataset.acc, p_accept: true }, "Ami ajouté."));
+  el.querySelectorAll("[data-ref]").forEach(b => b.onclick = () => act("friend_respond", { p_other: b.dataset.ref, p_accept: false }, "Demande refusée."));
+  el.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => act("friend_remove", { p_other: b.dataset.rm }, "C'est fait."));
+  el.querySelectorAll("[data-blk]").forEach(b => b.onclick = () => act("block_user", { p_other: b.dataset.blk, p_block: true }, "Joueur bloqué."));
+  el.querySelectorAll("[data-unb]").forEach(b => b.onclick = () => act("block_user", { p_other: b.dataset.unb, p_block: false }, "Joueur débloqué."));
+  el.querySelectorAll("[data-msg]").forEach(b => b.onclick = () => { SOC.threadWith = b.dataset.msg; setMobile("messages"); });
+  el.querySelectorAll("[data-trd]").forEach(b => b.onclick = () => { SOC.tradeWith = b.dataset.trd; SOC.give = []; SOC.want = []; SOC.friendCards = null; setMobile("trades"); });
+  el.querySelectorAll("[data-col]").forEach(b => b.onclick = () => { SOC.viewFriend = SOC.viewFriend === b.dataset.col ? null : b.dataset.col; renderFriends(); });
+  if (SOC.viewFriend) {
+    const [ok3, cards] = await rpc2("friend_cards", { p_other: SOC.viewFriend }); if (!ok3) return;
+    const list = cards.map(c => BYID.get(c.id)).filter(Boolean).sort((a, b) => b.t - a.t || a.n.localeCompare(b.n, "fr"));
+    $("frCol").innerHTML = `<h3>Collection de ${esc((fr.find(f => f.id === SOC.viewFriend) || {}).pseudo || "")} · ${nf(list.length)} cartes</h3>
+      <p class="lede" style="font-size:13px;margin-bottom:8px">En couleur : les cartes que vous n'avez pas encore.</p>
+      <div class="grid">${list.slice(0, 60).map(it => `<button data-id="${esc(it.i)}">${cardHTML(it, { extraClass: S.owned[it.i] ? "locked" : "" })}</button>`).join("")}</div>`;
+    $("frCol").querySelectorAll("[data-id]").forEach(b => b.onclick = () => openCard(b.dataset.id));
+  }
+}
+
+/* ----- Messages ----- */
+async function renderMessages() {
+  const el = viewEl("messages"); if (!(await socialGate("messages"))) return;
+  if (SOC.threadWith) {
+    const who = ((SOC.friends && SOC.friends.friends) || []).find(f => f.id === SOC.threadWith);
+    el.innerHTML = `<h2>Messages</h2><div class="panel"><div class="btn-row" style="justify-content:space-between;align-items:center"><button class="mini-btn ghost" id="thBack">← Conversations</button><strong style="color:var(--navy)">${esc(who ? who.pseudo : "")}</strong><button class="mini-btn ghost" id="thRep">Signaler</button></div>
+      <div class="bubbles" id="thList" style="margin-top:10px"><div class="empty">Chargement…</div></div>
+      <div class="sendrow"><input class="field" id="thIn" maxlength="500" placeholder="Votre message"><button class="btn small" id="thSend">Envoyer</button></div></div>`;
+    $("thBack").onclick = () => { SOC.threadWith = null; renderMessages(); };
+    $("thRep").onclick = async () => { const [ok] = await rpc2("report_user", { p_target: SOC.threadWith, p_reason: "Signalé depuis la messagerie" }); if (ok) toast("Signalement envoyé. Merci."); };
+    const send = async () => { const v = $("thIn").value.trim(); if (!v) return; const [ok, m] = await rpc2("send_message", { p_to: SOC.threadWith, p_body: v }); if (ok) { $("thIn").value = ""; SOC.thread = (SOC.thread || []).concat([m]); drawThread(); } };
+    $("thSend").onclick = send; $("thIn").onkeydown = e => { if (e.key === "Enter") send(); };
+    const [ok, th] = await rpc2("dm_thread", { p_other: SOC.threadWith }); if (!ok) return;
+    SOC.thread = th; drawThread(); socialPoll();
+    return;
+  }
+  const [ok, cv] = await rpc2("conversations"); if (!ok) return; SOC.convs = cv;
+  el.innerHTML = `<h2>Messages</h2><div class="panel"><h3>Conversations</h3>${cv.length ? cv.map(c => `<button class="prow" data-th="${c.id}" style="width:100%;border:0;background:none;text-align:left;border-bottom:1px solid var(--joint)"><span><strong>${esc(c.pseudo)}${+c.unread ? `<span class="ubadge">${c.unread}</span>` : ""}</strong><small>${esc(c.last || "Pas encore de message")}</small></span><span class="mini-btn">Ouvrir</span></button>`).join("") : `<div class="empty">Ajoutez des amis pour discuter avec eux.</div>`}</div>`;
+  el.querySelectorAll("[data-th]").forEach(b => b.onclick = () => { SOC.threadWith = b.dataset.th; renderMessages(); });
+}
+function drawThread() {
+  const box = $("thList"); if (!box) return; const me = ui.user.id;
+  box.innerHTML = (SOC.thread || []).map(m => `<div class="bubble${m.sender === me ? " me" : ""}">${m.place_id ? `<b>${esc(nameOf(m.place_id))}</b>` : ""}${esc(m.body)}<small>${new Date(m.created_at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small></div>`).join("") || `<div class="empty">Écrivez le premier message.</div>`;
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ----- Échanges ----- */
+function listPicker(target, ids, onPick, counts) {
+  const items = ids.map(id => BYID.get(id)).filter(Boolean).sort((a, b) => b.t - a.t || a.n.localeCompare(b.n, "fr"));
+  const draw = (q = "") => {
+    const nq = normTxt(q); const L = items.filter(it => !nq || normTxt(it.n).includes(nq)).slice(0, 80);
+    target.querySelector(".picker").innerHTML = L.map(it => `<button class="pick" data-id="${esc(it.i)}" style="--c:${famColor(it)}"><i></i><span>${esc(it.n)}<small>${esc(KINDS[it.k].l)} · ${TIERS[it.t]}${counts && counts[it.i] > 1 ? ` · ${counts[it.i]} exemplaires` : ""}</small></span><b>+</b></button>`).join("") || `<div class="empty">Aucune carte.</div>`;
+    target.querySelectorAll(".pick").forEach(b => b.onclick = () => onPick(b.dataset.id));
+  };
+  target.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><input class="field" type="search" placeholder="Rechercher" aria-label="Rechercher"><div class="picker" style="max-height:240px"></div></div>`;
+  target.querySelector("input").oninput = e => draw(e.target.value); draw();
+}
+async function renderTrades() {
+  const el = viewEl("trades"); if (!(await socialGate("trades"))) return;
+  const [ok, d] = await rpc2("my_trades"); if (!ok) return; SOC.trades = d;
+  if (!SOC.friends) { const [o2, f] = await rpc2("friends_list"); if (o2) SOC.friends = f; }
+  const me = ui.user.id, friends = (SOC.friends && SOC.friends.friends) || [];
+  const inc = d.filter(t => t.status === "open" && t.to === me), out = d.filter(t => t.status === "open" && t.from === me), past = d.filter(t => t.status !== "open").slice(0, 15);
+  const ST = { accepted: "accepté", declined: "refusé", cancelled: "annulé", expired: "expiré" };
+  const row = (t, acts) => `<div class="prow"><span><strong>${t.from === me ? `Vous → ${esc(t.to_pseudo)}` : `${esc(t.from_pseudo)} → vous`}</strong>
+      <small>${t.from === me ? "Vous donnez" : "Il donne"} :</small><span class="chips">${t.give.map(id => chipHTML(id)).join("") || "<small>rien</small>"}</span>
+      <small style="margin-top:4px">${t.from === me ? "Vous demandez" : "Il demande"} :</small><span class="chips">${t.want.map(id => chipHTML(id)).join("") || "<small>rien</small>"}</span></span><span class="acts">${acts}</span></div>`;
+  const fr = friends.find(f => f.id === SOC.tradeWith);
+  el.innerHTML = `<h2>Échanges</h2>
+    <p class="lede">Toutes les cartes s'échangent entre amis. Une carte cédée repart au niveau 1, sans sceau « Visité », chez son nouveau propriétaire.</p>
+    ${inc.length ? `<div class="panel"><h3>Propositions reçues</h3>${inc.map(t => row(t, `<button class="mini-btn" data-acc="${t.id}">Accepter</button><button class="mini-btn ghost" data-dec="${t.id}">Refuser</button>`)).join("")}</div>` : ""}
+    <div class="panel"><h3>Nouvel échange</h3>
+      <select class="field" id="trFriend"><option value="">Choisir un ami</option>${friends.map(f => `<option value="${f.id}" ${f.id === SOC.tradeWith ? "selected" : ""}>${esc(f.pseudo)}</option>`).join("")}</select>
+      ${fr ? `<div style="display:grid;gap:12px;margin-top:10px">
+        <div><strong style="color:var(--navy)">Je donne (${SOC.give.length}/10)</strong><div class="chips" style="margin-top:5px">${SOC.give.map((id, i) => `<button class="cchip" data-ug="${i}" style="--c:${famColor(BYID.get(id))}"><i></i>${esc(nameOf(id))} ×</button>`).join("")}</div><div id="trGive"></div></div>
+        <div><strong style="color:var(--navy)">Je demande à ${esc(fr.pseudo)} (${SOC.want.length}/10)</strong><div class="chips" style="margin-top:5px">${SOC.want.map((id, i) => `<button class="cchip" data-uw="${i}" style="--c:${famColor(BYID.get(id))}"><i></i>${esc(nameOf(id))} ×</button>`).join("")}</div><div id="trWant"><div class="empty">Chargement de sa collection…</div></div></div>
+        ${SOC.give.some(id => S.owned[id] && SOC.give.filter(x => x === id).length >= (S.owned[id].copies || 1)) ? `<p class="warn">Certaines cartes données sont vos derniers exemplaires : elles quitteront votre collection.</p>` : ""}
+        <button class="btn" id="trSend" ${SOC.give.length + SOC.want.length ? "" : "disabled"}>Proposer l'échange</button></div>` : `<p class="lede" style="font-size:13px;margin-top:8px">${friends.length ? "Choisissez un ami pour composer l'échange." : "Ajoutez d'abord des amis."}</p>`}</div>
+    ${out.length ? `<div class="panel"><h3>Mes propositions en attente</h3>${out.map(t => row(t, `<button class="mini-btn ghost" data-can="${t.id}">Annuler</button>`)).join("")}</div>` : ""}
+    ${past.length ? `<div class="panel"><h3>Historique</h3>${past.map(t => row(t, `<small>${ST[t.status] || t.status}</small>`)).join("")}</div>` : ""}`;
+  const act = async (fn, args, msg) => { const [ok2] = await rpc2(fn, args); if (ok2) { toast(msg); await afterCardMove(); renderTrades(); socialPoll(); } };
+  el.querySelectorAll("[data-acc]").forEach(b => b.onclick = () => act("respond_trade", { p_id: +b.dataset.acc, p_accept: true }, "Échange accepté : les cartes ont changé de main."));
+  el.querySelectorAll("[data-dec]").forEach(b => b.onclick = () => act("respond_trade", { p_id: +b.dataset.dec, p_accept: false }, "Échange refusé."));
+  el.querySelectorAll("[data-can]").forEach(b => b.onclick = () => act("cancel_trade", { p_id: +b.dataset.can }, "Proposition annulée."));
+  $("trFriend").onchange = () => { SOC.tradeWith = $("trFriend").value || null; SOC.give = []; SOC.want = []; SOC.friendCards = null; renderTrades(); };
+  if (!fr) return;
+  el.querySelectorAll("[data-ug]").forEach(b => b.onclick = () => { SOC.give.splice(+b.dataset.ug, 1); renderTrades(); });
+  el.querySelectorAll("[data-uw]").forEach(b => b.onclick = () => { SOC.want.splice(+b.dataset.uw, 1); renderTrades(); });
+  const myCounts = Object.fromEntries(Object.entries(S.owned).map(([id, o]) => [id, o.copies || 1]));
+  listPicker($("trGive"), Object.keys(S.owned).filter(id => SOC.give.filter(x => x === id).length < myCounts[id]), id => { if (SOC.give.length < 10) { SOC.give.push(id); renderTrades(); } }, myCounts);
+  $("trSend").onclick = async () => { const [ok2] = await rpc2("propose_trade", { p_to: SOC.tradeWith, p_give: SOC.give, p_want: SOC.want }); if (ok2) { toast(`Proposition envoyée à ${fr.pseudo}.`); SOC.give = []; SOC.want = []; renderTrades(); } };
+  if (!SOC.friendCards || SOC.friendCards.who !== SOC.tradeWith) { const [o3, cards] = await rpc2("friend_cards", { p_other: SOC.tradeWith }); if (!o3) return; SOC.friendCards = { who: SOC.tradeWith, cards }; }
+  const theirCounts = Object.fromEntries(SOC.friendCards.cards.map(c => [c.id, c.copies]));
+  if ($("trWant")) listPicker($("trWant"), Object.keys(theirCounts).filter(id => SOC.want.filter(x => x === id).length < theirCounts[id]), id => { if (SOC.want.length < 10) { SOC.want.push(id); renderTrades(); } }, theirCounts);
+}
+
+/* ----- Marché aux enchères ----- */
+async function renderMarket() {
+  const el = viewEl("market"); if (!(await socialGate("market"))) return;
+  const [ok, d] = await rpc2("market_list"); if (!ok) return; SOC.market = d;
+  const off = Date.parse(d.server_now) - Date.now(), now = () => Date.now() + off;
+  const tabs = [["open", "En vente"], ["sell", "Vendre"], ["mine", "Mes ventes et enchères"]];
+  let body = "";
+  if (SOC.mkTab === "open") {
+    const q = normTxt(SOC.mkQ);
+    const L = d.open.filter(l => { const it = BYID.get(l.place); return it && (!q || normTxt(it.n).includes(q)) && (!SOC.mkFam || famOf(it) === SOC.mkFam) && (SOC.mkTier === "" || it.t === +SOC.mkTier); });
+    body = `<div class="filters"><input type="search" id="mkQ" placeholder="Rechercher une carte" value="${esc(SOC.mkQ)}">
+        <select id="mkFam"><option value="">Toutes les familles</option>${Object.entries(FAMS).map(([k, f]) => `<option value="${k}" ${SOC.mkFam === k ? "selected" : ""}>${esc(f.name)}</option>`).join("")}</select>
+        <select id="mkTier"><option value="">Toutes les raretés</option>${TIERS.map((n, i) => `<option value="${i}" ${SOC.mkTier === String(i) ? "selected" : ""}>${n}</option>`).join("")}</select></div>
+      ${L.length ? `<div class="mk-grid" style="margin-top:10px">${L.map(l => { const it = BYID.get(l.place), left = Date.parse(l.ends_at) - now();
+        return `<div class="mk-item">${cardHTML(it)}<div class="mk-info"><b>${nf(l.bid || l.start)} écus</b> ${l.bid ? `· ${l.bids} enchère${l.bids > 1 ? "s" : ""}` : "· prix de départ"}<br>${timeLeft(left)} · ${esc(l.seller)}${l.leading ? `<br><span class="lead">Vous menez</span>` : ""}${l.buyout ? `<br>Achat immédiat : ${nf(l.buyout)}` : ""}</div>
+          ${l.mine ? (l.bid ? `<small>Votre vente</small>` : `<button class="mini-btn ghost" data-cancel="${l.id}">Annuler la vente</button>`) : `<div class="mk-act">${l.leading ? "" : `<input class="field" type="number" min="${l.min}" value="${l.min}" id="bid${l.id}"><button class="mini-btn" data-bid="${l.id}">Enchérir</button>`}</div>${l.buyout ? `<button class="mini-btn ghost" data-buy="${l.id}">Acheter ${nf(l.buyout)}</button>` : ""}`}</div>`; }).join("")}</div>` : `<div class="empty" style="margin-top:10px">Aucune carte en vente pour ces critères.</div>`}`;
+  } else if (SOC.mkTab === "sell") {
+    const it = SOC.mkSel && BYID.get(SOC.mkSel), o = it && S.owned[it.i];
+    body = it && o ? `<div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start">${cardHTML(it)}<div style="display:flex;flex-direction:column;gap:8px">
+        <label>Prix de départ (écus)<input class="field" type="number" id="slStart" min="1" value="${[20, 40, 80, 160, 400][it.t]}"></label>
+        <label>Achat immédiat (facultatif)<input class="field" type="number" id="slBuy" min="2" placeholder="aucun"></label>
+        <label>Durée<select class="field" id="slHours"><option value="1">1 heure</option><option value="24" selected>24 heures</option><option value="72">3 jours</option></select></label>
+        ${(o.copies || 1) <= 1 ? `<p class="warn">C'est votre dernier exemplaire : la carte quittera votre collection${o.vis ? " avec son niveau et son sceau « Visité »" : ""}.</p>` : `<p class="lede" style="font-size:13px">Il vous restera ${o.copies - 1} exemplaire${o.copies - 1 > 1 ? "s" : ""}.</p>`}
+        <div class="btn-row"><button class="btn" id="slGo">Mettre en vente</button><button class="mini-btn ghost" id="slOther">Autre carte</button></div></div></div>
+        <p class="lede" style="font-size:13px;margin-top:8px">La carte est mise de côté pendant la vente. 5 % du prix de vente sont prélevés. Sans enchère, elle vous revient à la fin.</p>`
+      : `<p class="lede" style="font-size:14px">Choisissez la carte à vendre :</p><div id="slPick"></div>`;
+  } else {
+    body = d.history.length ? d.history.map(h => `<div class="prow"><span>${chipHTML(h.place)}<small>${h.mine ? (h.status === "sold" ? `Vendue ${nf(h.price)} écus (vous recevez ${nf(Math.floor(h.price * .95))})` : h.status === "unsold" ? "Invendue, carte récupérée" : "Vente annulée") : `Remportée pour ${nf(h.price)} écus`}</small></span><small>${new Date(h.closed_at).toLocaleDateString("fr-FR")}</small></div>`).join("")
+      : `<div class="empty">Pas encore de vente ni d'achat.</div>`;
+    const mine = d.open.filter(l => l.mine || l.leading);
+    if (mine.length) body = `<h3 style="margin-top:4px">En cours</h3>${mine.map(l => `<div class="prow"><span>${chipHTML(l.place)}<small>${l.mine ? "Votre vente" : "Vous menez"} · ${nf(l.bid || l.start)} écus · ${timeLeft(Date.parse(l.ends_at) - now())}</small></span></div>`).join("")}<h3 style="margin-top:12px">Terminées</h3>` + body;
+  }
+  el.innerHTML = `<h2>Marché</h2>
+    <p class="lede">Solde : <b>${nf(d.ecus || 0)} écus</b>. Les écus d'une enchère sont mis de côté et rendus si quelqu'un surenchérit. Une enchère dans les 2 dernières minutes prolonge la vente.</p>
+    <div class="tabsrow">${tabs.map(([k, n]) => `<button class="mini-btn${SOC.mkTab === k ? "" : " ghost"}" data-tab2="${k}">${n}</button>`).join("")}</div>
+    <div class="panel">${body}</div>`;
+  el.querySelectorAll("[data-tab2]").forEach(b => b.onclick = () => { SOC.mkTab = b.dataset.tab2; renderMarket(); });
+  const done = async (msg) => { toast(msg); await afterCardMove(); renderMarket(); };
+  if ($("mkQ")) { $("mkQ").oninput = e => { SOC.mkQ = e.target.value; clearTimeout(SOC.mkT); SOC.mkT = setTimeout(renderMarket, 350); }; $("mkFam").onchange = e => { SOC.mkFam = e.target.value; renderMarket(); }; $("mkTier").onchange = e => { SOC.mkTier = e.target.value; renderMarket(); }; }
+  el.querySelectorAll("[data-bid]").forEach(b => b.onclick = async () => { const [ok2] = await rpc2("place_bid", { p_id: +b.dataset.bid, p_amount: +$("bid" + b.dataset.bid).value }); if (ok2) done("Enchère placée : vous menez."); });
+  el.querySelectorAll("[data-buy]").forEach(b => b.onclick = async () => { const [ok2] = await rpc2("buy_now", { p_id: +b.dataset.buy }); if (ok2) done("Carte achetée : elle est dans votre collection."); });
+  el.querySelectorAll("[data-cancel]").forEach(b => b.onclick = async () => { const [ok2] = await rpc2("cancel_listing", { p_id: +b.dataset.cancel }); if (ok2) done("Vente annulée : la carte vous revient."); });
+  if ($("slPick")) cardPicker($("slPick"), id => { SOC.mkSel = id; renderMarket(); });
+  if ($("slOther")) $("slOther").onclick = () => { SOC.mkSel = null; renderMarket(); };
+  if ($("slGo")) $("slGo").onclick = async () => {
+    const buy = $("slBuy").value ? +$("slBuy").value : null;
+    const [ok2] = await rpc2("create_listing", { p_place: SOC.mkSel, p_start: +$("slStart").value, p_buyout: buy, p_hours: +$("slHours").value });
+    if (ok2) { SOC.mkSel = null; SOC.mkTab = "mine"; done("Carte mise en vente."); }
+  };
+}
+
+/* ----- Classement ----- */
+async function renderLeaderboard() {
+  const el = viewEl("leaderboard"); if (!(await socialGate("leaderboard"))) return;
+  const K = [["cards", "Cartes"], ["legend", "Légendaires"], ["visits", "Visites"], ["wins", "Victoires"]];
+  const [ok, d] = await rpc2("leaderboard", { p_kind: SOC.lbKind }); if (!ok) return;
+  el.innerHTML = `<h2>Classement</h2>
+    <div class="tabsrow">${K.map(([k, n]) => `<button class="mini-btn${SOC.lbKind === k ? "" : " ghost"}" data-k="${k}">${n}</button>`).join("")}</div>
+    ${d.me ? `<p class="lede" style="margin-top:4px">Vous êtes <b>${d.me.rank}<sup>${d.me.rank === 1 ? "er" : "e"}</sup></b> sur ${nf(d.players)} joueurs, avec ${nf(d.me.value)}.</p>` : ""}
+    <div class="panel"><div class="lb-table">${d.top.map(r => `<div class="lb-row${r.me ? " me" : ""}"><b>${r.rank}</b><span>${esc(r.pseudo)}</span><b>${nf(r.value)}</b></div>`).join("") || `<div class="empty">Personne pour l'instant.</div>`}</div></div>`;
+  el.querySelectorAll("[data-k]").forEach(b => b.onclick = () => { SOC.lbKind = b.dataset.k; renderLeaderboard(); });
+}
+
+/* ----- Guilde ----- */
+async function renderGuild() {
+  const el = viewEl("guild"); if (!(await socialGate("guild"))) return;
+  const [ok, g] = await rpc2("guild_info"); if (!ok) return; SOC.guild = g;
+  if (!g) {
+    const [o2, list] = await rpc2("guild_search", { p_q: "" }); if (!o2) return;
+    el.innerHTML = `<h2>Guilde</h2><p class="lede">Collectionnez Paris en équipe : jusqu'à 20 membres, une collection commune et un objectif chaque semaine.</p>
+      <div class="panel"><h3>Créer une guilde</h3><div style="display:grid;gap:8px"><input class="field" id="gName" maxlength="30" placeholder="Nom (3 à 30 caractères)"><input class="field" id="gTag" maxlength="5" placeholder="Sigle (2 à 5 lettres ou chiffres)"><input class="field" id="gDesc" maxlength="200" placeholder="Description (facultatif)"><button class="btn" id="gCreate">Créer</button></div></div>
+      <div class="panel"><h3>Rejoindre une guilde</h3>${list.length ? list.map(x => `<div class="prow"><span><strong>${esc(x.name)} [${esc(x.tag)}]</strong><small>${x.members}/20 membres${x.description ? " · " + esc(x.description) : ""}</small></span><span class="acts"><button class="mini-btn" data-join="${x.id}" ${x.members >= 20 ? "disabled" : ""}>Rejoindre</button></span></div>`).join("") : `<div class="empty">Aucune guilde pour l'instant : créez la première.</div>`}</div>`;
+    $("gCreate").onclick = async () => { const [o3] = await rpc2("guild_create", { p_name: $("gName").value, p_tag: $("gTag").value, p_description: $("gDesc").value }); if (o3) { toast("Guilde créée."); renderGuild(); } };
+    el.querySelectorAll("[data-join]").forEach(b => b.onclick = async () => { const [o3] = await rpc2("guild_join", { p_id: +b.dataset.join }); if (o3) { toast("Bienvenue dans la guilde."); renderGuild(); } });
+    return;
+  }
+  const me = ui.user.id, chef = g.my_role === "chef", off = g.my_role === "officier";
+  const cov = g.coverage / g.total * 100, wk = Math.min(100, g.week_visits / g.week_goal * 100);
+  el.innerHTML = `<h2>Guilde</h2>
+    <div class="panel"><h3>${esc(g.name)} [${esc(g.tag)}]</h3>${g.description ? `<p class="lede" style="font-size:14px">${esc(g.description)}</p>` : ""}
+      <div class="stats" style="margin-top:8px"><div class="stat"><b>${g.members.length}/20</b><span>membres</span></div><div class="stat"><b>${cov.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %</b><span>de Paris collectionné ensemble (${nf(g.coverage)} lieux)</span></div><div class="stat"><b>${g.week_visits}/${g.week_goal}</b><span>visites cette semaine</span></div></div>
+      <div class="ach"><strong>Objectif de la semaine</strong><span class="lv">${g.week_visits >= g.week_goal ? "Atteint" : `${g.week_goal - g.week_visits} visites restantes`}</span><p>${g.week_goal} visites sur place par les membres, du lundi au dimanche.</p><span class="bar"><i style="width:${wk}%"></i></span></div></div>
+    <div class="panel"><h3>Membres</h3>${g.members.map(m => `<div class="prow"><span><strong>${esc(m.pseudo)}</strong><small>${m.role} · ${nf(m.cards)} cartes</small></span><span class="acts">${m.id === me ? "" : `${chef ? `${m.role !== "officier" ? `<button class="mini-btn ghost" data-role="${m.id}" data-r="officier">Officier</button>` : `<button class="mini-btn ghost" data-role="${m.id}" data-r="membre">Membre</button>`}<button class="mini-btn ghost" data-role="${m.id}" data-r="chef">Nommer chef</button>` : ""}${chef || (off && m.role === "membre") ? `<button class="mini-btn ghost" data-kick="${m.id}">Exclure</button>` : ""}`}</span></div>`).join("")}</div>
+    <div class="panel"><h3>Discussion</h3><div class="bubbles" id="gChat">${g.messages.map(m => `<div class="bubble${m.mine ? " me" : ""}">${m.mine ? "" : `<b>${esc(m.pseudo)}</b>`}${esc(m.body)}<small>${new Date(m.at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small></div>`).join("") || `<div class="empty">Lancez la discussion.</div>`}</div>
+      <div class="sendrow"><input class="field" id="gIn" maxlength="500" placeholder="Message à la guilde"><button class="btn small" id="gSend">Envoyer</button></div></div>
+    <button class="mini-btn ghost" id="gLeave" style="align-self:flex-start">Quitter la guilde</button>`;
+  const box = $("gChat"); box.scrollTop = box.scrollHeight;
+  const send = async () => { const v = $("gIn").value.trim(); if (!v) return; const [o3] = await rpc2("guild_send", { p_body: v }); if (o3) renderGuild(); };
+  $("gSend").onclick = send; $("gIn").onkeydown = e => { if (e.key === "Enter") send(); };
+  $("gLeave").onclick = async () => { const [o3, r] = await rpc2("guild_leave"); if (o3) { toast(capFirst(r)); renderGuild(); } };
+  el.querySelectorAll("[data-kick]").forEach(b => b.onclick = async () => { const [o3] = await rpc2("guild_kick", { p_user: b.dataset.kick }); if (o3) renderGuild(); });
+  el.querySelectorAll("[data-role]").forEach(b => b.onclick = async () => { const [o3] = await rpc2("guild_set_role", { p_user: b.dataset.role, p_role: b.dataset.r }); if (o3) renderGuild(); });
+  if (!SOC.gchan && SB.channel) SOC.gchan = SB.channel("pq-guild").on("postgres_changes", { event: "INSERT", schema: "public", table: "guild_messages", filter: `guild_id=eq.${g.id}` }, () => { if (ui.view === "guild") renderGuild(); }).subscribe();
+}
+
+/* ----- Bataille contre un ami ----- */
+async function renderPvp() {
+  const box = $("pvp"); if (!box) return;
+  if (!SOC.profile || !SOC.profile.pseudo) { box.innerHTML = `<h3>Contre un ami</h3><p class="lede" style="font-size:14px">Choisissez d'abord un pseudo dans l'onglet Amis.</p>`; return; }
+  const [[o1, h], [o2, f]] = await Promise.all([rpc2("battle_history"), rpc2("friends_list")]); if (!o1 || !o2) return;
+  const ready = S.deck.length === 5, fr = f.friends;
+  box.innerHTML = `<h3>Contre un ami</h3>
+    <p class="lede" style="font-size:14px">Bilan : ${h.wins} victoire${h.wins > 1 ? "s" : ""}, ${h.losses} défaite${h.losses > 1 ? "s" : ""}. Votre deck de défense : ${h.defense ? h.defense.map(id => chipHTML(id)).join(" ") : "aucun"}.</p>
+    <button class="mini-btn" id="pvpDef" ${ready ? "" : "disabled"} style="margin-top:6px">Mon deck actuel devient ma défense</button>
+    <div style="margin-top:10px">${fr.length ? fr.map(x => `<div class="prow"><span><strong>${esc(x.pseudo)}</strong><small>${x.defense ? "défense prête" : "pas encore de défense"}</small></span><span class="acts"><button class="mini-btn" data-ch="${x.id}" ${x.defense && ready ? "" : "disabled"}>Défier</button></span></div>`).join("") : `<div class="empty">Ajoutez des amis pour les défier.</div>`}</div>
+    ${h.last.length ? `<h3 style="margin-top:12px">Derniers combats</h3>${h.last.slice(0, 8).map(b => `<div class="prow"><span><strong>${b.victory ? "Victoire" : "Défaite"} ${b.score}-${5 - b.score}</strong><small>${b.attack ? "attaque" : "défense"} contre ${esc(b.opponent)}</small></span><small>${new Date(b.at).toLocaleDateString("fr-FR")}</small></div>`).join("")}` : ""}`;
+  $("pvpDef").onclick = async () => { const [ok] = await rpc2("set_defense", { p_cards: S.deck }); if (ok) { toast("Deck de défense enregistré."); renderPvp(); } };
+  box.querySelectorAll("[data-ch]").forEach(b => b.onclick = async () => {
+    const [ok, r] = await rpc2("challenge", { p_friend: b.dataset.ch, p_cards: S.deck }); if (!ok) return;
+    BAT.result = { w: r.won, won: r.victory, vs: r.opponent, rounds: r.rounds.map(x => ({ terr: x.terrain, me: BYID.get(x.me) || { n: "?" }, op: BYID.get(x.op) || { n: "Carte vendue" }, a: x.a, b: x.b, win: x.win })) };
+    if (r.victory) S.stats.won += 1; else S.stats.lost += 1; save(); renderBattle();
+  });
 }
 
 /* ----- Sections qui demandent le serveur ----- */
