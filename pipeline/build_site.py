@@ -8,6 +8,14 @@ src = (ROOT / "parisquest.html").read_text()
 head_part, body_part = src.split("</style>", 1)
 head_part = head_part.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', "")
 VERSION = time.strftime("%Y%m%d%H%M")
+# Serveur : site/supabase/config.json = {"url": "https://xxxx.supabase.co", "anonKey": "..."} (clé publique, sans danger)
+CONF = SITE / "supabase" / "config.json"
+SUPABASE = ""
+if CONF.exists():
+    c = json.loads(CONF.read_text())
+    if c.get("url") and c.get("anonKey"):
+        SUPABASE = ('\n<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>\n'
+                    f'<script>window.PQ_SUPABASE = {json.dumps({"url": c["url"], "anonKey": c["anonKey"]})};</script>')
 ML_VER = "4.7.1"
 
 index = f"""<!doctype html>
@@ -26,7 +34,7 @@ index = f"""<!doctype html>
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@{ML_VER}/dist/maplibre-gl.css">
 <script src="https://unpkg.com/maplibre-gl@{ML_VER}/dist/maplibre-gl.js"></script>
-<script>window.PQ_HOSTED = true;</script>
+<script>window.PQ_HOSTED = true;</script>{SUPABASE}
 {head_part}</style>
 </head>
 <body>{body_part.replace("</script>", "", 0)}
@@ -90,6 +98,6 @@ icon(512, True).save(SITE / "icons/icon-maskable-512.png")
 
 # Chaîne de données, pour mémoire
 PIPE = SITE / "pipeline"; PIPE.mkdir(exist_ok=True)
-for f in ["build2.py", "db.py", "wikidata.py", "ridership.py", "build_site.py", "requetes.sql", "parisquest.html"]:
+for f in ["build2.py", "db.py", "wikidata.py", "ridership.py", "build_site.py", "build_server.py", "requetes.sql", "parisquest.html"]:
     shutil.copy(ROOT / f, PIPE / f)
 print("site prêt", VERSION)

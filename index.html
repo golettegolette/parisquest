@@ -182,11 +182,36 @@ sup { font-size: .62em; line-height: 0; }
 .reset-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); }
 .empty { padding: 16px; border-radius: 10px; border: 1.5px dashed rgba(38,34,27,.3); color: var(--ink-2); text-align: center; line-height: 1.4; }
 
-.booster { border: 0; width: 100%; max-width: 360px; align-self: center; background: var(--navy); color: var(--white); border-radius: 12px; box-shadow: 0 0 0 5px var(--green), inset 0 0 0 2px var(--white), 0 10px 24px rgba(10,16,30,.3); padding: 22px 18px; display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 6px 5px; }
+.booster { border: 0; width: calc(100% - 10px); max-width: 360px; align-self: center; background: var(--navy); color: var(--white); border-radius: 12px; box-shadow: 0 0 0 5px var(--green), inset 0 0 0 2px var(--white), 0 10px 24px rgba(10,16,30,.3); padding: 22px 18px; display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 6px 5px; }
 .booster .k { font-family: var(--f-plaque); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
 .booster .t { font-family: var(--f-plaque); font-size: 28px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; line-height: 1; }
 .booster .s { font-size: 13px; opacity: .85; }
 .booster .cta { margin-top: 8px; }
+.booster:disabled { opacity: .75; cursor: default; }
+.stack { display: flex; gap: 4px; margin: 6px 0 2px; }
+.stack i { width: 16px; height: 22px; border-radius: 3px; background: rgba(246,242,232,.14); box-shadow: inset 0 0 0 1.5px rgba(246,242,232,.35); }
+.stack i.on { background: var(--green-2); box-shadow: inset 0 0 0 1.5px var(--white); }
+.pack-next { font-family: var(--f-plaque); font-size: 16px; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.acct { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13.5px; color: var(--ink-2); }
+.login { display: flex; flex-direction: column; gap: 10px; }
+.login input { font: inherit; padding: 11px 12px; border-radius: 7px; border: 1.5px solid var(--navy); background: var(--white); color: var(--ink); }
+.modal.pack { background: rgba(14, 21, 34, .92); }
+.modal.pack #modalCard { width: min(700px, 100%); min-width: 0; }
+.modal.pack .modal-box { width: min(700px, 100%); }
+.pack-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 12px 10px; }
+@media (min-width: 700px) { .pack-grid { grid-template-columns: repeat(5, 1fr); gap: 16px 14px; } .modal.pack #modalCard, .modal.pack .modal-box { width: min(860px, 100%); } }
+.pcard { border: 0; padding: 0; background: none; position: relative; aspect-ratio: 5 / 7; perspective: 1200px; }
+.pflip { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.3,.7,.3,1); transform: rotateY(180deg); }
+.pcard.open .pflip { transform: none; }
+.pface { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.pcover { transform: rotateY(180deg); }
+.cover { height: 100%; border-radius: 9px; background: var(--green); padding: 7%; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+.cover div { height: 100%; border-radius: 6px; background: var(--navy); box-shadow: inset 0 0 0 2px var(--white); color: var(--white); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: var(--f-plaque); text-transform: uppercase; }
+.cover small { font-size: 11px; letter-spacing: .16em; opacity: .85; }
+.cover b { font-size: 34px; letter-spacing: .04em; line-height: 1; }
+.ptag { position: absolute; left: 50%; top: -9px; transform: translateX(-50%); z-index: 2; white-space: nowrap; font-family: var(--f-plaque); font-weight: 700; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: var(--stone-3); color: var(--white); }
+.ptag.new { background: var(--r4); color: var(--navy); }
+.copies { position: absolute; right: .45em; bottom: .4em; font-family: var(--f-plaque); font-weight: 700; font-size: .7em; color: var(--white); background: var(--navy); padding: .05em .4em; border-radius: .25em; }
 .scouts { display: flex; flex-direction: column; gap: 10px; }
 .scout { display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: center; background: var(--stone-2); border-radius: 10px; padding: 10px 12px; box-shadow: inset 0 0 0 1px var(--joint); }
 .scout .ring { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: var(--white); box-shadow: 0 0 0 3px var(--white), 0 0 0 5px var(--green-2); font-family: var(--f-plaque); font-weight: 700; font-size: 20px; }
@@ -269,6 +294,7 @@ sup { font-size: .62em; line-height: 0; }
     <div class="logo" aria-label="Parisquest"><small>Collectionnez Paris</small><strong>Parisquest</strong></div>
     <div class="counters">
       <div class="counter"><b id="cntCards">0</b><span>cartes</span></div>
+      <div class="counter"><b id="cntPacks">0</b><span id="cntNext">paquets</span></div>
       <div class="counter"><b id="cntEcus">0</b><span>écus</span></div>
     </div>
   </header>
@@ -299,17 +325,17 @@ sup { font-size: .62em; line-height: 0; }
     <aside class="side" id="side">
       <div class="side-tabs">
         <button data-view="collection" aria-pressed="true">Collection</button>
-        <button data-view="reperage" aria-pressed="false">Repérage</button>
+        <button data-view="packs" aria-pressed="false">Paquets</button>
       </div>
       <section class="view" id="viewCollection"></section>
-      <section class="view" id="viewReperage" hidden></section>
+      <section class="view" id="viewPacks" hidden></section>
     </aside>
   </main>
 
   <nav class="tabbar" aria-label="Navigation">
     <button data-tab="map" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/></svg>Carte</button>
     <button data-tab="collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="11" height="15" rx="2"/><path d="M17 6.5 20.5 8 17 19"/></svg>Collection</button>
-    <button data-tab="reperage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><span>Repérage<span class="badge" id="scoutBadge" hidden>!</span></span></button>
+    <button data-tab="packs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="7" width="12" height="14" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v12"/></svg><span>Paquets<span class="badge" id="packBadge" hidden>0</span></span></button>
   </nav>
 </div>
 
@@ -350,19 +376,25 @@ const fmtDist = m => m < 1000 ? `${Math.max(5, Math.round(m / 5) * 5)} m` : `${(
 const TIERS = ["Commune", "Peu commune", "Rare", "Épique", "Légendaire"];
 const TIER_VAR = ["--r0", "--r1", "--r2", "--r3", "--r4"];
 const REWARD = [10, 15, 25, 40, 60];
-const BOOSTER_SIZE = 5, SCOUT_DAYS = 7, MAX_LEVEL = 5;
+const MAX_LEVEL = 5;
+/* Paquets : 5 cartes, un paquet toutes les 5 minutes, 10 en réserve au maximum, 5 offerts au départ. */
+const PACK_SIZE = 5, PACK_PERIOD = 300000, PACK_CAP = 10, PACK_START = 5;
+const TIER_ODDS = [.60, .25, .10, .04, .01]; // chance par carte : Commune → Légendaire (identique côté serveur)
 const CONIFERS = new Set(["Pinus", "Taxus", "Araucaria", "Taxodium", "Cedrus", "Sequoia", "Sequoiadendron", "Abies", "Picea", "Cupressus", "Metasequoia", "Larix", "Calocedrus", "Cryptomeria", "Thuja", "Juniperus", "Pseudotsuga", "Cephalotaxus", "Chamaecyparis", "Torreya"]);
 const DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
 
 let FAMS = {}, KINDS = {}, ITEMS = [], COLS = [], BYID = new Map(), TOTALS = {};
+const TIER_POOL = [[], [], [], [], []];
 let PARK_PATHS = null, MONDE_PATHS = [], ARR_PATH = null, WATER_PATH = null, STREET_PATH = null, STREET_LABELS = [];
 
 /* ---------- État ---------- */
 const STORE_KEY = "parisquest.v2";
 /* Version hébergée (GitHub Pages ou serveur local) : vrai GPS, fond de carte, photos. Le mode test n'y est visible qu'avec ?test dans l'adresse. */
 const HOSTED = !!window.PQ_HOSTED;
-const TEST_ALLOWED = !HOSTED || /[?&]test\b/.test(location.search);
-const DEFAULT_STATE = () => ({ pos: { lat: 48.8600, lon: 2.3565 }, owned: {}, ecus: 0, scouts: [], lastBooster: null, dayOffset: 0, done: {}, hidden: {}, test: !HOSTED });
+/* Serveur (Supabase) : quand il est branché, les paquets, le tirage et la collection vivent côté serveur. */
+const SB_CONF = window.PQ_SUPABASE && window.PQ_SUPABASE.url ? window.PQ_SUPABASE : null;
+const TEST_ALLOWED = !SB_CONF && (!HOSTED || /[?&]test\b/.test(location.search));
+const DEFAULT_STATE = () => ({ pos: { lat: 48.8600, lon: 2.3565 }, owned: {}, packs: { n: PACK_START, anchor: Date.now(), seen: Date.now() }, scouts: [], dayOffset: 0, done: {}, hidden: {}, test: !HOSTED });
 function load() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -376,7 +408,10 @@ function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } ca
 let S = load();
 if (!TEST_ALLOWED) { S.test = false; S.dayOffset = 0; }
 if (!HOSTED) S.test = true;
-const ui = { sel: null, cycle: 0, mobile: "map", view: "collection", fam: null, shown: 48, resetArmed: false, gpsWatch: null, ready: false, gps: "off", acc: null, firstFix: true };
+S.scouts = [];
+const ui = { sel: null, cycle: 0, mobile: "map", view: "collection", fam: null, shown: 48, resetArmed: false, gpsWatch: null, ready: false, gps: "off", acc: null, firstFix: true, user: null, server: null, clockOffset: 0, opening: false, visiting: false, lastRefresh: 0 };
+/* Jour de jeu (date de Paris). Avec le serveur, on suit son horloge, pas celle du téléphone. */
+const todayKey = () => new Date(Date.now() + (SB_CONF ? ui.clockOffset : S.dayOffset * 86400000)).toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" });
 const today = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000) + S.dayOffset;
 const simDate = () => new Date(Date.now() + S.dayOffset * 86400000);
 
@@ -429,7 +464,7 @@ function prepare(pl, mp) {
       for (let cx = Math.floor(x0 / CELL); cx <= Math.floor(x1 / CELL); cx++) for (let cy = Math.floor(y0 / CELL); cy <= Math.floor(y1 / CELL); cy++) gridAdd(cx, cy, idx);
     }
     gridAdd(Math.floor(it.p[0] / CELL), Math.floor(it.p[1] / CELL), idx);
-    BYID.set(it.i, it);
+    BYID.set(it.i, it); TIER_POOL[it.t].push(idx);
     const f = kd.f; TOTALS[f] = (TOTALS[f] || 0) + 1;
   });
 }
@@ -560,12 +595,12 @@ function cardFront(it, o) {
   const tier = o ? o.tier : it.t, lvl = o ? o.lvl : 1, fc = famColor(it);
   const pips = Array.from({ length: MAX_LEVEL }, (_, i) => `<i class="${i < lvl ? "on" : ""}"></i>`).join("");
   const fs = facts(it);
-  const badge = it.x && it.x.eph ? "En sursis" : it.x && it.x.lab ? "Label ARBRES" : it.x && it.x.mk ? "Horaires" : "";
+  const badge = o && o.vis ? "Visité" : it.x && it.x.eph ? "En sursis" : it.x && it.x.lab ? "Label ARBRES" : it.x && it.x.mk ? "Horaires" : "";
   return `<div class="face front" style="--c:${fc}"><div class="face-in">
     <div class="c-top"><span>${arrLabel(it.r)}</span><span class="type">${esc(KINDS[it.k].l)}</span></div>
     <div class="c-name">${esc(it.n)}</div>
     <div class="c-latin">${esc(it.s || "")}</div>
-    <div class="c-art">${artSVG(it)}${HOSTED && it.ph ? `<img src="${esc(photoThumb(it.ph))}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<div class="pips" aria-label="Niveau ${lvl}">${pips}</div>${badge ? `<span class="lab">${esc(badge)}</span>` : ""}</div>
+    <div class="c-art">${artSVG(it)}${HOSTED && it.ph ? `<img src="${esc(photoThumb(it.ph))}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<div class="pips" aria-label="Niveau ${lvl}">${pips}</div>${badge ? `<span class="lab">${esc(badge)}</span>` : ""}${o && o.copies > 1 ? `<span class="copies">×${o.copies}</span>` : ""}</div>
     <div class="c-stats" style="--n:${Math.max(1, fs.length)}">${fs.map(([l, v]) => `<div><small>${esc(l)}</small><b class="${String(v).length > 9 ? "long" : ""}">${esc(v)}</b></div>`).join("")}</div>
     <div class="c-band" style="background:var(${TIER_VAR[tier]})"><b>${TIERS[tier]}</b><span>${esc(it.site || "")}</span></div>
   </div></div>`;
@@ -651,7 +686,7 @@ function drawOverlay(s, tx, ty, W, H) {
     ctx.lineWidth = small ? 1 : 2; ctx.strokeStyle = "#F6F2E8"; ctx.stroke();
     if (!small) { ctx.beginPath(); ctx.arc(x, y, rOwn * .38, 0, 6.283); ctx.fillStyle = getTierColor(S.owned[it.i].tier); ctx.fill(); }
   }
-  for (const id of scouted) {
+  for (const id of []) {
     const it = BYID.get(id); if (!it || !visible(it)) continue;
     const x = it.p[0] * s + tx, y = it.p[1] * s + ty;
     ctx.beginPath(); ctx.arc(x, y, Math.max(8, rFree + 6), 0, 6.283); ctx.lineWidth = 3; ctx.strokeStyle = "#2D6448"; ctx.stroke();
@@ -807,36 +842,41 @@ function onTap(px, py) {
   if (S.test) { const [lat, lon] = unproj(wx, wy); movePlayer(lat, lon); }
   else if (ui.sel) { ui.sel = null; render(); renderSheet(); }
 }
-function movePlayer(lat, lon) { S.pos = { lat, lon }; ui.cycle = 0; save(); renderSheet(); render(); if (ui.view === "reperage") renderReperage(); }
+function movePlayer(lat, lon) { S.pos = { lat, lon }; ui.cycle = 0; save(); renderSheet(); render(); }
 
-/* ---------- Cible et capture ---------- */
+/* ---------- Cible et visite ----------
+   Les cartes s'obtiennent dans les paquets. Aller sur place « visite » une carte possédée :
+   sceau Visité à la première visite, puis un niveau par jour de visite, jusqu'au niveau 5. */
 let targetCache = null;
+const canVisit = (o, day) => o && o.last !== day && !(o.vis && o.lvl >= MAX_LEVEL);
 function inRangeList() {
-  const P = proj(S.pos.lat, S.pos.lon), out = [];
+  const P = proj(S.pos.lat, S.pos.lon), out = [], day = todayKey();
   for (const i of candidates(P[0], P[1], 1.5)) { const it = ITEMS[i]; if (!visible(it)) continue; const d = distTo(it, P); if (d <= it.rad) out.push({ it, d }); }
-  out.sort((a, b) => (S.owned[a.it.i] ? 1 : 0) - (S.owned[b.it.i] ? 1 : 0) || a.d - b.d);
+  const rank = it => { const o = S.owned[it.i]; return canVisit(o, day) ? 0 : o ? 1 : 2; };
+  out.sort((a, b) => rank(a.it) - rank(b.it) || a.d - b.d);
   return out;
 }
-function nearestFree() {
-  const P = proj(S.pos.lat, S.pos.lon);
-  for (let r = CELL; r <= CELL * 24; r *= 2) {
+function nearestToVisit() {
+  const P = proj(S.pos.lat, S.pos.lon), day = todayKey();
+  for (let r = CELL; r <= CELL * 48; r *= 2) {
     let best = null, bd = Infinity;
-    for (const i of candidates(P[0], P[1], r)) { const it = ITEMS[i]; if (S.owned[it.i] || !visible(it)) continue; const d = distTo(it, P); if (d < bd) { bd = d; best = it; } }
+    for (const i of candidates(P[0], P[1], r)) { const it = ITEMS[i]; if (!canVisit(S.owned[it.i], day) || !visible(it)) continue; const d = distTo(it, P); if (d < bd) { bd = d; best = it; } }
     if (best && bd <= r * MPU) return { it: best, d: bd };
   }
   return null;
 }
 function currentTarget() {
-  if (targetCache && targetCache.key === `${S.pos.lat},${S.pos.lon},${ui.sel},${ui.cycle},${JSON.stringify(S.hidden)},${Object.keys(S.owned).length}`) return targetCache.v;
+  const key = `${S.pos.lat},${S.pos.lon},${ui.sel},${ui.cycle},${JSON.stringify(S.hidden)},${Object.keys(S.owned).length}`;
+  if (targetCache && targetCache.key === key) return targetCache.v;
   const P = proj(S.pos.lat, S.pos.lon);
   let v2 = null;
   if (ui.sel && BYID.get(ui.sel)) { const it = BYID.get(ui.sel); v2 = { it, d: distTo(it, P), why: "Lieu sélectionné", list: [] }; }
   else {
     const list = inRangeList();
     if (list.length) { const k = ui.cycle % list.length; v2 = { ...list[k], why: list.length > 1 ? `À portée · ${k + 1} sur ${list.length}` : "À portée", list }; }
-    else { const nf_ = nearestFree(); if (nf_) v2 = { ...nf_, why: "Lieu inconnu le plus proche", list: [] }; }
+    else { const nv = nearestToVisit(); if (nv) v2 = { ...nv, why: "Carte à visiter la plus proche", list: [] }; }
   }
-  targetCache = { key: `${S.pos.lat},${S.pos.lon},${ui.sel},${ui.cycle},${JSON.stringify(S.hidden)},${Object.keys(S.owned).length}`, v: v2 };
+  targetCache = { key, v: v2 };
   return v2;
 }
 function renderSheet() {
@@ -845,27 +885,31 @@ function renderSheet() {
   const sheet = $("sheet");
   if (!S.test && ui.gps !== "ok") {
     const wait = ui.gps === "wait";
-    sheet.innerHTML = `<div class="sheet-text"><div class="eyebrow">Position</div><h2>${wait ? "Recherche du GPS" : "Où êtes-vous ?"}</h2><p>${wait ? "Autorisez la localisation si le navigateur la demande. Les lieux se capturent sur place." : "Parisquest a besoin de votre position pour savoir quels lieux sont à portée. Elle reste sur votre téléphone."}</p></div>
+    sheet.innerHTML = `<div class="sheet-text"><div class="eyebrow">Position</div><h2>${wait ? "Recherche du GPS" : "Où êtes-vous ?"}</h2><p>${wait ? "Autorisez la localisation si le navigateur la demande. Les cartes se visitent sur place." : "Parisquest a besoin de votre position pour savoir quels lieux sont à portée. Elle reste sur votre téléphone."}</p></div>
       <div class="sheet-actions"><button class="btn" id="gpsGo" ${wait ? "disabled" : ""}>${wait ? "Patience" : "Me localiser"}</button></div>`;
     $("gpsGo").onclick = startGPS; return;
   }
   const tg = currentTarget();
-  if (!tg) { sheet.innerHTML = `<div class="sheet-text"><div class="eyebrow">Rien autour</div><h2>Aucun lieu visible</h2><p>Réactivez des familles dans les filtres de la carte.</p></div>`; return; }
-  const it = tg.it, o = S.owned[it.i], within = tg.d <= it.rad, d0 = today(), ms = marketStatus(it);
-  let label = "Capturer", enabled = false, note;
-  if (!within) note = `Approchez-vous à moins de ${it.rad} m.` + (!S.test && ui.acc > 40 ? ` GPS précis à ${Math.round(ui.acc)} m près.` : "");
-  else if (!o) {
-    if (ms && !ms.open && !S.test) note = `Le marché est fermé. ${ms.text}.`;
-    else { enabled = true; note = ms && !ms.open ? `Mode test : horaires ignorés. En vrai, ${ms.text.toLowerCase()}.` : "Vous y êtes."; }
-  } else if (o.lvl >= MAX_LEVEL) { label = "Niveau max"; note = "Cette carte a atteint le niveau maximum."; }
-  else if (o.last === d0) { label = "Revenez demain"; note = `Niveau ${o.lvl}. Une visite par jour fait monter la carte d'un niveau.`; }
-  else { label = `Niveau ${o.lvl + 1}`; enabled = true; note = "Nouvelle visite : la carte gagne un niveau."; }
+  if (!tg) {
+    const empty = !Object.keys(S.owned).length;
+    sheet.innerHTML = `<div class="sheet-text"><div class="eyebrow">${empty ? "Bienvenue" : "Rien à visiter autour"}</div><h2>${empty ? "Ouvrez votre premier paquet" : "Explorez la carte"}</h2><p>${empty ? "Chaque paquet contient 5 lieux de Paris. Allez-y ensuite pour les faire monter de niveau." : "Touchez un point pour voir le lieu, ou ouvrez de nouveaux paquets."}</p></div>
+      <div class="sheet-actions"><button class="btn" id="goPacks">Paquets</button></div>`;
+    $("goPacks").onclick = () => setMobile("packs"); return;
+  }
+  const it = tg.it, o = S.owned[it.i], within = tg.d <= it.rad, day = todayKey(), ms = marketStatus(it);
+  let label = "Visiter", enabled = false, note;
+  if (!o) { label = "À obtenir"; note = "Pas encore dans votre collection : elle peut sortir d'un paquet."; }
+  else if (!within) note = `Approchez-vous à moins de ${it.rad} m pour la visiter.` + (!S.test && ui.acc > 40 ? ` GPS précis à ${Math.round(ui.acc)} m près.` : "");
+  else if (ms && !ms.open && !S.test) note = `Le marché est fermé. ${ms.text}.`;
+  else if (o.vis && o.lvl >= MAX_LEVEL) { label = "Niveau max"; note = "Cette carte a atteint le niveau maximum."; }
+  else if (o.last === day) { label = "Revenez demain"; note = `Niveau ${o.lvl}. Une visite par jour fait monter la carte d'un niveau.`; }
+  else { enabled = true; label = o.vis ? `Niveau ${o.lvl + 1}` : "Valider la visite"; note = o.vis ? "Nouvelle visite : la carte gagne un niveau." : "Vous y êtes : première visite."; }
   const kd = KINDS[it.k];
-  const named = !!o || it.k === "rue" || (ui.sel === it.i && !S.scouts.some(x => x.id === it.i));
+  const named = !!o || it.k === "rue" || ui.sel === it.i;
   const title = esc(named ? it.n : kd.l);
   const sub = [named && it.n !== kd.l ? esc(kd.l) : "", it.site && it.site !== it.n ? esc(it.site) : "", it.r ? arrLabel(it.r) : ""].filter(Boolean).join(" · ");
   sheet.innerHTML = `<div class="sheet-text">
-      <div class="eyebrow" style="--c:${famColor(it)}"><span class="dot"></span>${esc(tg.why)} · ${esc(FAMS[kd.f].name)}</div>
+      <div class="eyebrow" style="--c:${famColor(it)}"><span class="dot"></span>${esc(tg.why)} · ${esc(FAMS[kd.f].name)}${o ? " · " + TIERS[o.tier] : ""}</div>
       <h2>${title}</h2>
       <p>${sub}</p>
       <p><span class="dist">${within ? "Ici" : fmtDist(tg.d) + " · " + bearing(proj(S.pos.lat, S.pos.lon), it)}</span> &nbsp;${note}</p>
@@ -875,37 +919,44 @@ function renderSheet() {
       ${o ? `<button class="btn light small" id="seeCard">Voir</button>` : ""}
       <button class="btn" id="actBtn" ${enabled ? "" : "disabled"}>${label}</button>
     </div>`;
-  $("actBtn").onclick = () => act(it.i);
+  $("actBtn").onclick = () => visitCard(it.i);
   if (o) $("seeCard").onclick = () => openCard(it.i);
   if (tg.list.length > 1) $("nextBtn").onclick = () => { ui.cycle++; renderSheet(); render(); };
 }
-function act(id) {
-  const it = BYID.get(id); if (!it) return;
+async function visitCard(id) {
+  const it = BYID.get(id), o = S.owned[id]; if (!it || !o || ui.visiting) return;
   const P = proj(S.pos.lat, S.pos.lon); if (distTo(it, P) > it.rad) return;
-  const ms = marketStatus(it); if (ms && !ms.open && !S.test && !S.owned[id]) return;
-  const d0 = today(), o = S.owned[id];
-  if (!o) {
-    const si = S.scouts.findIndex(s => s.id === id);
-    let reward = REWARD[it.t] || 10; if (si >= 0) { reward *= 2; S.scouts.splice(si, 1); }
-    S.owned[id] = { tier: it.t, lvl: 1, first: d0, last: d0, at: Date.now() };
-    S.ecus += reward;
-    const msgs = checkCollections(it);
-    save(); refreshAll();
-    showReveal(it, { kicker: `Nouvelle carte · ${FAMS[famOf(it)].name}`, title: TIERS[it.t], sub: `+${reward} écus${si >= 0 ? " (repérage accompli, gain doublé)" : ""}` }, msgs);
-  } else if (o.last !== d0 && o.lvl < MAX_LEVEL) {
-    o.lvl += 1; o.last = d0; S.ecus += 5; save(); refreshAll();
-    showReveal(it, { kicker: "Visite du jour", title: `Niveau ${o.lvl}`, sub: "+5 écus" });
-  }
+  const ms = marketStatus(it); if (ms && !ms.open && !S.test) return;
+  const day = todayKey(); if (!canVisit(o, day)) return;
+  if (SB) {
+    ui.visiting = true;
+    const { data, error } = await SB.rpc("visit_place", { p_id: id, p_lat: S.pos.lat, p_lon: S.pos.lon, p_acc: ui.acc });
+    ui.visiting = false;
+    if (error) { toast(error.message || "Visite refusée par le serveur."); return; }
+    o.lvl = data.level; o.vis = data.visits; o.last = data.last_visit;
+  } else { o.vis = (o.vis || 0) + 1; o.lvl = o.vis === 1 ? (o.lvl || 1) : Math.min(MAX_LEVEL, (o.lvl || 1) + 1); o.last = day; }
+  save(); refreshAll();
+  showReveal(it, o.vis === 1
+    ? { kicker: "Première visite", title: "Visité", sub: "La carte porte désormais le sceau « Visité ». Revenez un autre jour pour la faire monter de niveau." }
+    : { kicker: "Visite du jour", title: `Niveau ${o.lvl}`, sub: o.lvl >= MAX_LEVEL ? "Niveau maximum atteint." : "Revenez un autre jour pour monter encore." });
+}
+/* Écus : calculés à partir de la collection (rareté, doublons, niveaux, collections complètes), jamais stockés. */
+function ecus() {
+  let e = 0;
+  for (const id in S.owned) { const o = S.owned[id]; if (!BYID.has(id)) continue; e += REWARD[o.tier] || 10; e += ((o.copies || 1) - 1) * 5; e += (o.vis ? 10 : 0) + ((o.lvl || 1) - 1) * 10; }
+  for (let c = 0; c < COLS.length; c++) if (S.done[c]) e += 50;
+  return e;
 }
 function checkCollections(it) {
   const msgs = [];
   for (let c = 0; c < COLS.length; c++) {
     const [fam, name, , idxs] = COLS[c];
     if (S.done[c] || fam !== famOf(it)) continue;
-    if (idxs.every(i => S.owned[ITEMS[i].i])) { S.done[c] = true; S.ecus += 50; msgs.push(`Collection complète : ${name} (+50 écus)`); }
+    if (idxs.every(i => S.owned[ITEMS[i].i])) { S.done[c] = true; msgs.push(`Collection complète : ${name} (+50 écus)`); }
   }
   return msgs;
 }
+function recomputeDone() { S.done = {}; COLS.forEach(([, , , idxs], c) => { if (idxs.length && idxs.every(i => S.owned[ITEMS[i].i])) S.done[c] = true; }); }
 
 /* ---------- Modale ---------- */
 let pendingToasts = [];
@@ -914,14 +965,24 @@ function openModal(it, msgHTML, reveal) {
   $("modalMsg").innerHTML = msgHTML;
   $("modalCard").innerHTML = cardHTML(it, { flippable: true, extraClass: reveal ? `reveal${tier >= 3 ? " glow" : ""}` : "" });
   $("modalCard").firstElementChild.style.setProperty("--glow", getTierColor(tier));
-  $("flipBtn").textContent = "Retourner la carte";
+  $("flipBtn").textContent = "Retourner la carte"; $("modal").classList.remove("pack"); ui.packModal = false;
   $("modal").hidden = false; $("closeBtn").focus();
 }
 function showReveal(it, m, extra = []) { pendingToasts = extra; openModal(it, `<div class="k">${esc(m.kicker)}</div><div class="t" id="modalTitle">${esc(m.title)}</div><div class="s">${esc(m.sub)}</div>`, true); }
 function openCard(id) { const it = BYID.get(id), o = S.owned[id]; if (!o) return; openModal(it, `<div class="k">${esc(KINDS[it.k].l)}</div><div class="t" id="modalTitle">${esc(it.n)}</div><div class="s">Niveau ${o.lvl} · ${TIERS[o.tier]}</div>`, false); }
-function closeModal() { $("modal").hidden = true; if (pendingToasts.length) { toast(pendingToasts.join(" · ")); pendingToasts = []; } }
+const coverHTML = () => `<div class="cover"><div><small>Paris</small><b>PQ</b><small>Parisquest</small></div></div>`;
+function showPack(cards, msgs) {
+  pendingToasts = msgs; ui.packModal = true;
+  $("modalMsg").innerHTML = `<div class="k">Paquet ouvert</div><div class="t" id="modalTitle">${cards.length} cartes</div><div class="s">Touchez une carte pour la révéler.</div>`;
+  $("modalCard").innerHTML = `<div class="pack-grid">${cards.map((c, i) => `<button class="pcard" data-i="${i}" aria-label="Révéler la carte ${i + 1}" style="--glow:${getTierColor(c.it.t)}"><div class="pflip"><div class="pface pcover">${coverHTML()}</div><div class="pface pfront"><span class="ptag${c.isNew ? " new" : ""}">${c.isNew ? "Nouvelle" : "Doublon"}</span>${cardHTML(c.it, { extraClass: c.it.t >= 3 ? "glow" : "" })}</div></div></button>`).join("")}</div>`;
+  $("modalCard").querySelectorAll(".pcard").forEach(b => b.onclick = () => { if (b.classList.contains("open")) { const c = cards[+b.dataset.i]; if (c) { closeModal(); openCard(c.it.i); } return; } b.classList.add("open"); updatePackBtn(); });
+  $("modal").classList.add("pack"); updatePackBtn();
+  $("modal").hidden = false; $("flipBtn").focus();
+}
+function updatePackBtn() { if (!ui.packModal) return; const left = $("modalCard").querySelectorAll(".pcard:not(.open)").length; $("flipBtn").hidden = !left; $("flipBtn").textContent = "Tout révéler"; }
+function closeModal() { $("modal").hidden = true; $("modal").classList.remove("pack"); $("flipBtn").hidden = false; ui.packModal = false; if (pendingToasts.length) { toast(pendingToasts.join(" · ")); pendingToasts = []; } }
 $("closeBtn").onclick = closeModal;
-$("flipBtn").onclick = () => { const c = $("modalCard").querySelector(".card"); if (!c) return; c.classList.toggle("flipped"); $("flipBtn").textContent = c.classList.contains("flipped") ? "Voir le recto" : "Retourner la carte"; };
+$("flipBtn").onclick = () => { if (ui.packModal) { $("modalCard").querySelectorAll(".pcard").forEach(b => b.classList.add("open")); updatePackBtn(); return; } const c = $("modalCard").querySelector(".card"); if (!c) return; c.classList.toggle("flipped"); $("flipBtn").textContent = c.classList.contains("flipped") ? "Voir le recto" : "Retourner la carte"; };
 $("modal").addEventListener("click", e => { if (e.target === $("modal")) closeModal(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("modal").hidden) closeModal(); });
 
@@ -944,7 +1005,7 @@ function renderCollection() {
     .sort((a, b) => (b.n > 0) - (a.n > 0) || (b.n / b.c[3].length) - (a.n / a.c[3].length) || a.c[3].length - b.c[3].length);
   $("viewCollection").innerHTML = `
     <h2>Ma collection</h2>
-    <p class="lede">${nf(ownedIds.length)} carte${ownedIds.length > 1 ? "s" : ""} sur ${nf(ITEMS.length)} lieux de Paris. Approchez-vous d'un lieu pour le capturer, revenez les jours suivants pour monter son niveau.</p>
+    <p class="lede">${nf(ownedIds.length)} carte${ownedIds.length > 1 ? "s" : ""} sur ${nf(ITEMS.length)} lieux de Paris. Les paquets agrandissent la collection ; aller sur place fait monter vos cartes de niveau.</p>
     <div class="tiers">${TIERS.map((n, i) => `<div class="tier" style="background:var(${TIER_VAR[i]})"><b>${nf(tierCounts[i])}</b><span>${n}</span></div>`).join("")}</div>
     <div class="panel"><h3>Familles</h3><div class="fams">
       <button class="fam" data-f="" aria-pressed="${!fam}" style="--c:var(--navy)"><i></i><strong>Toutes</strong><span class="n">${nf(ownedIds.length)} / ${nf(ITEMS.length)}</span></button>
@@ -957,18 +1018,18 @@ function renderCollection() {
     <div>
       <div class="grid-head"><h3>Mes cartes${fam ? " · " + esc(FAMS[fam].name) : ""}</h3></div>
       ${list.length ? `<div class="grid">${list.slice(0, ui.shown).map(it => `<button data-id="${esc(it.i)}" aria-label="${esc(it.n)}">${cardHTML(it)}</button>`).join("")}</div>${list.length > ui.shown ? `<button class="mini-btn ghost more" id="moreBtn">Afficher plus (${nf(list.length - ui.shown)})</button>` : ""}`
-        : `<div class="empty">Aucune carte${fam ? " dans cette famille" : ""} pour l'instant.<br>Sur la carte, touchez un endroit près d'un point coloré pour vous y placer, puis capturez.</div>`}
+        : `<div class="empty">Aucune carte${fam ? " dans cette famille" : ""} pour l'instant.<br>Ouvrez des paquets dans l'onglet Paquets.</div>`}
     </div>
     <p class="credits">Données : <a href="https://opendata.paris.fr" target="_blank" rel="noopener">Ville de Paris</a> (ODbL), <a href="https://data.iledefrance-mobilites.fr" target="_blank" rel="noopener">Île-de-France Mobilités</a>, <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a>, photos <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a> et Ville de Paris.${ML ? ` Fond de carte <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a>.` : ""}</p>
-    <div class="reset-row"><span>Progression enregistrée dans ce navigateur.</span>
+    ${SB_CONF ? "" : `<div class="reset-row"><span>Progression enregistrée dans ce navigateur.</span>
       <button class="mini-btn ghost" id="resetBtn">${ui.resetArmed ? "Confirmer la remise à zéro" : "Remettre à zéro"}</button>
       ${ui.resetArmed ? `<button class="mini-btn ghost" id="resetCancel">Annuler</button>` : ""}
-    </div>`;
+    </div>`}`;
   const root = $("viewCollection");
   root.querySelectorAll(".fam").forEach(b => b.onclick = () => { ui.fam = b.dataset.f || null; ui.shown = 48; renderCollection(); });
   root.querySelectorAll(".grid > button").forEach(b => b.onclick = () => openCard(b.dataset.id));
   if ($("moreBtn")) $("moreBtn").onclick = () => { ui.shown += 48; renderCollection(); };
-  $("resetBtn").onclick = () => {
+  if ($("resetBtn")) $("resetBtn").onclick = () => {
     if (!ui.resetArmed) { ui.resetArmed = true; renderCollection(); return; }
     const keep = { pos: S.pos, hidden: S.hidden }; S = Object.assign(DEFAULT_STATE(), keep); ui.resetArmed = false; ui.sel = null;
     save(); refreshAll(); toast("Progression remise à zéro.");
@@ -977,37 +1038,127 @@ function renderCollection() {
 }
 function showOnMap(id) { const it = BYID.get(id); if (!it) return; ui.sel = id; setMobile("map"); renderSheet(); centerOn(it.a, it.o, 40); }
 
-/* ---------- Repérage ---------- */
-function pruneScouts() { const d = today(); S.scouts = S.scouts.filter(s => s.until >= d && !S.owned[s.id] && BYID.has(s.id)); }
-function openBooster() {
-  const d0 = today(); if (S.lastBooster === d0) return;
-  const P = proj(S.pos.lat, S.pos.lon), taken = new Set(S.scouts.map(s => s.id));
-  const pool = [];
-  for (const i of candidates(P[0], P[1], CELL * 6)) { const it = ITEMS[i]; if (S.owned[it.i] || taken.has(it.i) || !visible(it)) continue; pool.push({ it, d: distTo(it, P) }); }
-  pool.sort((a, b) => a.d - b.d);
-  const pick = [], famUsed = new Set();
-  for (const c of pool) { if (pick.length >= BOOSTER_SIZE) break; const f = famOf(c.it); if (!famUsed.has(f)) { famUsed.add(f); pick.push(c); } }
-  for (const c of pool) { if (pick.length >= BOOSTER_SIZE) break; if (!pick.includes(c)) pick.push(c); }
-  if (!pick.length) { toast("Aucun lieu à repérer près d'ici. Déplacez-vous un peu."); return; }
-  pick.forEach(({ it }) => S.scouts.push({ id: it.i, until: d0 + SCOUT_DAYS - 1 }));
-  S.lastBooster = d0; save(); refreshAll();
-  toast(`${pick.length} lieux repérés autour de vous, de familles différentes. Ils sont entourés en vert sur la carte.`);
+/* ---------- Paquets ----------
+   Version serveur : le compte, l'horloge et le tirage sont sur le serveur ; le téléphone ne fait qu'afficher.
+   Version locale (démo) : même règle, calculée dans le navigateur, donc non sécurisée. */
+const rnd = () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
+const drawTier = () => { const r = rnd(); return r < .01 ? 4 : r < .05 ? 3 : r < .15 ? 2 : r < .40 ? 1 : 0; };
+function localAccrue() {
+  const P = S.packs; let now = Date.now();
+  if (now < P.seen) now = P.seen; // horloge reculée : aucun paquet recrédité
+  P.seen = now;
+  if (P.n >= PACK_CAP) { P.anchor = now; return; }
+  const k = Math.floor((now - P.anchor) / PACK_PERIOD);
+  if (k > 0) { P.n = Math.min(PACK_CAP, P.n + k); P.anchor = P.n >= PACK_CAP ? now : P.anchor + k * PACK_PERIOD; }
 }
-function renderReperage() {
+function packInfo() {
+  if (SB_CONF) { const st = ui.server; return st ? { n: st.packs, nextAt: st.nextAt == null ? null : st.nextAt - ui.clockOffset } : { n: 0, nextAt: null, off: true }; }
+  localAccrue(); return { n: S.packs.n, nextAt: S.packs.n >= PACK_CAP ? null : S.packs.anchor + PACK_PERIOD };
+}
+const mmss = ms => { const t = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
+const nextText = pi => pi.off ? "Connectez-vous pour recevoir vos paquets." : pi.nextAt == null ? "Réserve pleine : ouvrez un paquet pour relancer le compteur." : `Prochain paquet dans ${mmss(pi.nextAt - Date.now())}`;
+const stackHTML = n => Array.from({ length: PACK_CAP }, (_, i) => `<i class="${i < n ? "on" : ""}"></i>`).join("");
+function applyServerState(js) { ui.server = { packs: js.packs, nextAt: js.next_at ? Date.parse(js.next_at) : null }; ui.clockOffset = Date.parse(js.server_now) - Date.now(); }
+async function openPack() {
+  if (ui.opening || !ui.ready) return;
+  ui.opening = true;
+  try {
+    let drawn;
+    if (SB_CONF) {
+      if (!SB || !ui.user) { toast("Connectez-vous pour ouvrir des paquets."); return; }
+      const { data, error } = await SB.rpc("open_pack");
+      if (error) { toast(/aucun paquet/i.test(error.message) ? "Aucun paquet disponible pour l'instant." : "Le serveur n'a pas répondu. Réessayez."); await refreshServer(); return; }
+      applyServerState(data); drawn = data.cards.map(c => ({ id: c.id, isNew: c.new }));
+    } else {
+      localAccrue(); const P = S.packs;
+      if (P.n < 1) { toast("Aucun paquet disponible pour l'instant."); return; }
+      if (P.n >= PACK_CAP) P.anchor = Date.now();
+      P.n -= 1; drawn = [];
+      for (let k = 0; k < PACK_SIZE; k++) { const pool = TIER_POOL[drawTier()]; const it = ITEMS[pool[Math.floor(rnd() * pool.length)]]; drawn.push({ id: it.i, isNew: !S.owned[it.i] && !drawn.some(d => d.id === it.i) }); }
+    }
+    const cards = [];
+    for (const d of drawn) {
+      const it = BYID.get(d.id); if (!it) continue;
+      const o = S.owned[it.i];
+      if (o) o.copies = (o.copies || 1) + 1; else S.owned[it.i] = { tier: it.t, lvl: 1, copies: 1, vis: 0, last: null, at: Date.now() };
+      cards.push({ it, isNew: d.isNew });
+    }
+    const msgs = []; for (const c of cards) msgs.push(...checkCollections(c.it));
+    save(); refreshAll(); showPack(cards, msgs);
+  } finally { ui.opening = false; }
+}
+function renderPacks() {
   if (!ui.ready) return;
-  const d0 = today(), P = proj(S.pos.lat, S.pos.lon);
-  const canOpen = S.lastBooster !== d0;
-  const scouts = S.scouts.map(s => ({ s, it: BYID.get(s.id) })).filter(x => x.it).map(x => ({ ...x, d: distTo(x.it, P) })).sort((a, b) => a.d - b.d);
-  $("viewReperage").innerHTML = `
-    <h2>Repérage du jour</h2>
-    <p class="lede">Chaque jour, ${BOOSTER_SIZE} lieux inconnus de familles différentes sont repérés autour de vous. Capturez-les dans les ${SCOUT_DAYS} jours pour doubler vos écus.</p>
-    ${canOpen ? `<button class="booster" id="boosterBtn"><span class="k">Pli du jour</span><span class="t">Repérage</span><span class="s">${BOOSTER_SIZE} lieux autour de votre position</span><span class="btn cta">Ouvrir</span></button>` : `<div class="empty">Repérage du jour ouvert. Le prochain arrive demain.</div>`}
-    <div><h3>En cours</h3>
-      ${scouts.length ? `<div class="scouts">${scouts.map(({ s, it, d }) => { const left = s.until - d0 + 1; return `<div class="scout"><div class="ring" style="--c:${famColor(it)}">?</div><div><strong>${esc(KINDS[it.k].l)}${it.site ? " · " + esc(it.site) : ""}</strong><span>${arrLabel(it.r)} · ${fmtDist(d)} · expire ${left <= 1 ? "ce soir" : `dans ${left} jours`}</span></div><button class="mini-btn" data-id="${esc(it.i)}">Carte</button></div>`; }).join("")}</div>` : `<div class="empty">Aucun lieu repéré pour l'instant.</div>`}
-    </div>`;
-  if (canOpen) $("boosterBtn").onclick = openBooster;
-  $("viewReperage").querySelectorAll(".scout button").forEach(b => b.onclick = () => showOnMap(b.dataset.id));
-  $("scoutBadge").hidden = !canOpen;
+  const pi = packInfo(); ui.lastN = pi.n;
+  let account = "";
+  if (SB_CONF && !ui.user) account = `<div class="panel login"><h3>Connexion</h3><p class="lede" style="font-size:14px">Votre collection et vos paquets sont gardés sur le serveur. Entrez votre e-mail : vous recevrez un lien de connexion, sans mot de passe.</p><input type="email" id="loginEmail" placeholder="vous@exemple.fr" autocomplete="email"><button class="btn" id="loginBtn">Recevoir le lien</button></div>`;
+  else if (SB_CONF) account = `<div class="acct"><span>Connecté : ${esc(ui.user.email || "")}</span><button class="mini-btn ghost" id="logoutBtn">Se déconnecter</button></div>`;
+  else account = `<p class="credits">Démo locale : le compteur tourne dans ce navigateur et n'est pas protégé. Une fois le serveur branché, il sera impossible à tromper.</p>`;
+  $("viewPacks").innerHTML = `
+    <h2>Paquets</h2>
+    <p class="lede">Un paquet de ${PACK_SIZE} cartes toutes les 5 minutes, jusqu'à ${PACK_CAP} en réserve. Chaque carte est un lieu de Paris tiré au hasard ; allez-y pour la faire monter de niveau.</p>
+    ${SB_CONF && !ui.user ? account : `
+    <button class="booster" id="packBtn" ${pi.n < 1 ? "disabled" : ""}><span class="k">Réserve</span><span class="t"><span id="packN">${pi.n}</span> / ${PACK_CAP}</span><span class="stack" id="packStack">${stackHTML(pi.n)}</span><span class="pack-next" id="packNext">${nextText(pi)}</span><span class="btn cta">${pi.n ? "Ouvrir un paquet" : "Patience"}</span></button>
+    <div class="panel"><h3>Chances par carte</h3><div class="tiers">${TIERS.map((n, i) => `<div class="tier" style="background:var(${TIER_VAR[i]})"><b>${String(TIER_ODDS[i] * 100).replace(".", ",")} %</b><span>${n}</span></div>`).join("")}</div></div>
+    ${account}`}`;
+  if ($("packBtn")) $("packBtn").onclick = openPack;
+  if ($("loginBtn")) $("loginBtn").onclick = async () => {
+    const email = $("loginEmail").value.trim(); if (!/^\S+@\S+\.\S+$/.test(email)) { toast("Adresse e-mail invalide."); return; }
+    $("loginBtn").disabled = true;
+    const { error } = await SB.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
+    $("loginBtn").disabled = false;
+    toast(error ? "Envoi impossible : " + error.message : "Lien envoyé. Ouvrez l'e-mail sur ce téléphone pour vous connecter.");
+  };
+  if ($("logoutBtn")) $("logoutBtn").onclick = () => SB.auth.signOut();
+  tickUI(pi);
+}
+function tickUI(pi) {
+  $("cntPacks").textContent = pi.off ? "–" : pi.n;
+  $("cntNext").textContent = pi.off || pi.nextAt == null ? "paquets" : mmss(pi.nextAt - Date.now());
+  if ($("packNext")) $("packNext").textContent = nextText(pi);
+  const b = $("packBadge"); b.hidden = !(pi.n > 0); b.textContent = pi.n;
+}
+function tick() {
+  if (!ui.ready) return;
+  const pi = packInfo();
+  if (SB && ui.user && pi.nextAt != null && Date.now() >= pi.nextAt + 400 && Date.now() - ui.lastRefresh > 5000) { ui.lastRefresh = Date.now(); refreshServer(); }
+  if (pi.n !== ui.lastN) { if (!SB_CONF) save(); renderPacks(); } else tickUI(pi);
+}
+setInterval(tick, 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && SB && ui.user) { ui.lastRefresh = Date.now(); refreshServer(); } });
+
+/* ---------- Serveur ---------- */
+let SB = null;
+async function initServer() {
+  if (!SB_CONF) return;
+  if (!window.supabase) { toast("Connexion au serveur impossible. Vérifiez le réseau."); return; }
+  SB = window.supabase.createClient(SB_CONF.url, SB_CONF.anonKey);
+  SB.auth.onAuthStateChange((ev, session) => { setUser(session && session.user); });
+  const { data } = await SB.auth.getSession(); setUser(data.session && data.session.user);
+}
+async function setUser(u) {
+  const prev = ui.user && ui.user.id; ui.user = u || null;
+  if ((u && u.id) === prev) return;
+  S.owned = {}; S.done = {}; ui.server = null;
+  if (u) await syncServer(); else refreshAll();
+}
+async function syncServer() {
+  if (!SB || !ui.user || !ui.ready) return;
+  const owned = {};
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await SB.from("user_cards").select("place_id,copies,level,visits,first_at,last_visit").order("place_id").range(from, from + 999);
+    if (error) { toast("Synchronisation impossible. Réessayez plus tard."); return; }
+    for (const r of data) { const it = BYID.get(r.place_id); if (it) owned[r.place_id] = { tier: it.t, lvl: r.level, copies: r.copies, vis: r.visits, last: r.last_visit, at: Date.parse(r.first_at) }; }
+    if (data.length < 1000) break;
+  }
+  S.owned = owned; recomputeDone(); save();
+  await refreshServer(); refreshAll();
+}
+async function refreshServer() {
+  if (!SB || !ui.user) return;
+  const { data, error } = await SB.rpc("pack_state");
+  if (!error) applyServerState(data);
+  renderPacks();
 }
 
 /* ---------- Navigation ---------- */
@@ -1018,9 +1169,9 @@ function setMobile(m) {
   if (ui.mobile === "map") requestAnimationFrame(resize);
 }
 function setView(view) {
-  ui.view = view; $("viewCollection").hidden = view !== "collection"; $("viewReperage").hidden = view !== "reperage";
+  ui.view = view; $("viewCollection").hidden = view !== "collection"; $("viewPacks").hidden = view !== "packs";
   document.querySelectorAll(".side-tabs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === view)));
-  if (view === "reperage") renderReperage();
+  if (view === "packs") renderPacks();
 }
 document.querySelectorAll(".tabbar button").forEach(b => b.onclick = () => setMobile(b.dataset.tab));
 document.querySelectorAll(".side-tabs button").forEach(b => b.onclick = () => setView(b.dataset.view));
@@ -1029,7 +1180,7 @@ document.querySelectorAll(".side-tabs button").forEach(b => b.onclick = () => se
 function renderTestbar() { $("testbar").hidden = !TEST_ALLOWED; $("testToggle").setAttribute("aria-pressed", String(S.test)); $("testHint").textContent = S.test ? "Touchez la carte pour vous déplacer." : "Position GPS réelle."; $("nextDay").hidden = !S.test; }
 $("testToggle").onclick = () => { if (S.test) { startGPS(); return; } stopGPS(); S.test = true; renderTestbar(); renderSheet(); };
 $("gpsBtn").onclick = startGPS;
-$("nextDay").onclick = () => { S.dayOffset += 1; pruneScouts(); save(); refreshAll(); toast("Un jour passe. Nouveau repérage disponible, et vos cartes peuvent à nouveau monter de niveau."); };
+$("nextDay").onclick = () => { S.dayOffset += 1; save(); refreshAll(); toast("Un jour passe : vos cartes peuvent à nouveau être visitées pour monter de niveau."); };
 function gpsFail(msg) {
   stopGPS();
   if (TEST_ALLOWED) { S.test = true; ui.gps = "off"; renderTestbar(); toast(HOSTED ? msg : "Le GPS n'est pas disponible ici. Ouvrez la version hébergée sur votre téléphone, ou restez en mode test."); }
@@ -1061,10 +1212,11 @@ $("fitBtn").onclick = fit;
 function refreshAll() {
   if (!ui.ready) return;
   const n = Object.keys(S.owned).filter(id => BYID.has(id)).length;
-  $("cntCards").textContent = `${nf(n)} / ${nf(ITEMS.length)}`; $("cntEcus").textContent = nf(S.ecus);
-  renderLayers(); renderSheet(); renderCollection(); renderReperage(); renderTestbar(); render();
+  $("cntCards").textContent = nf(n); $("cntEcus").textContent = nf(ecus());
+  renderLayers(); renderSheet(); renderCollection(); renderPacks(); renderTestbar(); render();
 }
 initBasemap();
+initServer();
 new ResizeObserver(resize).observe(wrap);
 resize(); setView("collection"); renderTestbar();
 let streetsLoaded = false;
@@ -1086,7 +1238,9 @@ function loadStreets() {
 }
 Promise.all([fetch("data/places.json").then(r => r.json()), fetch("data/map.json").then(r => r.json())])
   .then(([pl, mp]) => {
-    prepare(pl, mp); ui.ready = true; pruneScouts();
+    prepare(pl, mp); ui.ready = true;
+    if (!SB_CONF) recomputeDone();
+    if (SB && ui.user) syncServer();
     $("loading").hidden = true;
     refreshAll();
     centerOn(S.pos.lat, S.pos.lon, 30);

@@ -10,13 +10,14 @@ Pour essayer sans se déplacer, ajoutez `?test` à l'adresse : un mode test appa
 
 ## Règles
 
-- **Capture** : à moins du rayon du lieu (25 m pour une plaque, 60 m pour une station, l'emprise entière pour un parc ou une rue).
-- **Niveaux** : une visite par jour fait monter une carte d'un niveau, jusqu'au niveau 5.
-- **Rareté** : 5 niveaux (Commune, Peu commune, Rare, Épique, Légendaire), attribués par centiles à l'intérieur de chaque type de lieu. Un lieu célèbre (nombre d'éditions Wikipédia qui en parlent) est plus prestigieux ; une station très fréquentée (validations annuelles Île-de-France Mobilités) est plus rare.
-- **Repérage** : chaque jour, 5 lieux inconnus de familles différentes sont repérés autour de vous ; les capturer dans les 7 jours double les écus.
-- **Collections** : 39 séries thématiques (Passages couverts, Stations fantômes, Ponts de Paris…), bonus de 50 écus à la complétion.
+- **Paquets** : un paquet de 5 cartes toutes les 5 minutes, jusqu'à 10 en réserve (5 offerts au départ). Le compteur s'arrête quand la réserve est pleine.
+- **Rareté** : chaque carte tirée a 60 % de chances d'être Commune, 25 % Peu commune, 10 % Rare, 4 % Épique, 1 % Légendaire. Le palier d'un lieu est fixé par centiles à l'intérieur de son type : un lieu célèbre (nombre d'éditions Wikipédia qui en parlent) est plus prestigieux, une station très fréquentée (validations Île-de-France Mobilités) est plus rare.
+- **Doublons** : un lieu déjà possédé ajoute un exemplaire (×2, ×3…).
+- **Visites** : aller sur place valide une carte possédée. Première visite : sceau « Visité ». Ensuite, une visite par jour fait monter la carte d'un niveau, jusqu'au niveau 5.
+- **Collections** : 38 séries thématiques (Passages couverts, Stations fantômes, Ponts de Paris…), bonus de 50 écus à la complétion.
+- **Écus** : calculés à partir de la collection (rareté, doublons, visites, collections complètes).
 
-La progression est enregistrée dans le navigateur du téléphone. La position du joueur ne quitte jamais l'appareil.
+Tant que le serveur n'est pas branché, le jeu tourne en démo locale : la progression et le compteur restent dans le navigateur et ne sont pas protégés. Avec le serveur (dossier `supabase/`), les paquets, le tirage et la collection sont gérés côté serveur et impossibles à tromper. La position du joueur n'est jamais enregistrée.
 
 ## Contenu du dépôt
 
@@ -27,6 +28,7 @@ La progression est enregistrée dans le navigateur du téléphone. La position d
 | `data/map.json` | contours des parcs, arrondissements, Seine et biens UNESCO |
 | `data/streets.json` | emprises des voies (plan de secours si le fond de carte ne charge pas) |
 | `manifest.webmanifest`, `sw.js`, `icons/` | installation sur l'écran d'accueil et usage hors ligne |
+| `supabase/` | serveur : schéma SQL sécurisé, référentiel des lieux, guide d'installation |
 | `pipeline/` | scripts qui produisent les données à partir des sources ouvertes |
 
 ## Sources et licences
