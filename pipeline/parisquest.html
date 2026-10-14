@@ -546,9 +546,11 @@ const MAX_LEVEL = 5;
 /* Paquets : 5 cartes, un paquet toutes les 5 minutes, 10 en réserve au maximum, 5 offerts au départ. */
 const PACK_SIZE = 5, PACK_PERIOD = 300000, PASS_PERIOD = 120000, PACK_CAP = 10, PACK_START = 5;
 /* Pass PariGo : un paquet toutes les 2 minutes + un Pack PariGo offert chaque jour. Pack PariGo : 20 cartes, meilleures chances, une Épique ou mieux garantie. */
-const PARIGO_SIZE = 20, PARIGO_ODDS = [.40, .30, .18, .09, .03];
-/* Achats en euros : 10 paquets 0,99 € ; Pack PariGo 1,99 € (un offert chaque jour avec le Pass). */
-const PRICE = { p10: "0,99 €", parigo: "1,99 €", pass: "4 € / mois" };
+const PARIGO_SIZE = 20, PARIGO_ODDS = [.32, .28, .22, .13, .05];
+/* Achats en euros : 10 paquets 0,99 € ; Pack PariGo 1,49 € (un offert chaque jour avec le Pass).
+   Équilibre : 10 paquets = 50 cartes, ~0,5 Légendaire et ~2 Épiques attendues (volume) ;
+   Pack PariGo = 20 cartes, ~1 Légendaire et ~2,6 Épiques attendues, peu de Communes (qualité). */
+const PRICE = { p10: "0,99 €", parigo: "1,49 €", pass: "4 € / mois" };
 const ECU_OFFERS = [{ id: "e500", ecus: 500, eur: "0,99 €" }, { id: "e1200", ecus: 1200, eur: "1,99 €", bonus: "+20 %" }, { id: "e3500", ecus: 3500, eur: "4,99 €", bonus: "+40 %", hl: true }, { id: "e8000", ecus: 8000, eur: "9,99 €", bonus: "+60 %" }];
 const TIER_ODDS = [.60, .25, .10, .04, .01]; // chance par carte : Commune → Légendaire (identique côté serveur)
 const CONIFERS = new Set(["Pinus", "Taxus", "Araucaria", "Taxodium", "Cedrus", "Sequoia", "Sequoiadendron", "Abies", "Picea", "Cupressus", "Metasequoia", "Larix", "Calocedrus", "Cryptomeria", "Thuja", "Juniperus", "Pseudotsuga", "Cephalotaxus", "Chamaecyparis", "Torreya"]);
@@ -1263,7 +1265,7 @@ async function openPack() {
   } finally { ui.opening = false; }
 }
 /* Pack PariGo : 20 cartes, tirage avec PARIGO_ODDS, au moins une Épique garantie.
-   Un offert par jour avec le Pass PariGo ; sinon acheté 1,99 € (stock de packs achetés). */
+   Un offert par jour avec le Pass PariGo ; sinon acheté 1,49 € (stock de packs achetés). */
 function parigoInfo() {
   if (SB_CONF) { const st = ui.server || {}; return { free: !!st.parigoFree && passActive(), stock: st.parigo || 0 }; }
   return { free: passActive() && S.parigo.freeOn !== todayKey(), stock: S.parigo.n || 0 };

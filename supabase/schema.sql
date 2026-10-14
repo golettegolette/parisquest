@@ -198,8 +198,8 @@ begin
 end $$;
 
 -- ---------- Boutique ----------
--- Pack PariGo : 20 cartes. Chances : Légendaire 3 %, Épique 9 %, Rare 18 %, Peu commune 30 %, Commune 40 %.
--- Au moins une Épique (ou mieux) garantie. Un offert par jour avec le Pass PariGo, sinon acheté 1,99 € (stock).
+-- Pack PariGo : 20 cartes. Chances : Légendaire 5 %, Épique 13 %, Rare 22 %, Peu commune 28 %, Commune 32 %.
+-- Au moins une Épique (ou mieux) garantie. Un offert par jour avec le Pass PariGo, sinon acheté 1,49 € (stock).
 create or replace function public.open_parigo_pack()
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare
@@ -215,7 +215,7 @@ begin
   end if;
   for i in 1..20 loop
     r := random();
-    t := case when r < 0.03 then 4 when r < 0.12 then 3 when r < 0.30 then 2 when r < 0.60 then 1 else 0 end;
+    t := case when r < 0.05 then 4 when r < 0.18 then 3 when r < 0.40 then 2 when r < 0.68 then 1 else 0 end;
     if i = 20 and best < 3 and t < 3 then t := 3; end if;      -- garantie
     best := greatest(best, t);
     select id into pid from public.places where tier = t order by random() limit 1;
