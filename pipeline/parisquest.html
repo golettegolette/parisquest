@@ -1,0 +1,1078 @@
+<title>Parisquest</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;1,7..72,400&display=swap">
+<style>
+/* Layout : carte plein écran en canvas, panneau latéral (bureau) ou onglets (mobile).
+   Direction : plaques de rue émaillées (bleu nuit, cadre vert, lettres blanches) sur pierre de taille haussmannienne.
+   Chaque famille de cartes a sa couleur d'émail. */
+:root {
+  --stone: #BBA987;
+  --stone-2: #CDBF9F;
+  --stone-3: #A3906B;
+  --joint: rgba(70, 52, 24, .16);
+  --navy: #172B4D;
+  --navy-2: #233A60;
+  --green: #1F4A36;
+  --green-2: #2D6448;
+  --white: #F6F2E8;
+  --ink: #26221B;
+  --ink-2: #5A5040;
+  --water: #5E7D96;
+  --bois: #97A079;
+  --r0: #77715F; --r1: #3F7D62; --r2: #2D63B0; --r3: #7A3F8F; --r4: #B5862A;
+  --f-plaque: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-ui: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --f-text: "Literata", Georgia, "Times New Roman", serif;
+  color-scheme: light;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { background: var(--stone); color: var(--ink); font-family: var(--f-ui); font-size: 15px; overflow: hidden; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--r4); outline-offset: 2px; }
+sup { font-size: .62em; line-height: 0; }
+
+.app { height: 100%; display: grid; grid-template-rows: auto 1fr auto; }
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding-block: 8px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--stone); border-bottom: 1px solid var(--joint);
+}
+.logo {
+  display: inline-flex; flex-direction: column; align-items: center;
+  background: var(--navy); color: var(--white); border-radius: 7px; padding: 4px 14px 5px; margin: 3px; line-height: 1;
+  box-shadow: 0 0 0 3px var(--green), inset 0 0 0 1.5px var(--white), 0 2px 0 3px rgba(0,0,0,.15);
+}
+.logo small { font-family: var(--f-plaque); font-weight: 500; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+.logo strong { font-family: var(--f-plaque); font-weight: 700; font-size: 22px; letter-spacing: .06em; text-transform: uppercase; }
+.counters { display: flex; gap: 8px; font-variant-numeric: tabular-nums; }
+.counter { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.05; padding: 4px 10px; border-radius: 6px; background: var(--stone-2); box-shadow: inset 0 0 0 1px var(--joint); }
+.counter b { font-family: var(--f-plaque); font-size: 19px; font-weight: 700; color: var(--navy); white-space: nowrap; }
+.counter span { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+
+.main { position: relative; min-height: 0; display: grid; grid-template-columns: 1fr; }
+.map-wrap { position: relative; min-height: 0; overflow: hidden; background: var(--stone-3); }
+#basemap { position: absolute; inset: 0; }
+#basemap .maplibregl-ctrl-top-right { top: 196px; }
+#basemap .maplibregl-ctrl-attrib { font-size: 11px; }
+.has-basemap #map { pointer-events: none; }
+#map { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-plaque); font-size: 18px; letter-spacing: .08em; text-transform: uppercase; color: var(--navy); background: var(--stone-3); }
+
+.map-top {
+  position: absolute; top: 10px;
+  left: max(12px, env(safe-area-inset-left, 0px)); right: max(64px, calc(env(safe-area-inset-right, 0px) + 56px));
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px; pointer-events: none;
+}
+.testbar {
+  pointer-events: auto; align-self: stretch;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+  padding: 6px 8px; border-radius: 8px; background: rgba(246, 242, 232, .93);
+  box-shadow: 0 1px 0 rgba(0,0,0,.08), inset 0 0 0 1px var(--joint); font-size: 13px;
+}
+.testbar .hint { flex: 1 1 160px; min-width: 0; color: var(--ink-2); }
+.switch { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; padding: 2px 4px; font-weight: 600; color: var(--navy); }
+.switch i { width: 30px; height: 18px; border-radius: 9px; background: var(--stone-3); position: relative; transition: background .2s; }
+.switch i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--white); transition: transform .2s; }
+.switch[aria-pressed="true"] i { background: var(--green-2); }
+.switch[aria-pressed="true"] i::after { transform: translateX(12px); }
+.mini-btn { border: 0; border-radius: 5px; padding: 5px 9px; background: var(--navy); color: var(--white); font-family: var(--f-plaque); font-weight: 600; font-size: 13px; letter-spacing: .05em; text-transform: uppercase; }
+.mini-btn.ghost { background: transparent; color: var(--navy); box-shadow: inset 0 0 0 1.5px var(--navy); }
+
+.layers { pointer-events: auto; align-self: stretch; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.layers::-webkit-scrollbar { display: none; }
+.chip {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px;
+  padding: 5px 10px 5px 7px; background: rgba(246,242,232,.93); color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--joint); font-size: 13px; font-weight: 600;
+}
+.chip i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--white); }
+.chip[aria-pressed="false"] { opacity: .5; }
+.chip[aria-pressed="false"] i { background: transparent; box-shadow: inset 0 0 0 2px var(--c); }
+
+.tools { position: absolute; top: 10px; right: max(12px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 6px; }
+.tool { width: 40px; height: 40px; border: 0; border-radius: 8px; background: var(--navy); color: var(--white); box-shadow: 0 0 0 2px var(--green), 0 2px 6px rgba(0,0,0,.2); display: grid; place-items: center; }
+.tool svg { width: 20px; height: 20px; }
+.scalebar { margin-left: 4px; font-family: var(--f-plaque); font-size: 12px; font-weight: 600; color: var(--navy); font-variant-numeric: tabular-nums; pointer-events: none; }
+.scalebar i { display: block; height: 6px; border: 2px solid var(--navy); border-top: 0; margin-top: 2px; }
+
+.sheet {
+  position: absolute; bottom: 14px;
+  left: max(14px, calc(env(safe-area-inset-left, 0px) + 14px)); right: max(14px, calc(env(safe-area-inset-right, 0px) + 14px));
+  max-width: 560px; margin-inline: auto; background: var(--navy); color: var(--white); border-radius: 10px;
+  box-shadow: 0 0 0 4px var(--green), inset 0 0 0 1.5px var(--white), 0 8px 24px rgba(10,16,30,.35);
+  padding: 13px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+}
+.sheet-text { flex: 1 1 220px; min-width: 0; }
+.eyebrow { font-family: var(--f-plaque); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; opacity: .78; display: flex; align-items: center; gap: 6px; }
+.eyebrow .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1.5px var(--white); }
+.sheet h2 { margin: 2px 0; font-family: var(--f-plaque); font-weight: 700; font-size: 21px; line-height: 1.05; text-transform: uppercase; letter-spacing: .02em; text-wrap: balance; }
+.sheet p { margin: 0; font-size: 13.5px; opacity: .9; }
+.sheet .dist { font-family: var(--f-plaque); font-weight: 600; font-size: 15px; letter-spacing: .03em; font-variant-numeric: tabular-nums; }
+.sheet-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { border: 0; border-radius: 7px; padding: 11px 18px; background: var(--green-2); color: var(--white); box-shadow: inset 0 0 0 1.5px rgba(246,242,232,.55); font-family: var(--f-plaque); font-weight: 700; font-size: 16px; letter-spacing: .07em; text-transform: uppercase; transition: transform .12s, filter .12s; }
+.btn:hover:not(:disabled) { filter: brightness(1.1); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { background: transparent; color: rgba(246,242,232,.6); box-shadow: inset 0 0 0 1.5px rgba(246,242,232,.3); cursor: default; }
+.btn.light { background: var(--white); color: var(--navy); box-shadow: inset 0 0 0 1.5px var(--navy); }
+.btn.small { padding: 8px 12px; font-size: 14px; }
+
+.side {
+  position: absolute; inset: 0; z-index: 5; overflow-y: auto; overscroll-behavior: contain;
+  background-color: var(--stone);
+  background-image: repeating-linear-gradient(180deg, transparent 0 58px, var(--joint) 58px 59px);
+  padding-block: 18px 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.app[data-mobile="map"] .side { display: none; }
+.side-tabs { display: none; }
+.view { display: flex; flex-direction: column; gap: 18px; }
+.view h2 { margin: 3px 0 0 3px; align-self: flex-start; font-family: var(--f-plaque); font-weight: 700; font-size: 20px; text-transform: uppercase; letter-spacing: .06em; background: var(--navy); color: var(--white); padding: 5px 12px 4px; border-radius: 6px; box-shadow: 0 0 0 3px var(--green), inset 0 0 0 1.5px var(--white); }
+.view h3 { margin: 0 0 8px; font-family: var(--f-plaque); font-weight: 600; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.lede { margin: 0; color: var(--ink-2); max-width: 60ch; line-height: 1.45; }
+.panel { background: rgba(205, 191, 159, .88); border-radius: 10px; padding: 14px; box-shadow: inset 0 0 0 1px var(--joint); }
+.tiers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.tier { border-radius: 6px; padding: 6px 4px 5px; text-align: center; color: var(--white); line-height: 1.1; }
+.tier b { display: block; font-family: var(--f-plaque); font-size: 18px; font-variant-numeric: tabular-nums; }
+.tier span { font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
+
+.fams { display: flex; flex-direction: column; gap: 6px; }
+.fam { display: grid; grid-template-columns: 14px 1fr auto; gap: 2px 10px; align-items: center; border: 0; background: none; text-align: left; padding: 7px 8px; border-radius: 7px; }
+.fam:hover { background: rgba(246,242,232,.45); }
+.fam[aria-pressed="true"] { background: var(--white); box-shadow: inset 0 0 0 1.5px var(--navy); }
+.fam i { width: 14px; height: 14px; border-radius: 4px; background: var(--c); }
+.fam strong { font-weight: 600; color: var(--navy); }
+.fam .n { font-family: var(--f-plaque); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.fam .bar { grid-column: 2 / -1; height: 5px; border-radius: 3px; background: rgba(38,34,27,.12); overflow: hidden; }
+.fam .bar b { display: block; height: 100%; background: var(--c); min-width: 2px; }
+
+.cols { display: flex; flex-direction: column; gap: 10px; }
+.col { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: baseline; }
+.col strong { font-weight: 600; color: var(--navy); }
+.col .n { font-family: var(--f-plaque); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.col .bar { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: rgba(38,34,27,.12); overflow: hidden; }
+.col .bar i { display: block; height: 100%; background: var(--c, var(--green-2)); border-radius: 3px; }
+.col.done .bar i { background: var(--r4); }
+.col .sub { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-2); }
+.grid-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.grid-head h3 { margin: 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 12px; }
+.grid > button { border: 0; padding: 0; background: none; text-align: left; }
+.more { margin-top: 12px; }
+.reset-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); }
+.empty { padding: 16px; border-radius: 10px; border: 1.5px dashed rgba(38,34,27,.3); color: var(--ink-2); text-align: center; line-height: 1.4; }
+
+.booster { border: 0; width: 100%; max-width: 360px; align-self: center; background: var(--navy); color: var(--white); border-radius: 12px; box-shadow: 0 0 0 5px var(--green), inset 0 0 0 2px var(--white), 0 10px 24px rgba(10,16,30,.3); padding: 22px 18px; display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 6px 5px; }
+.booster .k { font-family: var(--f-plaque); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
+.booster .t { font-family: var(--f-plaque); font-size: 28px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; line-height: 1; }
+.booster .s { font-size: 13px; opacity: .85; }
+.booster .cta { margin-top: 8px; }
+.scouts { display: flex; flex-direction: column; gap: 10px; }
+.scout { display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: center; background: var(--stone-2); border-radius: 10px; padding: 10px 12px; box-shadow: inset 0 0 0 1px var(--joint); }
+.scout .ring { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: var(--white); box-shadow: 0 0 0 3px var(--white), 0 0 0 5px var(--green-2); font-family: var(--f-plaque); font-weight: 700; font-size: 20px; }
+.scout strong { display: block; color: var(--navy); font-weight: 600; line-height: 1.2; }
+.scout span { font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+.tabbar { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--navy); box-shadow: 0 -3px 0 var(--green); padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); position: relative; z-index: 6; }
+.tabbar button { border: 0; background: none; color: rgba(246,242,232,.65); padding: 9px 4px 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-family: var(--f-plaque); font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+.tabbar button svg { width: 22px; height: 22px; }
+.tabbar button[aria-current="page"] { color: var(--white); }
+.tabbar button[aria-current="page"] svg { color: #9FD0B4; }
+.tabbar .badge { display: inline-block; min-width: 16px; padding: 0 4px; border-radius: 8px; background: var(--r4); color: var(--navy); font-size: 11px; line-height: 16px; margin-left: 3px; }
+
+@media (min-width: 900px) {
+  .main { grid-template-columns: 1fr 420px; }
+  .side { position: relative; inset: auto; display: block !important; border-left: 4px solid var(--green); }
+  .tabbar { display: none; }
+  .side-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .side-tabs button { border: 0; border-radius: 6px; padding: 7px 12px; background: var(--stone-2); color: var(--ink-2); font-family: var(--f-plaque); font-weight: 600; font-size: 15px; letter-spacing: .08em; text-transform: uppercase; box-shadow: inset 0 0 0 1px var(--joint); }
+  .side-tabs button[aria-pressed="true"] { background: var(--navy); color: var(--white); box-shadow: 0 0 0 2px var(--green); }
+  .view h2 { display: none; }
+}
+
+/* Cartes */
+.card { position: relative; width: 100%; aspect-ratio: 5 / 7; max-width: 100%; container-type: inline-size; perspective: 1400px; }
+.card .flip { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.3,.7,.3,1); }
+.card.flipped .flip { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; font-size: 5cqw; border-radius: .7em; background: var(--green); padding: .42em; box-shadow: 0 .15em .5em rgba(10,16,30,.25); }
+.face.back { transform: rotateY(180deg); }
+.face-in { height: 100%; border-radius: .45em; background: var(--navy); color: var(--white); box-shadow: inset 0 0 0 .12em var(--white); padding: .75em .75em 0; display: flex; flex-direction: column; gap: .4em; overflow: hidden; }
+.c-top { display: flex; justify-content: space-between; align-items: center; gap: .5em; font-family: var(--f-plaque); font-size: .78em; letter-spacing: .06em; white-space: nowrap; }
+.c-top .type { text-transform: uppercase; font-weight: 600; letter-spacing: .08em; padding: .1em .55em; border-radius: .3em; background: var(--c); overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.c-name { font-family: var(--f-plaque); font-weight: 700; font-size: 1.45em; line-height: .98; text-transform: uppercase; letter-spacing: .01em; text-wrap: balance; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 1.96em; }
+.c-latin { font-family: var(--f-text); font-style: italic; font-size: .76em; opacity: .78; margin-top: -.15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 1.3em; }
+.c-art { flex: 1; min-height: 0; position: relative; border-radius: .3em; overflow: hidden; background-color: var(--stone-2); background-image: repeating-linear-gradient(180deg, transparent 0 1.9em, var(--joint) 1.9em 2em), linear-gradient(180deg, rgba(255,255,255,.18), rgba(0,0,0,.06)); }
+.c-art svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.c-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.credits { font-size: 12px; line-height: 1.5; color: var(--ink-2); }
+.credits a { color: var(--navy); }
+.pips { position: absolute; top: .45em; left: .5em; display: flex; gap: .22em; }
+.pips i { width: .55em; height: .55em; transform: rotate(45deg); background: rgba(23,43,77,.2); border: .08em solid var(--navy); }
+.pips i.on { background: var(--navy); }
+.lab { position: absolute; top: .4em; right: .45em; font-family: var(--f-plaque); font-size: .62em; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--white); background: var(--c); padding: .1em .4em; border-radius: .25em; }
+.c-stats { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: .3em; text-align: center; }
+.c-stats div { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; }
+.c-stats small { font-family: var(--f-plaque); font-size: .58em; letter-spacing: .12em; text-transform: uppercase; opacity: .7; }
+.c-stats b { font-family: var(--f-plaque); font-size: 1.05em; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-stats b.long { font-size: .8em; padding-top: .15em; }
+.c-band { margin: 0 -.75em; padding: .35em .75em .45em; display: flex; justify-content: space-between; align-items: baseline; gap: .6em; color: var(--white); }
+.c-band b { font-family: var(--f-plaque); font-size: .8em; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+.c-band span { font-size: .6em; opacity: .92; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.back .face-in { padding: .9em; gap: .5em; }
+.back h4 { margin: 0; font-family: var(--f-plaque); font-weight: 700; font-size: 1.2em; text-transform: uppercase; line-height: 1; }
+.back .why { font-family: var(--f-text); font-size: .74em; line-height: 1.35; margin: 0; padding: .45em .55em; background: rgba(246,242,232,.1); border-radius: .3em; }
+.back .desc { flex: 1; min-height: 0; overflow-y: auto; font-family: var(--f-text); font-size: .72em; line-height: 1.45; margin: 0; padding-right: .3em; }
+.back .meta { font-size: .62em; line-height: 1.4; opacity: .8; }
+.back .links { display: flex; gap: .5em; flex-wrap: wrap; }
+.back .links a { font-family: var(--f-plaque); font-weight: 600; font-size: .72em; letter-spacing: .08em; text-transform: uppercase; color: var(--navy); background: var(--white); padding: .3em .6em; border-radius: .3em; text-decoration: none; }
+
+.modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(14, 21, 34, .78); padding: 20px max(16px, env(safe-area-inset-left, 0px)) 20px max(16px, env(safe-area-inset-right, 0px)); overflow-y: auto; }
+.modal-box { display: flex; flex-direction: column; align-items: center; gap: 14px; width: min(330px, 100%); }
+.modal-msg { text-align: center; color: var(--white); }
+.modal-msg .k { font-family: var(--f-plaque); font-size: 13px; letter-spacing: .16em; text-transform: uppercase; opacity: .8; }
+.modal-msg .t { font-family: var(--f-plaque); font-size: 26px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; line-height: 1.05; }
+.modal-msg .s { font-size: 14px; opacity: .9; margin-top: 4px; }
+#modalCard { width: min(320px, 100%, calc((100vh - 230px) * 5 / 7)); min-width: 200px; }
+.modal .card { width: 100%; }
+.modal-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.reveal { animation: reveal .7s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes reveal { from { transform: translateY(24px) scale(.82) rotateY(70deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.glow .face { box-shadow: 0 0 0 .1em var(--glow), 0 0 1.6em .3em var(--glow); }
+.toast { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 70px); transform: translateX(-50%); z-index: 30; max-width: min(440px, calc(100vw - 32px)); background: var(--ink); color: var(--white); padding: 10px 14px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.3); font-size: 14px; line-height: 1.35; }
+@media (prefers-reduced-motion: reduce) { .card .flip { transition: none; } .reveal { animation: none; } }
+</style>
+
+<div class="app" id="app" data-mobile="map">
+  <header class="top">
+    <div class="logo" aria-label="Parisquest"><small>Collectionnez Paris</small><strong>Parisquest</strong></div>
+    <div class="counters">
+      <div class="counter"><b id="cntCards">0</b><span>cartes</span></div>
+      <div class="counter"><b id="cntEcus">0</b><span>écus</span></div>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="map-wrap" id="mapWrap" aria-label="Carte de Paris">
+      <canvas id="map" role="img" aria-label="Plan de Paris avec les lieux à collectionner"></canvas>
+      <div class="loading" id="loading">Chargement de Paris…</div>
+      <div class="map-top">
+        <div class="testbar" id="testbar">
+          <button class="switch" id="testToggle" aria-pressed="true"><i></i>Mode test</button>
+          <span class="hint" id="testHint">Touchez la carte pour vous déplacer.</span>
+          <button class="mini-btn" id="nextDay">Jour suivant</button>
+          <button class="mini-btn ghost" id="gpsBtn">GPS</button>
+        </div>
+        <div class="layers" id="layers" role="group" aria-label="Familles affichées"></div>
+        <div class="scalebar"><span id="scaleLabel">500 m</span><i id="scaleBar" style="width:60px"></i></div>
+      </div>
+      <div class="tools">
+        <button class="tool" id="zoomIn" aria-label="Zoomer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button class="tool" id="zoomOut" aria-label="Dézoomer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+        <button class="tool" id="meBtn" aria-label="Centrer sur ma position"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+        <button class="tool" id="fitBtn" aria-label="Voir tout Paris"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      </div>
+      <div class="sheet" id="sheet" aria-live="polite"><div class="sheet-text"><div class="eyebrow">Parisquest</div><h2>Chargement</h2><p>Préparation des 15 000 lieux de Paris.</p></div></div>
+    </section>
+
+    <aside class="side" id="side">
+      <div class="side-tabs">
+        <button data-view="collection" aria-pressed="true">Collection</button>
+        <button data-view="reperage" aria-pressed="false">Repérage</button>
+      </div>
+      <section class="view" id="viewCollection"></section>
+      <section class="view" id="viewReperage" hidden></section>
+    </aside>
+  </main>
+
+  <nav class="tabbar" aria-label="Navigation">
+    <button data-tab="map" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/></svg>Carte</button>
+    <button data-tab="collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="11" height="15" rx="2"/><path d="M17 6.5 20.5 8 17 19"/></svg>Collection</button>
+    <button data-tab="reperage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><span>Repérage<span class="badge" id="scoutBadge" hidden>!</span></span></button>
+  </nav>
+</div>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-box">
+    <div class="modal-msg" id="modalMsg"></div>
+    <div id="modalCard"></div>
+    <div class="modal-actions">
+      <button class="btn light" id="flipBtn">Retourner la carte</button>
+      <button class="btn" id="closeBtn">Fermer</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ---------- Géographie ---------- */
+const LAT0 = 48.8566, LON0 = 2.3522, K = 1000, COS0 = Math.cos(LAT0 * Math.PI / 180);
+const MPU = 111195 / K; // mètres par unité projetée
+/* Projection de Mercator mise à l'échelle : 1 unité ≈ 111 m. Identique au fond de carte (MapLibre), à une homothétie près. */
+const RAD = Math.PI / 180, KM = K * COS0 / RAD, mercN = lat => Math.log(Math.tan(Math.PI / 4 + lat * RAD / 2)), N0 = mercN(LAT0);
+const proj = (lat, lon) => [(lon - LON0) * COS0 * K, -(mercN(lat) - N0) * KM];
+const unproj = (x, y) => [(2 * Math.atan(Math.exp(N0 - y / KM)) - Math.PI / 2) / RAD, LON0 + x / (COS0 * K)];
+const decLat = a => 48.8 + a / 1e5, decLon = b => 2.2 + b / 1e5;
+
+const PERIPH = [[48.8985,2.3597],[48.8990,2.3705],[48.8975,2.3860],[48.8880,2.3925],[48.8770,2.4065],[48.8640,2.4100],[48.8535,2.4110],[48.8470,2.4110],[48.8355,2.4060],[48.8290,2.4020],[48.8225,2.3930],[48.8215,2.3690],[48.8190,2.3595],[48.8165,2.3445],[48.8230,2.3255],[48.8270,2.3050],[48.8320,2.2875],[48.8360,2.2650],[48.8380,2.2565],[48.8480,2.2580],[48.8590,2.2690],[48.8715,2.2765],[48.8780,2.2825],[48.8860,2.2920],[48.8915,2.3020],[48.8945,2.3135],[48.8975,2.3290],[48.8995,2.3445]];
+const SEINE = [[48.8165,2.4140],[48.8215,2.4010],[48.8260,2.3890],[48.8300,2.3820],[48.8340,2.3770],[48.8380,2.3712],[48.8435,2.3655],[48.8480,2.3605],[48.8505,2.3560],[48.8530,2.3490],[48.8560,2.3430],[48.8580,2.3370],[48.8600,2.3290],[48.8630,2.3210],[48.8640,2.3130],[48.8630,2.3020],[48.8600,2.2930],[48.8560,2.2875],[48.8500,2.2810],[48.8460,2.2755],[48.8395,2.2670],[48.8340,2.2560],[48.8285,2.2420],[48.8260,2.2310],[48.8330,2.2235],[48.8440,2.2215],[48.8560,2.2240],[48.8680,2.2260],[48.8790,2.2370],[48.8850,2.2550],[48.8930,2.2700]];
+const ARR = [["1",48.8625,2.3364],["2",48.8683,2.3428],["3",48.8630,2.3600],["4",48.8543,2.3576],["5",48.8445,2.3500],["6",48.8491,2.3328],["7",48.8562,2.3122],["8",48.8727,2.3125],["9",48.8770,2.3375],["10",48.8761,2.3608],["11",48.8590,2.3800],["12",48.8400,2.3880],["13",48.8283,2.3622],["14",48.8292,2.3266],["15",48.8401,2.2928],["16",48.8604,2.2790],["17",48.8873,2.3067],["18",48.8925,2.3484],["19",48.8871,2.3848],["20",48.8634,2.4011]];
+let BOUNDS = (() => { const ps = PERIPH.map(([a, b]) => proj(a, b)).concat([proj(48.8460, 2.4700), proj(48.8800, 2.2250), proj(48.8180, 2.4600)]); const xs = ps.map(p => p[0]), ys = ps.map(p => p[1]); return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) }; })();
+
+function bearing(a, b) {
+  const deg = (Math.atan2(b.p[0] - a[0], -(b.p[1] - a[1])) * 180 / Math.PI + 360) % 360;
+  return ["nord", "nord-est", "est", "sud-est", "sud", "sud-ouest", "ouest", "nord-ouest"][Math.round(deg / 45) % 8];
+}
+const fmtDist = m => m < 1000 ? `${Math.max(5, Math.round(m / 5) * 5)} m` : `${(m / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} km`;
+
+/* ---------- Règles ---------- */
+const TIERS = ["Commune", "Peu commune", "Rare", "Épique", "Légendaire"];
+const TIER_VAR = ["--r0", "--r1", "--r2", "--r3", "--r4"];
+const REWARD = [10, 15, 25, 40, 60];
+const BOOSTER_SIZE = 5, SCOUT_DAYS = 7, MAX_LEVEL = 5;
+const CONIFERS = new Set(["Pinus", "Taxus", "Araucaria", "Taxodium", "Cedrus", "Sequoia", "Sequoiadendron", "Abies", "Picea", "Cupressus", "Metasequoia", "Larix", "Calocedrus", "Cryptomeria", "Thuja", "Juniperus", "Pseudotsuga", "Cephalotaxus", "Chamaecyparis", "Torreya"]);
+const DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+
+let FAMS = {}, KINDS = {}, ITEMS = [], COLS = [], BYID = new Map(), TOTALS = {};
+let PARK_PATHS = null, MONDE_PATHS = [], ARR_PATH = null, WATER_PATH = null, STREET_PATH = null, STREET_LABELS = [];
+
+/* ---------- État ---------- */
+const STORE_KEY = "parisquest.v2";
+/* Version hébergée (GitHub Pages ou serveur local) : vrai GPS, fond de carte, photos. Le mode test n'y est visible qu'avec ?test dans l'adresse. */
+const HOSTED = !!window.PQ_HOSTED;
+const TEST_ALLOWED = !HOSTED || /[?&]test\b/.test(location.search);
+const DEFAULT_STATE = () => ({ pos: { lat: 48.8600, lon: 2.3565 }, owned: {}, ecus: 0, scouts: [], lastBooster: null, dayOffset: 0, done: {}, hidden: {}, test: !HOSTED });
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return Object.assign(DEFAULT_STATE(), JSON.parse(raw));
+    const v1 = localStorage.getItem("parisquest.v1");
+    if (v1) { const o = JSON.parse(v1); const s = DEFAULT_STATE(); s.ecus = o.ecus || 0; s.pos = o.pos || s.pos; s.dayOffset = o.dayOffset || 0; for (const id in (o.owned || {})) s.owned["arbre:" + id] = o.owned[id]; return s; }
+  } catch (e) {}
+  return DEFAULT_STATE();
+}
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) {} }
+let S = load();
+if (!TEST_ALLOWED) { S.test = false; S.dayOffset = 0; }
+if (!HOSTED) S.test = true;
+const ui = { sel: null, cycle: 0, mobile: "map", view: "collection", fam: null, shown: 48, resetArmed: false, gpsWatch: null, ready: false, gps: "off", acc: null, firstFix: true };
+const today = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000) + S.dayOffset;
+const simDate = () => new Date(Date.now() + S.dayOffset * 86400000);
+
+/* ---------- Utilitaires ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const arrLabel = ar => !ar ? "Paris" : `${esc(ar)}<sup>${ar === "1" ? "er" : "e"}</sup> Arr<sup>t</sup>`;
+const nf = n => Number(n).toLocaleString("fr-FR");
+function seeded(id) { let h = 2166136261; for (const c of String(id)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return () => ((h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0) % 1000) / 1000; }
+const famOf = it => KINDS[it.k].f;
+const famColor = it => FAMS[famOf(it)].color;
+const visible = it => !S.hidden[famOf(it)];
+let toastTimer;
+function toast(msg) { const el = $("toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3600); }
+
+/* ---------- Préparation des données ---------- */
+const CELL = 3; // unités projetées (≈ 330 m)
+const GRID = new Map();
+const cellKey = (cx, cy) => cx * 100000 + cy;
+function gridAdd(cx, cy, idx) { const k = cellKey(cx, cy); let a = GRID.get(k); if (!a) GRID.set(k, a = []); if (a[a.length - 1] !== idx) a.push(idx); }
+function prepare(pl, mp) {
+  FAMS = pl.families; KINDS = pl.kinds; ITEMS = pl.items; COLS = pl.collections;
+  const parkRings = mp.parks.map(p => ({ c: p.c, i: p.i, rings: p.r.map(r => { const out = new Float64Array(r.length); for (let j = 0; j < r.length; j += 2) { const q = proj(decLat(r[j]), decLon(r[j + 1])); out[j] = q[0]; out[j + 1] = q[1]; } return out; }) }));
+  const mondeRings = (mp.monde || []).map(rs => rs.map(r => { const out = new Float64Array(r.length); for (let j = 0; j < r.length; j += 2) { const q = proj(decLat(r[j]), decLon(r[j + 1])); out[j] = q[0]; out[j + 1] = q[1]; } return out; }));
+  PARK_PATHS = { park: new Path2D(), cim: new Path2D(), bois: new Path2D() };
+  for (const p of parkRings) for (const r of p.rings) { const P = PARK_PATHS[p.c] || PARK_PATHS.park; P.moveTo(r[0], r[1]); for (let j = 2; j < r.length; j += 2) P.lineTo(r[j], r[j + 1]); P.closePath(); }
+  const ringsToPath = (P, rings) => { for (const r of rings) { for (let j = 0; j < r.length; j += 2) { const q = proj(decLat(r[j]), decLon(r[j + 1])); j ? P.lineTo(q[0], q[1]) : P.moveTo(q[0], q[1]); } P.closePath(); } };
+  if (mp.arr && mp.arr.length) {
+    ARR_PATH = new Path2D(); mp.arr.forEach(a => ringsToPath(ARR_PATH, a.r));
+    ARR_P = mp.arr.filter(a => a.at && a.at[0]).map(a => [a.n + (a.n === "1" ? "er" : "e"), proj(a.at[0], a.at[1])]);
+  }
+  if (mp.water && mp.water.length) { WATER_PATH = new Path2D(); mp.water.forEach(rs => ringsToPath(WATER_PATH, rs)); }
+  MONDE_PATHS = mondeRings.map(rs => { const P = new Path2D(); for (const r of rs) { P.moveTo(r[0], r[1]); for (let j = 2; j < r.length; j += 2) P.lineTo(r[j], r[j + 1]); P.closePath(); } return P; });
+  ITEMS.forEach((it, idx) => {
+    it.idx = idx;
+    if (it.p && it.p.startsWith("c:")) it.ph = "https://commons.wikimedia.org/wiki/Special:FilePath/" + it.p.slice(2); else if (it.p) it.ph = it.p;
+    if (it.wp) it.wp = "https://fr.wikipedia.org/wiki/" + it.wp;
+    it.p = proj(it.a, it.o);
+    const kd = KINDS[it.k], x = it.x || {};
+    it.rad = x.rad || (it.k === "arbre" && x.bois ? 100 : kd.rad);
+    if (x.pts && x.pts.length) {
+      it.pts = new Float64Array(x.pts.length);
+      for (let j = 0; j < x.pts.length; j += 2) { const q = proj(decLat(x.pts[j]), decLon(x.pts[j + 1])); it.pts[j] = q[0]; it.pts[j + 1] = q[1]; gridAdd(Math.floor(q[0] / CELL), Math.floor(q[1] / CELL), idx); }
+    }
+    if (x.poly != null && parkRings[x.poly]) it.poly = parkRings[x.poly].rings;
+    if (x.mpoly != null && mondeRings[x.mpoly]) it.poly = mondeRings[x.mpoly];
+    if (it.poly) {
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      for (const r of it.poly) for (let j = 0; j < r.length; j += 2) { x0 = Math.min(x0, r[j]); x1 = Math.max(x1, r[j]); y0 = Math.min(y0, r[j + 1]); y1 = Math.max(y1, r[j + 1]); }
+      for (let cx = Math.floor(x0 / CELL); cx <= Math.floor(x1 / CELL); cx++) for (let cy = Math.floor(y0 / CELL); cy <= Math.floor(y1 / CELL); cy++) gridAdd(cx, cy, idx);
+    }
+    gridAdd(Math.floor(it.p[0] / CELL), Math.floor(it.p[1] / CELL), idx);
+    BYID.set(it.i, it);
+    const f = kd.f; TOTALS[f] = (TOTALS[f] || 0) + 1;
+  });
+}
+function candidates(px, py, rUnits) {
+  const out = new Set();
+  const c0x = Math.floor((px - rUnits) / CELL), c1x = Math.floor((px + rUnits) / CELL), c0y = Math.floor((py - rUnits) / CELL), c1y = Math.floor((py + rUnits) / CELL);
+  for (let cx = c0x; cx <= c1x; cx++) for (let cy = c0y; cy <= c1y; cy++) { const a = GRID.get(cellKey(cx, cy)); if (a) for (const i of a) out.add(i); }
+  return out;
+}
+function inPoly(rings, x, y) {
+  let inside = false;
+  for (const r of rings) for (let i = 0, j = r.length - 2; i < r.length; j = i, i += 2) {
+    const xi = r[i], yi = r[i + 1], xj = r[j], yj = r[j + 1];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+function segDist(px, py, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy;
+  let t = L ? ((px - ax) * dx + (py - ay) * dy) / L : 0; t = Math.max(0, Math.min(1, t));
+  return Math.hypot(px - ax - t * dx, py - ay - t * dy);
+}
+/* distance en mètres entre la position projetée et un lieu */
+function distTo(it, P) {
+  if (it.poly) {
+    if (inPoly(it.poly, P[0], P[1])) return 0;
+    let d = Infinity;
+    for (const r of it.poly) for (let i = 0; i < r.length - 2; i += 2) d = Math.min(d, segDist(P[0], P[1], r[i], r[i + 1], r[i + 2], r[i + 3]));
+    return d * MPU;
+  }
+  let d = Math.hypot(it.p[0] - P[0], it.p[1] - P[1]);
+  if (it.pts) for (let j = 0; j < it.pts.length; j += 2) d = Math.min(d, Math.hypot(it.pts[j] - P[0], it.pts[j + 1] - P[1]));
+  return d * MPU;
+}
+
+/* Marchés : ouverts seulement aux jours et heures du marché */
+function marketStatus(it, date = simDate()) {
+  const x = it.x || {}; if (!x.mk) return null;
+  const di = (date.getDay() + 6) % 7;
+  const hr = x.hr || [];
+  const slot = di < 5 ? [hr[0], hr[1]] : di === 5 ? [hr[2], hr[3]] : [hr[4], hr[5]];
+  const toMin = s => { const m = /^(\d\d):(\d\d)/.exec(s || ""); return m ? +m[1] * 60 + +m[2] : null; };
+  const now = date.getHours() * 60 + date.getMinutes();
+  const a = toMin(slot[0]) ?? 420, b = toMin(slot[1]) ?? 840;
+  const open = !!x.mk[di] && now >= a && now <= b;
+  const days = DAYS.filter((d, i) => x.mk[i]).join(", ");
+  return { open, text: open ? `Ouvert jusqu'à ${slot[1] || "14:00"}` : `Ouvert le ${days}` };
+}
+
+/* ---------- Illustrations ---------- */
+const ART = {
+  tree(it) {
+    const x = it.x || {}, rnd = seeded(it.i), k = .62 + .38 * Math.min(1, (x.h || 12) / 35), base = 80, tw = 4 + Math.min(8, (x.c || 100) / 90);
+    const crown = x.g === "Ginkgo" ? "#C59A2E" : x.g === "Taxodium" ? "#9A5A33" : "#2F5B40", light = x.g === "Ginkgo" ? "#DDB64A" : x.g === "Taxodium" ? "#B87245" : "#41745A";
+    let s = `<ellipse cx="50" cy="${base + 1}" rx="30" ry="3.2" fill="rgba(40,30,15,.2)"/>`;
+    if (CONIFERS.has(x.g)) {
+      s += `<rect x="${50 - tw / 2}" y="${base - 14 * k}" width="${tw}" height="${14 * k}" fill="#5B4632"/>`;
+      for (let i = 0; i < 3; i++) { const w = (30 - i * 7) * k * (.9 + rnd() * .2), yb = base - (10 + i * 17) * k; s += `<polygon points="${50 - w},${yb} ${50 + w},${yb} 50,${yb - 30 * k}" fill="${i % 2 ? light : crown}"/>`; }
+    } else {
+      const ct = base - 44 * k;
+      s += `<path d="M${50 - tw / 2} ${base} L${50 - tw / 2.6} ${ct + 6} L${50 + tw / 2.6} ${ct + 6} L${50 + tw / 2} ${base} Z" fill="#5B4632"/>`;
+      [[0, -2, 24], [-17, 6, 16], [17, 6, 16], [-8, -16, 15], [10, -14, 15], [0, -26, 12]].forEach(([dx, dy, r], i) => { s += `<circle cx="${50 + dx * k + (rnd() - .5) * 4}" cy="${ct + dy * k + (rnd() - .5) * 3}" r="${r * k * (.9 + rnd() * .2)}" fill="${i > 2 ? light : crown}"/>`; });
+    }
+    if (x.eph) s += `<rect x="${50 - tw}" y="${base - 22}" width="${tw * 2}" height="5" fill="#B23A2E"/><path d="M28 70 L72 70" stroke="#B23A2E" stroke-width="0" />`;
+    return s;
+  },
+  park() { return `<ellipse cx="50" cy="81" rx="40" ry="3" fill="rgba(40,30,15,.18)"/><path d="M10 80 Q50 66 90 80" fill="#8FA36A"/><rect x="26" y="52" width="4" height="26" fill="#5B4632"/><circle cx="28" cy="44" r="14" fill="#2F5B40"/><circle cx="20" cy="50" r="9" fill="#41745A"/><rect x="70" y="58" width="3.5" height="20" fill="#5B4632"/><circle cx="72" cy="50" r="11" fill="#41745A"/><rect x="40" y="66" width="22" height="3" rx="1" fill="#1F4A36"/><rect x="40" y="61" width="22" height="2" rx="1" fill="#1F4A36"/><rect x="42" y="69" width="2" height="7" fill="#1F4A36"/><rect x="58" y="69" width="2" height="7" fill="#1F4A36"/>`; },
+  sprout() { return `<ellipse cx="50" cy="81" rx="24" ry="3" fill="rgba(40,30,15,.2)"/><path d="M34 58 h32 l-4 22 h-24 Z" fill="#A9653E"/><rect x="32" y="54" width="36" height="6" rx="1.5" fill="#B87245"/><path d="M50 54 V30" stroke="#2F5B40" stroke-width="3"/><path d="M50 40 C40 38 34 30 36 22 C46 24 50 32 50 40Z" fill="#41745A"/><path d="M50 34 C60 32 66 24 64 16 C54 18 50 26 50 34Z" fill="#2F5B40"/>`; },
+  fountain(it) {
+    const ft = (it.x || {}).ft;
+    if (ft === "FONTNE_WALLACE") return `<ellipse cx="50" cy="81" rx="22" ry="3" fill="rgba(40,30,15,.2)"/><rect x="36" y="70" width="28" height="9" rx="2" fill="#1E4A3A"/><rect x="40" y="64" width="20" height="6" fill="#255C48"/>${[0, 1, 2, 3].map(i => `<path d="M${41 + i * 6} 64 v-22 c0-3 4-3 4 0 v22" fill="#2D6B53"/>`).join("")}<path d="M36 42 h28 l-3 -4 h-22 Z" fill="#1E4A3A"/><path d="M38 38 Q50 18 62 38 Z" fill="#255C48"/><circle cx="50" cy="20" r="2.5" fill="#1E4A3A"/><path d="M50 44 v18" stroke="#8FC1DA" stroke-width="1.6" stroke-dasharray="2 2"/>`;
+    const bubbles = ft === "FTNE_PETILLANTE" ? [0, 1, 2, 3, 4].map(i => `<circle cx="${44 + i * 3}" cy="${30 - i * 3}" r="${1.2 + (i % 2)}" fill="#8FC1DA"/>`).join("") : "";
+    const col = ft === "FONTAINE_ALBIEN" || ft === "FTNE_MILLENAIRE" ? "#A8742A" : "#2C5F7C";
+    return `<ellipse cx="50" cy="81" rx="20" ry="3" fill="rgba(40,30,15,.2)"/><rect x="40" y="74" width="20" height="6" rx="2" fill="${col}"/><rect x="45" y="36" width="10" height="40" rx="3" fill="${col}"/><rect x="42" y="32" width="16" height="6" rx="2" fill="${col}"/><path d="M55 46 q10 0 10 12" stroke="#8FC1DA" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="65" cy="62" r="1.6" fill="#8FC1DA"/>${bubbles}`;
+  },
+  pool() { return `<rect x="14" y="46" width="72" height="34" rx="3" fill="#5E9AB8"/>${[0, 1, 2].map(i => `<path d="M18 ${56 + i * 8} q6 -4 12 0 t12 0 t12 0 t12 0 t12 0" stroke="#D7EAF2" stroke-width="2" fill="none"/>`).join("")}<path d="M72 46 v-16 M80 46 v-16 M72 34 h8 M72 40 h8" stroke="#1F3B6E" stroke-width="2.4"/>`; },
+  plaque(it) {
+    const name = (it.n || "").toUpperCase();
+    const fs = Math.max(6.2, Math.min(11, 150 / Math.max(8, name.length)));
+    const words = name.split(" "); let l1 = name, l2 = "";
+    if (name.length > 20 && words.length > 1) { const half = Math.ceil(words.length / 2); l1 = words.slice(0, half).join(" "); l2 = words.slice(half).join(" "); }
+    const fz = l2 ? Math.max(6, Math.min(10, 110 / Math.max(l1.length, l2.length))) : fs;
+    return `<rect x="8" y="26" width="84" height="38" rx="5" fill="#1F4A36"/><rect x="10.5" y="28.5" width="79" height="33" rx="3.5" fill="#172B4D" stroke="#F6F2E8" stroke-width=".9"/><text x="50" y="37" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-size="5.2" font-weight="600" fill="#F6F2E8" letter-spacing=".4">${esc(it.r ? it.r + (it.r === "1" ? "ER" : "E") + " ARRT" : "PARIS")}</text>${l2 ? `<text x="50" y="${47.5}" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-size="${fz}" font-weight="700" fill="#F6F2E8">${esc(l1)}</text><text x="50" y="${47.5 + fz + 1}" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-size="${fz}" font-weight="700" fill="#F6F2E8">${esc(l2)}</text>` : `<text x="50" y="${50 + fs * .3}" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-size="${fs}" font-weight="700" fill="#F6F2E8">${esc(l1)}</text>`}<rect x="8" y="64" width="84" height="1.2" fill="rgba(0,0,0,.15)"/>`;
+  },
+  stairs() { let s = `<path d="M10 80 H90" stroke="rgba(40,30,15,.25)" stroke-width="2"/>`; for (let i = 0; i < 7; i++) s += `<rect x="${14 + i * 10}" y="${74 - i * 8}" width="${76 - i * 10}" height="8" fill="${i % 2 ? "#B9A784" : "#C9B994"}" stroke="#8C7A57" stroke-width=".6"/>`; return s + `<path d="M18 62 L80 14" stroke="#1F3B6E" stroke-width="2.2"/><path d="M18 62 v10 M40 45 v10 M62 28 v10 M80 14 v10" stroke="#1F3B6E" stroke-width="1.6"/>`; },
+  memorial(it) { const rnd = seeded(it.i); let lines = ""; for (let i = 0; i < 5; i++) { const w = 30 + rnd() * 26; lines += `<rect x="${50 - w / 2}" y="${36 + i * 7}" width="${w}" height="2" rx="1" fill="#8C7A66"/>`; } return `<rect x="20" y="22" width="60" height="54" rx="2" fill="#EDE6D6" stroke="#B8AC96" stroke-width="1.2"/><rect x="24" y="26" width="52" height="46" fill="none" stroke="#D2C7B2" stroke-width=".8"/><text x="50" y="33" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-size="5" font-weight="700" fill="#8C2F3A" letter-spacing=".5">ICI</text>${lines}`; },
+  cameo() { return `<ellipse cx="50" cy="48" rx="25" ry="31" fill="#8C2F3A"/><ellipse cx="50" cy="48" rx="21" ry="27" fill="#EDE6D6"/><path d="M58 70 c-2-6-6-8-6-12 c3-1 4-3 3-5 l3-2 -2-3 c1-2 0-5-2-6 c-1-7-6-12-14-11 c-9 1-13 9-11 17 c1 6 5 9 4 14 c-1 4-5 6-8 8 c6 4 22 5 33 0Z" fill="#8C2F3A"/>`; },
+  amphora() { return `<ellipse cx="50" cy="81" rx="16" ry="3" fill="rgba(40,30,15,.2)"/><path d="M44 18 h12 v6 c0 3 10 8 12 22 c2 14 -6 26 -14 32 h-8 c-8-6-16-18-14-32 c2-14 12-19 12-22 Z" fill="#B8693E"/><path d="M44 24 c-10 0 -12 12 -6 16 M56 24 c10 0 12 12 6 16" stroke="#8C4A2A" stroke-width="2.4" fill="none"/><path d="M34 48 h32 M36 56 h28" stroke="#8C4A2A" stroke-width="1.6"/><path d="M58 60 l6 6 -5 3" stroke="#5A3018" stroke-width="1" fill="none"/>`; },
+  laurel() { let l = ""; for (let i = 0; i < 7; i++) { const a = (Math.PI * (0.55 + i * 0.11)); l += `<ellipse cx="${50 + Math.cos(a) * 26}" cy="${50 + Math.sin(a) * 26}" rx="6" ry="2.6" transform="rotate(${a * 180 / Math.PI + 90} ${50 + Math.cos(a) * 26} ${50 + Math.sin(a) * 26})" fill="#A8742A"/><ellipse cx="${50 - Math.cos(a) * 26}" cy="${50 + Math.sin(a) * 26}" rx="6" ry="2.6" transform="rotate(${-a * 180 / Math.PI - 90} ${50 - Math.cos(a) * 26} ${50 + Math.sin(a) * 26})" fill="#A8742A"/>`; } return l + `<polygon points="50,30 55,44 70,44 58,53 62,67 50,58 38,67 42,53 30,44 45,44" fill="#B5862A"/>`; },
+  church() { return `<rect x="26" y="40" width="48" height="40" fill="#D9CDB3" stroke="#9C8B6A"/><polygon points="22,42 50,20 78,42" fill="#C2B190" stroke="#9C8B6A"/><circle cx="50" cy="36" r="6" fill="#2D63B0" stroke="#9C8B6A"/><path d="M50 30 v12 M44 36 h12" stroke="#D9CDB3" stroke-width="1"/><path d="M43 80 v-14 a7 7 0 0 1 14 0 v14 Z" fill="#5B4632"/><rect x="31" y="50" width="6" height="12" rx="3" fill="#7A6A4F"/><rect x="63" y="50" width="6" height="12" rx="3" fill="#7A6A4F"/>`; },
+  townhall() { return `<rect x="16" y="44" width="68" height="36" fill="#D9CDB3" stroke="#9C8B6A"/><rect x="40" y="30" width="20" height="14" fill="#C2B190" stroke="#9C8B6A"/><circle cx="50" cy="37" r="4" fill="#F6F2E8" stroke="#5A5040"/><path d="M50 30 V14" stroke="#5A5040" stroke-width="1.4"/><rect x="51" y="14" width="5" height="8" fill="#2D63B0"/><rect x="56" y="14" width="5" height="8" fill="#F6F2E8"/><rect x="61" y="14" width="5" height="8" fill="#C0392B"/>${[0, 1, 2, 3, 4].map(i => `<rect x="${21 + i * 13}" y="52" width="6" height="10" fill="#7A6A4F"/><rect x="${21 + i * 13}" y="67" width="6" height="10" fill="#7A6A4F"/>`).join("")}`; },
+  stele() { return `<path d="M10 80 Q50 72 90 80" fill="#8FA36A"/><path d="M36 78 v-34 a14 14 0 0 1 28 0 v34 Z" fill="#B6AE9E" stroke="#8C8577"/><rect x="42" y="50" width="16" height="2" fill="#8C8577"/><rect x="44" y="56" width="12" height="2" fill="#8C8577"/><circle cx="26" cy="72" r="5" fill="#41745A"/><circle cx="74" cy="70" r="6" fill="#2F5B40"/>`; },
+  museum() { return `<polygon points="16,36 50,18 84,36" fill="#C2B190" stroke="#9C8B6A"/><rect x="18" y="36" width="64" height="5" fill="#B8A584"/>${[0, 1, 2, 3, 4].map(i => `<rect x="${22 + i * 12.5}" y="42" width="6" height="30" fill="#E3D8C0" stroke="#B8A584" stroke-width=".6"/>`).join("")}<rect x="14" y="72" width="72" height="5" fill="#B8A584"/><rect x="10" y="77" width="80" height="4" fill="#A3906B"/>`; },
+  books() { const c = ["#6B3F8F", "#2D63B0", "#8C2F3A", "#1F4A36", "#A8742A", "#172B4D"]; return `<rect x="12" y="78" width="76" height="3" fill="#7A6A4F"/>` + c.map((col, i) => `<rect x="${18 + i * 11}" y="${34 + (i % 3) * 5}" width="9" height="${44 - (i % 3) * 5}" rx="1" fill="${col}"/><rect x="${19.5 + i * 11}" y="${40 + (i % 3) * 5}" width="6" height="2" fill="rgba(246,242,232,.6)"/>`).join("") + `<rect x="84" y="40" width="9" height="38" rx="1" fill="#C2582B" transform="rotate(12 84 78)"/>`; },
+  curtain() { return `<rect x="12" y="16" width="76" height="8" fill="#8C2F3A"/><path d="M12 24 h36 c-6 20 -4 40 -12 56 h-24 Z" fill="#A83A47"/><path d="M88 24 h-36 c6 20 4 40 12 56 h24 Z" fill="#A83A47"/><rect x="12" y="78" width="76" height="4" fill="#5B4632"/><circle cx="50" cy="56" r="7" fill="#F6F2E8"/><path d="M46 55 h2 M52 55 h2 M46 59 q4 3 8 0" stroke="#26221B" stroke-width="1"/>`; },
+  lyre() { return `<path d="M34 72 C20 50 26 24 38 20 M66 72 C80 50 74 24 62 20" stroke="#A8742A" stroke-width="5" fill="none" stroke-linecap="round"/><rect x="32" y="70" width="36" height="7" rx="3" fill="#8C5E22"/><rect x="34" y="28" width="32" height="4" rx="2" fill="#8C5E22"/>${[0, 1, 2, 3].map(i => `<path d="M${42 + i * 5.3} 32 V70" stroke="#5A5040" stroke-width=".8"/>`).join("")}`; },
+  palette() { return `<path d="M50 20 C24 20 14 40 18 56 C22 72 44 80 60 74 C70 70 62 62 66 58 C72 54 86 58 86 44 C86 30 72 20 50 20Z" fill="#D9B98A" stroke="#9C7A4A"/><circle cx="36" cy="38" r="5" fill="#C0392B"/><circle cx="52" cy="32" r="5" fill="#2D63B0"/><circle cx="68" cy="38" r="5" fill="#B5862A"/><circle cx="32" cy="54" r="5" fill="#3F7D62"/><ellipse cx="54" cy="58" rx="5" ry="4" fill="#F6F2E8"/><path d="M58 80 L82 20" stroke="#5B4632" stroke-width="3"/>`; },
+  compass() { return `<circle cx="50" cy="50" r="28" fill="#EDE6D6" stroke="#6B3F8F" stroke-width="3"/><polygon points="50,24 55,50 50,76 45,50" fill="#6B3F8F"/><polygon points="24,50 50,45 76,50 50,55" fill="#A88BBF"/><circle cx="50" cy="50" r="3" fill="#26221B"/>`; },
+  awning(it) { const c = famColor(it); let s = `<rect x="20" y="40" width="4" height="40" fill="#5B4632"/><rect x="76" y="40" width="4" height="40" fill="#5B4632"/>`; for (let i = 0; i < 6; i++) s += `<path d="M${16 + i * 11.3} 26 h11.3 v12 q-5.6 6 -11.3 0 Z" fill="${i % 2 ? "#F6F2E8" : c}"/>`; return s + `<rect x="14" y="22" width="72" height="5" fill="${c}"/><rect x="26" y="62" width="48" height="16" fill="#A9653E"/><circle cx="34" cy="60" r="4" fill="#C0392B"/><circle cx="43" cy="60" r="4" fill="#E0A030"/><circle cx="52" cy="60" r="4" fill="#3F7D62"/><circle cx="61" cy="60" r="4" fill="#C0392B"/><circle cx="68" cy="60" r="3.6" fill="#E0A030"/>`; },
+  kiosk() { return `<ellipse cx="50" cy="81" rx="20" ry="3" fill="rgba(40,30,15,.2)"/><rect x="34" y="34" width="32" height="44" fill="#1F4A36"/><rect x="38" y="42" width="24" height="18" fill="#F6F2E8"/><rect x="40" y="45" width="9" height="12" fill="#C2582B"/><rect x="51" y="45" width="9" height="12" fill="#2D63B0"/><path d="M30 34 Q50 12 70 34 Z" fill="#255C48"/><rect x="30" y="32" width="40" height="4" fill="#1E4A3A"/><circle cx="50" cy="16" r="2.5" fill="#1E4A3A"/>`; },
+  eye(it) { const c = famColor(it); return `<circle cx="44" cy="44" r="20" fill="#EDE6D6" stroke="${c}" stroke-width="5"/><path d="M58 58 L78 78" stroke="${c}" stroke-width="8" stroke-linecap="round"/><path d="M34 44 q10 -10 20 0 q-10 10 -20 0Z" fill="${c}"/><circle cx="44" cy="44" r="3.5" fill="#26221B"/>`; },
+  station(it) {
+    const mode = (it.x || {}).mode;
+    if (mode === "tram") return `<path d="M10 80 H90" stroke="#5A5040" stroke-width="2"/><path d="M14 76 H86" stroke="#8C8577" stroke-width="1.4"/><rect x="16" y="40" width="68" height="32" rx="9" fill="#4D5B6E"/><rect x="22" y="46" width="14" height="12" rx="2" fill="#D7EAF2"/><rect x="40" y="46" width="14" height="12" rx="2" fill="#D7EAF2"/><rect x="58" y="46" width="20" height="12" rx="3" fill="#D7EAF2"/><rect x="16" y="62" width="68" height="4" fill="#F6F2E8"/><circle cx="30" cy="74" r="3" fill="#26221B"/><circle cx="70" cy="74" r="3" fill="#26221B"/><path d="M50 40 L44 26 H60" stroke="#26221B" stroke-width="1.6" fill="none"/>`;
+    if (mode === "rail") return `<path d="M30 80 L40 60 M70 80 L60 60" stroke="#5A5040" stroke-width="2"/><rect x="28" y="18" width="44" height="46" rx="10" fill="#4D5B6E"/><rect x="34" y="26" width="32" height="16" rx="3" fill="#D7EAF2"/><circle cx="38" cy="54" r="3.5" fill="#F2D27A"/><circle cx="62" cy="54" r="3.5" fill="#F2D27A"/><rect x="44" y="50" width="12" height="6" rx="1" fill="#F6F2E8"/>`;
+    return `<path d="M10 80 H90" stroke="rgba(40,30,15,.25)" stroke-width="2"/><path d="M30 80 C30 50 26 34 18 24" stroke="#2F5B40" stroke-width="4" fill="none"/><path d="M70 80 C70 50 74 34 82 24" stroke="#2F5B40" stroke-width="4" fill="none"/><ellipse cx="17" cy="20" rx="4" ry="6" fill="#E08A2E"/><ellipse cx="83" cy="20" rx="4" ry="6" fill="#E08A2E"/><rect x="26" y="34" width="48" height="10" rx="2" fill="#2F5B40"/><rect x="28" y="35.5" width="44" height="7" fill="#F2D27A"/><text x="50" y="41.4" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-size="6.2" font-weight="700" fill="#2F5B40" letter-spacing=".6">MÉTRO</text><path d="M36 80 V60 M64 80 V60 M36 64 H64" stroke="#2F5B40" stroke-width="2"/>`;
+  },
+  mansion() { return `<rect x="10" y="78" width="80" height="3" fill="#A3906B"/><rect x="18" y="38" width="64" height="40" fill="#D9CDB3" stroke="#9C8B6A"/><path d="M14 38 L22 26 H78 L86 38 Z" fill="#5A6170"/>${[0, 1, 2, 3].map(i => `<rect x="${25 + i * 14}" y="44" width="7" height="11" fill="#7A6A4F"/><rect x="${25 + i * 14}" y="61" width="7" height="11" fill="#7A6A4F"/>`).join("")}<rect x="42" y="18" width="16" height="10" fill="#5A6170"/><circle cx="50" cy="23" r="3" fill="#D9CDB3"/><path d="M44 78 v-10 a6 6 0 0 1 12 0 v10Z" fill="#5B4632"/>`; },
+  obelisk() { return `<path d="M10 80 H90" stroke="rgba(40,30,15,.25)" stroke-width="2"/><rect x="34" y="72" width="32" height="8" fill="#B8A584"/><rect x="38" y="66" width="24" height="6" fill="#C9B994"/><path d="M44 66 L46 22 L50 14 L54 22 L56 66 Z" fill="#D9CDB3" stroke="#9C8B6A"/><path d="M50 14 L54 22 L46 22 Z" fill="#B5862A"/><path d="M48 30 h4 M48 38 h4 M48 46 h4 M48 54 h4" stroke="#9C8B6A" stroke-width="1"/>`; },
+  rampart() { let m = ""; for (let i = 0; i < 9; i++) m += `<rect x="${12 + i * 8.5}" y="38" width="5" height="6" fill="#B8A584"/>`; return `<path d="M10 80 H90" stroke="rgba(40,30,15,.25)" stroke-width="2"/><rect x="12" y="44" width="76" height="36" fill="#C9B994" stroke="#9C8B6A"/>${m}<path d="M40 80 v-18 a10 10 0 0 1 20 0 v18Z" fill="#5B4632"/><rect x="14" y="30" width="16" height="50" fill="#B8A584" stroke="#9C8B6A"/><rect x="70" y="30" width="16" height="50" fill="#B8A584" stroke="#9C8B6A"/><path d="M14 30 l8 -10 l8 10Z M70 30 l8 -10 l8 10Z" fill="#5A6170"/>`; },
+  facade() { return `<rect x="22" y="14" width="56" height="66" fill="#D9CDB3" stroke="#9C8B6A"/><path d="M18 14 H82 L74 6 H26Z" fill="#5A6170"/>${[0, 1, 2, 3].map(r => [0, 1, 2].map(c => `<rect x="${29 + c * 16}" y="${20 + r * 14}" width="10" height="9" fill="#7A6A4F"/><rect x="${28 + c * 16}" y="${29 + r * 14}" width="12" height="1.6" fill="#26221B"/>`).join("")).join("")}<rect x="44" y="70" width="12" height="10" fill="#5B4632"/>`; },
+  ghost() { return `<rect x="22" y="22" width="56" height="58" fill="none" stroke="#5A5040" stroke-width="1.6" stroke-dasharray="4 3"/><path d="M18 22 H82 L74 12 H26Z" fill="none" stroke="#5A5040" stroke-width="1.6" stroke-dasharray="4 3"/>${[0, 1, 2].map(r => [0, 1, 2].map(c => `<rect x="${30 + c * 15}" y="${30 + r * 15}" width="9" height="9" fill="none" stroke="#5A5040" stroke-width="1.2" stroke-dasharray="2 2"/>`).join("")).join("")}<path d="M10 80 H90" stroke="rgba(40,30,15,.35)" stroke-width="2"/>`; },
+  statue() { return `<rect x="34" y="66" width="32" height="14" fill="#B8A584" stroke="#9C8B6A"/><rect x="30" y="78" width="40" height="3" fill="#A3906B"/><circle cx="50" cy="20" r="6" fill="#7E8B7A"/><path d="M42 66 L44 34 Q50 28 56 34 L58 66 Z" fill="#7E8B7A"/><path d="M56 36 L68 24" stroke="#7E8B7A" stroke-width="4" stroke-linecap="round"/><path d="M44 38 L36 52" stroke="#7E8B7A" stroke-width="4" stroke-linecap="round"/>`; },
+  cinema() { return `<rect x="14" y="26" width="72" height="40" rx="3" fill="#26221B"/><rect x="18" y="30" width="64" height="32" fill="#F6F2E8"/><path d="M40 38 L58 46 L40 54 Z" fill="#8C2F3A"/>${[0, 1, 2, 3, 4, 5, 6, 7].map(i => `<rect x="${17 + i * 8.5}" y="26.5" width="4" height="2.5" fill="#F6F2E8"/><rect x="${17 + i * 8.5}" y="63" width="4" height="2.5" fill="#F6F2E8"/>`).join("")}<rect x="22" y="72" width="56" height="6" rx="1" fill="#6B3F8F"/>`; },
+  bridge() { return `<rect x="6" y="56" width="88" height="26" fill="#7E9DB3"/><path d="M6 46 H94 V52 H6Z" fill="#C9B994" stroke="#9C8B6A"/><path d="M6 52 H94 V56 Q83 44 72 56 Q61 44 50 56 Q39 44 28 56 Q17 44 6 56Z" fill="#B8A584" stroke="#9C8B6A"/><path d="M6 42 H94" stroke="#5A6170" stroke-width="1.6"/>${[0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => `<path d="M${10 + i * 10} 42 v4" stroke="#5A6170" stroke-width="1.2"/>`).join("")}<path d="M12 66 q6 -3 12 0 M40 70 q6 -3 12 0 M68 66 q6 -3 12 0" stroke="#D7EAF2" stroke-width="1.6" fill="none"/>`; },
+  cafe(it) { const c = famColor(it); let s = ""; for (let i = 0; i < 6; i++) s += `<path d="M${14 + i * 12} 26 h12 v9 q-6 5 -12 0 Z" fill="${i % 2 ? "#F6F2E8" : c}"/>`; return `<rect x="12" y="22" width="76" height="5" fill="${c}"/>${s}<rect x="14" y="40" width="72" height="40" fill="#5B4632"/><rect x="20" y="44" width="26" height="22" fill="#D7EAF2"/><rect x="54" y="44" width="26" height="22" fill="#D7EAF2"/><ellipse cx="34" cy="76" rx="8" ry="2" fill="#26221B"/><rect x="33" y="68" width="2" height="8" fill="#26221B"/><ellipse cx="66" cy="76" rx="8" ry="2" fill="#26221B"/><rect x="65" y="68" width="2" height="8" fill="#26221B"/>`; },
+  ball(it) { const c = famColor(it); return `<path d="M10 80 H90" stroke="rgba(40,30,15,.25)" stroke-width="2"/><circle cx="50" cy="52" r="24" fill="#F6F2E8" stroke="${c}" stroke-width="3"/><path d="M28 44 q22 10 44 0 M28 60 q22 -10 44 0 M50 28 v48" stroke="${c}" stroke-width="2" fill="none"/>`; },
+};
+const artSVG = it => `<svg viewBox="0 0 100 86" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${(ART[KINDS[it.k].art] || ART.eye)(it)}</svg>`;
+
+/* ---------- Cartes ---------- */
+function facts(it) {
+  const kd = KINDS[it.k]; const f = it.f || [];
+  return f.map((v, i) => Array.isArray(v) ? v : [(kd.fl || [])[i] || "", v]).filter(([, v]) => v != null && v !== "").slice(0, 3);
+}
+const photoThumb = u => /commons\.wikimedia\.org\/wiki\/Special:FilePath\//.test(u) ? u + "?width=480" : u;
+function cardFront(it, o) {
+  const tier = o ? o.tier : it.t, lvl = o ? o.lvl : 1, fc = famColor(it);
+  const pips = Array.from({ length: MAX_LEVEL }, (_, i) => `<i class="${i < lvl ? "on" : ""}"></i>`).join("");
+  const fs = facts(it);
+  const badge = it.x && it.x.eph ? "En sursis" : it.x && it.x.lab ? "Label ARBRES" : it.x && it.x.mk ? "Horaires" : "";
+  return `<div class="face front" style="--c:${fc}"><div class="face-in">
+    <div class="c-top"><span>${arrLabel(it.r)}</span><span class="type">${esc(KINDS[it.k].l)}</span></div>
+    <div class="c-name">${esc(it.n)}</div>
+    <div class="c-latin">${esc(it.s || "")}</div>
+    <div class="c-art">${artSVG(it)}${HOSTED && it.ph ? `<img src="${esc(photoThumb(it.ph))}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<div class="pips" aria-label="Niveau ${lvl}">${pips}</div>${badge ? `<span class="lab">${esc(badge)}</span>` : ""}</div>
+    <div class="c-stats" style="--n:${Math.max(1, fs.length)}">${fs.map(([l, v]) => `<div><small>${esc(l)}</small><b class="${String(v).length > 9 ? "long" : ""}">${esc(v)}</b></div>`).join("")}</div>
+    <div class="c-band" style="background:var(${TIER_VAR[tier]})"><b>${TIERS[tier]}</b><span>${esc(it.site || "")}</span></div>
+  </div></div>`;
+}
+function cardBack(it) {
+  const links = [it.wp ? `<a href="${esc(it.wp)}" target="_blank" rel="noopener">Wikipédia ↗</a>` : "", it.u ? `<a href="${esc(it.u)}" target="_blank" rel="noopener">${/\.pdf$/i.test(it.u) ? "Fiche PDF" : "En savoir plus"} ↗</a>` : "", it.ph ? `<a href="${esc(it.ph)}" target="_blank" rel="noopener">Photo ↗</a>` : ""].join("");
+  return `<div class="face back" style="--c:${famColor(it)}"><div class="face-in">
+    <h4>${esc(it.n)}</h4>
+    ${it.w ? `<p class="why">${esc(it.w)}</p>` : ""}
+    <p class="desc">${esc(it.d || "")}</p>
+    <div class="meta">${esc(it.site || "")}<br>Données : ${/:Q\d+$/.test(it.i) ? "Wikidata" : it.k === "station" ? "Île-de-France Mobilités" : "Ville de Paris, opendata.paris.fr"}${it.c ? `<br>Photo : ${esc(it.c)}` : ""}</div>
+    ${links ? `<div class="links">${links}</div>` : ""}
+  </div></div>`;
+}
+function cardHTML(it, { flippable = false, extraClass = "" } = {}) {
+  return `<div class="card ${extraClass}"><div class="flip">${cardFront(it, S.owned[it.i])}${flippable ? cardBack(it) : ""}</div></div>`;
+}
+
+/* ---------- Carte (canvas) ---------- */
+const canvas = $("map"), ctx = canvas.getContext("2d"), wrap = $("mapWrap");
+const v = { s: 5, tx: 0, ty: 0, W: 0, H: 0, fitS: 5, dpr: 1 };
+const PARIS = new Path2D(), SEINE_P = new Path2D();
+PERIPH.forEach(([a, b], i) => { const [x, y] = proj(a, b); i ? PARIS.lineTo(x, y) : PARIS.moveTo(x, y); }); PARIS.closePath();
+SEINE.forEach(([a, b], i) => { const [x, y] = proj(a, b); i ? SEINE_P.lineTo(x, y) : SEINE_P.moveTo(x, y); });
+let ARR_P = ARR.map(([n, a, b]) => [n + (n === "1" ? "er" : "e"), proj(a, b)]);
+
+let raf = 0;
+function render() { if (!raf) raf = requestAnimationFrame(draw); }
+function draw() {
+  raf = 0;
+  const { s, tx, ty, W, H, dpr } = v;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (ML) ctx.clearRect(0, 0, W, H);
+  else { ctx.fillStyle = "#A3906B"; ctx.fillRect(0, 0, W, H); }
+  ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * tx, dpr * ty);
+  if (!ML) drawBase(s);
+  else if (ARR_PATH) { ctx.strokeStyle = "rgba(23,43,77,.5)"; ctx.lineWidth = 1.6 / s; ctx.setLineDash([6 / s, 4 / s]); ctx.stroke(ARR_PATH); ctx.setLineDash([]); }
+  if (MONDE_PATHS.length && !S.hidden.patrimoine) { ctx.strokeStyle = "rgba(181,134,42,.85)"; ctx.lineWidth = 2 / s; ctx.setLineDash([6 / s, 4 / s]); MONDE_PATHS.forEach(P => ctx.stroke(P)); ctx.setLineDash([]); }
+  drawOverlay(s, tx, ty, W, H);
+}
+function drawBase(s) {
+  ctx.fillStyle = STREET_PATH ? "#C3B391" : "#CDBF9F"; ctx.fill(ARR_PATH || PARIS);
+  if (PARK_PATHS) {
+    ctx.fillStyle = "#97A079"; ctx.fill(PARK_PATHS.bois); ctx.fill(PARK_PATHS.park);
+    ctx.fillStyle = "#A7A68E"; ctx.fill(PARK_PATHS.cim);
+  }
+  if (STREET_PATH) { ctx.fillStyle = "#E4D9C1"; ctx.fill(STREET_PATH); if (s > 40) { ctx.strokeStyle = "rgba(90,80,64,.35)"; ctx.lineWidth = .8 / s; ctx.stroke(STREET_PATH); } }
+  if (WATER_PATH) { ctx.fillStyle = "#7E9DB3"; ctx.fill(WATER_PATH); }
+  else { ctx.strokeStyle = "#5E7D96"; ctx.lineWidth = Math.max(1.5, 3 / s); ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.stroke(SEINE_P); }
+  if (ARR_PATH) { ctx.strokeStyle = "rgba(23,43,77,.45)"; ctx.lineWidth = 1.4 / s; ctx.setLineDash([5 / s, 3 / s]); ctx.stroke(ARR_PATH); ctx.setLineDash([]); }
+  else { ctx.strokeStyle = "rgba(23,43,77,.5)"; ctx.lineWidth = 2 / s; ctx.stroke(PARIS); }
+}
+function drawOverlay(s, tx, ty, W, H) {
+  const dpr = v.dpr;
+  // rayon de capture
+  const P = proj(S.pos.lat, S.pos.lon);
+  const tg = ui.ready ? currentTarget() : null;
+  if (tg) { ctx.beginPath(); ctx.arc(P[0], P[1], tg.it.rad / MPU, 0, Math.PI * 2); ctx.fillStyle = "rgba(45,100,72,.16)"; ctx.fill(); ctx.strokeStyle = "rgba(45,100,72,.9)"; ctx.lineWidth = 1.5 / s; ctx.setLineDash([4 / s, 3 / s]); ctx.stroke(); ctx.setLineDash([]); }
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.font = "600 14px 'Barlow Condensed', 'Arial Narrow', sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "rgba(23,43,77,.4)";
+  if (s < 60) { if (ML) ctx.fillStyle = "rgba(23,43,77,.55)"; for (const [n, p] of ARR_P) ctx.fillText(n, p[0] * s + tx, p[1] * s + ty); }
+  if (!ML && STREET_LABELS.length && s >= 70) drawStreetLabels();
+  if (!ui.ready) return;
+  const small = s < 10, mid = s < 30;
+  const rFree = small ? 1.3 : mid ? 2.4 : s < 90 ? 3.8 : 5;
+  const rOwn = small ? 2.6 : mid ? 4.2 : s < 90 ? 6 : 7.5;
+  const owned = [];
+  const scouted = new Set(S.scouts.map(x => x.id));
+  const pad = 12;
+  ctx.globalAlpha = small ? .55 : .85;
+  for (const it of ITEMS) {
+    const x = it.p[0] * s + tx, y = it.p[1] * s + ty;
+    if (x < -pad || y < -pad || x > W + pad || y > H + pad || !visible(it)) continue;
+    if (S.owned[it.i]) { owned.push([it, x, y]); continue; }
+    ctx.fillStyle = FAMS[KINDS[it.k].f].color;
+    if (small) ctx.fillRect(x - rFree, y - rFree, rFree * 2, rFree * 2);
+    else { ctx.beginPath(); ctx.arc(x, y, rFree, 0, 6.283); ctx.fill(); }
+  }
+  ctx.globalAlpha = 1;
+  for (const [it, x, y] of owned) {
+    ctx.beginPath(); ctx.arc(x, y, rOwn, 0, 6.283); ctx.fillStyle = FAMS[KINDS[it.k].f].color; ctx.fill();
+    ctx.lineWidth = small ? 1 : 2; ctx.strokeStyle = "#F6F2E8"; ctx.stroke();
+    if (!small) { ctx.beginPath(); ctx.arc(x, y, rOwn * .38, 0, 6.283); ctx.fillStyle = getTierColor(S.owned[it.i].tier); ctx.fill(); }
+  }
+  for (const id of scouted) {
+    const it = BYID.get(id); if (!it || !visible(it)) continue;
+    const x = it.p[0] * s + tx, y = it.p[1] * s + ty;
+    ctx.beginPath(); ctx.arc(x, y, Math.max(8, rFree + 6), 0, 6.283); ctx.lineWidth = 3; ctx.strokeStyle = "#2D6448"; ctx.stroke();
+    ctx.lineWidth = 1; ctx.strokeStyle = "#F6F2E8"; ctx.stroke();
+  }
+  const sel = ui.sel && BYID.get(ui.sel);
+  if (sel) { const x = sel.p[0] * s + tx, y = sel.p[1] * s + ty; ctx.beginPath(); ctx.arc(x, y, Math.max(11, rOwn + 5), 0, 6.283); ctx.lineWidth = 3; ctx.strokeStyle = "#F6F2E8"; ctx.stroke(); ctx.lineWidth = 1.2; ctx.strokeStyle = "#172B4D"; ctx.stroke(); }
+  // joueur
+  const px = P[0] * s + tx, py = P[1] * s + ty;
+  if (!S.test && ui.acc && ui.gps === "ok") { const ra = ui.acc / MPU * s; if (ra > 14) { ctx.beginPath(); ctx.arc(px, py, ra, 0, 6.283); ctx.fillStyle = "rgba(45,99,176,.12)"; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = "rgba(45,99,176,.5)"; ctx.stroke(); } }
+  ctx.beginPath(); ctx.arc(px, py, 13, 0, 6.283); ctx.fillStyle = "rgba(23,43,77,.18)"; ctx.fill();
+  ctx.beginPath(); ctx.arc(px, py, 7, 0, 6.283); ctx.fillStyle = "#172B4D"; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = "#F6F2E8"; ctx.stroke();
+  updateScale();
+}
+function drawStreetLabels() {
+  const { s, tx, ty, W, H } = v;
+  const fs = s >= 200 ? 12 : 10.5;
+  ctx.font = `600 ${fs}px 'Barlow Condensed', 'Arial Narrow', sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.lineJoin = "round"; ctx.lineWidth = 3; ctx.strokeStyle = "rgba(228,217,193,.95)"; ctx.fillStyle = "#3A4253";
+  let n = 0;
+  for (const L of STREET_LABELS) {
+    const x = L.x * s + tx, y = L.y * s + ty;
+    if (x < -80 || y < -20 || x > W + 80 || y > H + 20) continue;
+    if (!L.w) L.w = ctx.measureText(L.t).width / fs;
+    if (L.w * fs > L.len * s * .85) continue;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(L.ang); ctx.strokeText(L.t, 0, 0); ctx.fillText(L.t, 0, 0); ctx.restore();
+    if (++n > 350) break;
+  }
+  ctx.textBaseline = "alphabetic";
+}
+const TIER_HEX = ["#77715F", "#3F7D62", "#2D63B0", "#7A3F8F", "#B5862A"];
+const getTierColor = t => TIER_HEX[t] || TIER_HEX[0];
+function updateScale() {
+  const pxPerM = v.s / MPU, steps = [20, 50, 100, 200, 500, 1000, 2000, 5000];
+  let len = steps[0]; for (const st of steps) if (st * pxPerM <= 96) len = st;
+  $("scaleBar").style.width = Math.round(len * pxPerM) + "px";
+  $("scaleLabel").textContent = len >= 1000 ? `${len / 1000} km` : `${len} m`;
+}
+function fit() {
+  if (ML) { const [la0, lo0] = unproj(BOUNDS.x0, BOUNDS.y1), [la1, lo1] = unproj(BOUNDS.x1, BOUNDS.y0); ML.fitBounds([[lo0, la0], [lo1, la1]], { padding: { top: 100, bottom: 130, left: 10, right: 10 }, duration: 0 }); return; }
+  const b = BOUNDS, topPad = 100, botPad = 130, H = Math.max(120, v.H - topPad - botPad);
+  v.fitS = Math.min(v.W / (b.x1 - b.x0), H / (b.y1 - b.y0)) * .94; v.s = v.fitS;
+  v.tx = v.W / 2 - (b.x0 + b.x1) / 2 * v.s; v.ty = topPad + H / 2 - (b.y0 + b.y1) / 2 * v.s; render();
+}
+const zoomFromS = sc => Math.log2(sc * 360 * K * COS0 / 512);
+function centerOn(lat, lon, minS) {
+  if (ML) { const z = minS ? Math.max(ML.getZoom(), zoomFromS(minS)) : ML.getZoom(); ML.easeTo({ center: [lon, lat], zoom: z, offset: [0, -30], duration: 450 }); return; }
+  const [x, y] = proj(lat, lon); if (minS) v.s = Math.max(v.s, minS); v.tx = v.W / 2 - x * v.s; v.ty = (v.H - 60) / 2 - y * v.s; render(); }
+function zoomAt(px, py, f) {
+  if (ML) { ML.easeTo({ zoom: ML.getZoom() + Math.log2(f), around: ML.unproject([px, py]), duration: 250 }); return; } const ns = Math.max(v.fitS * .6, Math.min(600, v.s * f)), k = ns / v.s; v.tx = px - (px - v.tx) * k; v.ty = py - (py - v.ty) * k; v.s = ns; render(); }
+function resize() {
+  const r = wrap.getBoundingClientRect(); if (!r.width || !r.height) return;
+  const first = !v.W, cx = v.W ? (v.W / 2 - v.tx) / v.s : 0, cy = v.H ? (v.H / 2 - v.ty) / v.s : 0;
+  v.W = r.width; v.H = r.height; v.dpr = Math.min(2.5, window.devicePixelRatio || 1);
+  canvas.width = Math.round(v.W * v.dpr); canvas.height = Math.round(v.H * v.dpr);
+  if (ML) { ML.resize(); syncFromML(); return; }
+  if (first) { fit(); return; }
+  v.tx = v.W / 2 - cx * v.s; v.ty = v.H / 2 - cy * v.s; render();
+}
+
+/* ---------- Fond de carte vectoriel (version hébergée) ----------
+   Tuiles OpenFreeMap (données OpenStreetMap), style maison aux couleurs du jeu.
+   Le canvas du jeu reste dessiné par-dessus ; MapLibre gère les gestes. Si le fond ne charge pas, le plan dessiné du jeu reprend la main. */
+let ML = null;
+const NAME = ["coalesce", ["get", "name:fr"], ["get", "name"]];
+const RCLS = (a, b, c) => ["match", ["get", "class"], ["motorway", "trunk", "primary"], a, ["secondary", "tertiary"], b, c];
+const ROADW = ["interpolate", ["exponential", 1.6], ["zoom"], 11, RCLS(1.2, .8, .2), 18, RCLS(26, 20, 13)];
+const zi = (pairs) => ["interpolate", ["exponential", 1.6], ["zoom"], ...pairs];
+const BASE_STYLE = {
+  version: 8,
+  glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
+  sources: { omt: { type: "vector", url: "https://tiles.openfreemap.org/planet" } },
+  layers: [
+    { id: "bg", type: "background", paint: { "background-color": "#C9B996" } },
+    { id: "landuse", type: "fill", source: "omt", "source-layer": "landuse", filter: ["in", ["get", "class"], ["literal", ["cemetery", "stadium", "pitch", "playground"]]], paint: { "fill-color": "#ADAA8E", "fill-opacity": .8 } },
+    { id: "wood", type: "fill", source: "omt", "source-layer": "landcover", filter: ["in", ["get", "class"], ["literal", ["wood", "grass", "farmland", "wetland"]]], paint: { "fill-color": "#97A079", "fill-opacity": .85 } },
+    { id: "park", type: "fill", source: "omt", "source-layer": "park", paint: { "fill-color": "#97A079", "fill-opacity": .9 } },
+    { id: "water", type: "fill", source: "omt", "source-layer": "water", filter: ["!=", ["get", "brunnel"], "tunnel"], paint: { "fill-color": "#7E9DB3" } },
+    { id: "waterway", type: "line", source: "omt", "source-layer": "waterway", filter: ["!=", ["get", "brunnel"], "tunnel"], paint: { "line-color": "#7E9DB3", "line-width": zi([12, .8, 18, 6]) } },
+    { id: "building", type: "fill", source: "omt", "source-layer": "building", minzoom: 14, paint: { "fill-color": "#B6A37F", "fill-outline-color": "#9F8B66", "fill-opacity": zi([14, 0, 15, 1]) } },
+    { id: "rail", type: "line", source: "omt", "source-layer": "transportation", filter: ["all", ["==", ["get", "class"], "rail"], ["!=", ["get", "brunnel"], "tunnel"]], paint: { "line-color": "#7F7563", "line-width": zi([12, .6, 18, 2.5]), "line-dasharray": [3, 2] } },
+    { id: "path", type: "line", source: "omt", "source-layer": "transportation", minzoom: 14, filter: ["all", ["in", ["get", "class"], ["literal", ["path", "track"]]], ["!=", ["get", "brunnel"], "tunnel"]], paint: { "line-color": "#EFE7D6", "line-width": zi([14, .8, 18, 3]), "line-dasharray": [2, 1.5] } },
+    { id: "road-case", type: "line", source: "omt", "source-layer": "transportation", filter: ["all", ["in", ["get", "class"], ["literal", ["motorway", "trunk", "primary", "secondary", "tertiary", "minor", "service"]]], ["!=", ["get", "brunnel"], "tunnel"]], layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#A3906B", "line-gap-width": ROADW, "line-width": zi([13, .4, 18, 1.5]) } },
+    { id: "road", type: "line", source: "omt", "source-layer": "transportation", filter: ["all", ["in", ["get", "class"], ["literal", ["motorway", "trunk", "primary", "secondary", "tertiary", "minor", "service"]]], ["!=", ["get", "brunnel"], "tunnel"]], layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": ["match", ["get", "class"], ["motorway", "trunk", "primary"], "#F4EEE1", "#E7DDC7"], "line-width": ROADW } },
+    { id: "road-name", type: "symbol", source: "omt", "source-layer": "transportation_name", minzoom: 14.5, layout: { "symbol-placement": "line", "text-field": NAME, "text-font": ["Noto Sans Regular"], "text-size": zi([14.5, 10, 18, 13]), "text-max-angle": 30 }, paint: { "text-color": "#3A4253", "text-halo-color": "#EFE7D6", "text-halo-width": 1.4 } },
+    { id: "water-name", type: "symbol", source: "omt", "source-layer": "water_name", layout: { "text-field": NAME, "text-font": ["Noto Sans Italic"], "text-size": 12, "symbol-placement": "line" }, paint: { "text-color": "#2E4A63", "text-halo-color": "#A9BDCB", "text-halo-width": 1 } },
+    { id: "place", type: "symbol", source: "omt", "source-layer": "place", minzoom: 13, filter: ["in", ["get", "class"], ["literal", ["suburb", "quarter", "neighbourhood"]]], layout: { "text-field": NAME, "text-font": ["Noto Sans Bold"], "text-size": 11, "text-transform": "uppercase", "text-letter-spacing": .08, "text-max-width": 8 }, paint: { "text-color": "rgba(23,43,77,.6)", "text-halo-color": "rgba(201,185,150,.8)", "text-halo-width": 1.2 } }
+  ]
+};
+function syncFromML() {
+  const a = ML.project([LON0, LAT0]), b = ML.project([LON0 + .01, LAT0]);
+  v.s = (b.x - a.x) / (.01 * COS0 * K); v.tx = a.x; v.ty = a.y; render();
+}
+function initBasemap() {
+  if (!HOSTED || !window.maplibregl) return false;
+  let ok = false;
+  try {
+    const div = document.createElement("div"); div.id = "basemap"; wrap.insertBefore(div, canvas);
+    ML = new maplibregl.Map({ container: div, style: BASE_STYLE, center: [S.pos.lon, S.pos.lat], zoom: 13.5, minZoom: 10.5, maxZoom: 18.5,
+      maxBounds: [[2.12, 48.76], [2.58, 48.96]], dragRotate: false, pitchWithRotate: false, touchPitch: false, attributionControl: false });
+    ML.addControl(new maplibregl.AttributionControl({ compact: true }), "top-right");
+    ML.touchZoomRotate.disableRotation(); ML.keyboard.disableRotation();
+    $("app").classList.add("has-basemap");
+    ML.on("move", syncFromML); ML.on("resize", syncFromML);
+    ML.on("click", e => onTap(e.point.x, e.point.y));
+    ML.once("load", () => { ok = true; });
+    setTimeout(() => { if (!ok && ML && !ML.loaded()) dropBasemap(); }, 12000);
+    syncFromML();
+    return true;
+  } catch (e) { dropBasemap(); return false; }
+}
+function dropBasemap() {
+  const keep = ML ? { s: v.s, tx: v.tx, ty: v.ty } : null;
+  try { if (ML) ML.remove(); } catch (e) {}
+  ML = null; const d = $("basemap"); if (d) d.remove(); $("app").classList.remove("has-basemap");
+  if (keep) Object.assign(v, keep);
+  loadStreets(); render();
+}
+
+/* Gestes */
+const pointers = new Map(); let gesture = null;
+canvas.addEventListener("pointerdown", e => {
+  canvas.setPointerCapture(e.pointerId); pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  const r = canvas.getBoundingClientRect();
+  if (pointers.size === 1) gesture = { type: "pan", sx: e.clientX, sy: e.clientY, tx: v.tx, ty: v.ty, moved: 0, t0: performance.now() };
+  else if (pointers.size === 2) { const [a, b] = [...pointers.values()]; gesture = { type: "pinch", d0: Math.hypot(a.x - b.x, a.y - b.y), s0: v.s, tx: v.tx, ty: v.ty, cx: (a.x + b.x) / 2 - r.left, cy: (a.y + b.y) / 2 - r.top, moved: 99 }; }
+});
+canvas.addEventListener("pointermove", e => {
+  if (!pointers.has(e.pointerId) || !gesture) return;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (gesture.type === "pan" && pointers.size === 1) { const dx = e.clientX - gesture.sx, dy = e.clientY - gesture.sy; gesture.moved = Math.max(gesture.moved, Math.hypot(dx, dy)); v.tx = gesture.tx + dx; v.ty = gesture.ty + dy; render(); }
+  else if (gesture.type === "pinch" && pointers.size === 2) { const [a, b] = [...pointers.values()]; const ns = Math.max(v.fitS * .6, Math.min(600, gesture.s0 * Math.hypot(a.x - b.x, a.y - b.y) / gesture.d0)), k = ns / gesture.s0; v.s = ns; v.tx = gesture.cx - (gesture.cx - gesture.tx) * k; v.ty = gesture.cy - (gesture.cy - gesture.ty) * k; render(); }
+});
+function endPointer(e) {
+  if (!pointers.has(e.pointerId)) return; pointers.delete(e.pointerId);
+  if (gesture && gesture.type === "pan" && pointers.size === 0 && gesture.moved < 7 && performance.now() - gesture.t0 < 600) { const r = canvas.getBoundingClientRect(); onTap(e.clientX - r.left, e.clientY - r.top); }
+  if (pointers.size === 0) gesture = null;
+  else if (pointers.size === 1) { const [p] = [...pointers.values()]; gesture = { type: "pan", sx: p.x, sy: p.y, tx: v.tx, ty: v.ty, moved: 99, t0: 0 }; }
+}
+canvas.addEventListener("pointerup", endPointer); canvas.addEventListener("pointercancel", endPointer);
+canvas.addEventListener("wheel", e => { e.preventDefault(); const r = canvas.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * .0016)); }, { passive: false });
+
+function onTap(px, py) {
+  if (!ui.ready) return;
+  const wx = (px - v.tx) / v.s, wy = (py - v.ty) / v.s, rU = 20 / v.s;
+  let best = null, bd = 20;
+  for (const i of candidates(wx, wy, rU + CELL)) {
+    const it = ITEMS[i]; if (!visible(it)) continue;
+    const d = Math.hypot(it.p[0] * v.s + v.tx - px, it.p[1] * v.s + v.ty - py);
+    if (d < bd) { bd = d; best = it; }
+  }
+  if (best) { ui.sel = best.i === ui.sel ? null : best.i; render(); renderSheet(); return; }
+  if (S.test) { const [lat, lon] = unproj(wx, wy); movePlayer(lat, lon); }
+  else if (ui.sel) { ui.sel = null; render(); renderSheet(); }
+}
+function movePlayer(lat, lon) { S.pos = { lat, lon }; ui.cycle = 0; save(); renderSheet(); render(); if (ui.view === "reperage") renderReperage(); }
+
+/* ---------- Cible et capture ---------- */
+let targetCache = null;
+function inRangeList() {
+  const P = proj(S.pos.lat, S.pos.lon), out = [];
+  for (const i of candidates(P[0], P[1], 1.5)) { const it = ITEMS[i]; if (!visible(it)) continue; const d = distTo(it, P); if (d <= it.rad) out.push({ it, d }); }
+  out.sort((a, b) => (S.owned[a.it.i] ? 1 : 0) - (S.owned[b.it.i] ? 1 : 0) || a.d - b.d);
+  return out;
+}
+function nearestFree() {
+  const P = proj(S.pos.lat, S.pos.lon);
+  for (let r = CELL; r <= CELL * 24; r *= 2) {
+    let best = null, bd = Infinity;
+    for (const i of candidates(P[0], P[1], r)) { const it = ITEMS[i]; if (S.owned[it.i] || !visible(it)) continue; const d = distTo(it, P); if (d < bd) { bd = d; best = it; } }
+    if (best && bd <= r * MPU) return { it: best, d: bd };
+  }
+  return null;
+}
+function currentTarget() {
+  if (targetCache && targetCache.key === `${S.pos.lat},${S.pos.lon},${ui.sel},${ui.cycle},${JSON.stringify(S.hidden)},${Object.keys(S.owned).length}`) return targetCache.v;
+  const P = proj(S.pos.lat, S.pos.lon);
+  let v2 = null;
+  if (ui.sel && BYID.get(ui.sel)) { const it = BYID.get(ui.sel); v2 = { it, d: distTo(it, P), why: "Lieu sélectionné", list: [] }; }
+  else {
+    const list = inRangeList();
+    if (list.length) { const k = ui.cycle % list.length; v2 = { ...list[k], why: list.length > 1 ? `À portée · ${k + 1} sur ${list.length}` : "À portée", list }; }
+    else { const nf_ = nearestFree(); if (nf_) v2 = { ...nf_, why: "Lieu inconnu le plus proche", list: [] }; }
+  }
+  targetCache = { key: `${S.pos.lat},${S.pos.lon},${ui.sel},${ui.cycle},${JSON.stringify(S.hidden)},${Object.keys(S.owned).length}`, v: v2 };
+  return v2;
+}
+function renderSheet() {
+  if (!ui.ready) return;
+  targetCache = null;
+  const sheet = $("sheet");
+  if (!S.test && ui.gps !== "ok") {
+    const wait = ui.gps === "wait";
+    sheet.innerHTML = `<div class="sheet-text"><div class="eyebrow">Position</div><h2>${wait ? "Recherche du GPS" : "Où êtes-vous ?"}</h2><p>${wait ? "Autorisez la localisation si le navigateur la demande. Les lieux se capturent sur place." : "Parisquest a besoin de votre position pour savoir quels lieux sont à portée. Elle reste sur votre téléphone."}</p></div>
+      <div class="sheet-actions"><button class="btn" id="gpsGo" ${wait ? "disabled" : ""}>${wait ? "Patience" : "Me localiser"}</button></div>`;
+    $("gpsGo").onclick = startGPS; return;
+  }
+  const tg = currentTarget();
+  if (!tg) { sheet.innerHTML = `<div class="sheet-text"><div class="eyebrow">Rien autour</div><h2>Aucun lieu visible</h2><p>Réactivez des familles dans les filtres de la carte.</p></div>`; return; }
+  const it = tg.it, o = S.owned[it.i], within = tg.d <= it.rad, d0 = today(), ms = marketStatus(it);
+  let label = "Capturer", enabled = false, note;
+  if (!within) note = `Approchez-vous à moins de ${it.rad} m.` + (!S.test && ui.acc > 40 ? ` GPS précis à ${Math.round(ui.acc)} m près.` : "");
+  else if (!o) {
+    if (ms && !ms.open && !S.test) note = `Le marché est fermé. ${ms.text}.`;
+    else { enabled = true; note = ms && !ms.open ? `Mode test : horaires ignorés. En vrai, ${ms.text.toLowerCase()}.` : "Vous y êtes."; }
+  } else if (o.lvl >= MAX_LEVEL) { label = "Niveau max"; note = "Cette carte a atteint le niveau maximum."; }
+  else if (o.last === d0) { label = "Revenez demain"; note = `Niveau ${o.lvl}. Une visite par jour fait monter la carte d'un niveau.`; }
+  else { label = `Niveau ${o.lvl + 1}`; enabled = true; note = "Nouvelle visite : la carte gagne un niveau."; }
+  const kd = KINDS[it.k];
+  const title = o || it.k === "rue" ? esc(it.n) : esc(kd.l);
+  const sub = [it.site ? esc(it.site) : "", it.r ? arrLabel(it.r) : ""].filter(Boolean).join(" · ");
+  sheet.innerHTML = `<div class="sheet-text">
+      <div class="eyebrow" style="--c:${famColor(it)}"><span class="dot"></span>${esc(tg.why)} · ${esc(FAMS[kd.f].name)}</div>
+      <h2>${title}</h2>
+      <p>${sub}</p>
+      <p><span class="dist">${within ? "Ici" : fmtDist(tg.d) + " · " + bearing(proj(S.pos.lat, S.pos.lon), it)}</span> &nbsp;${note}</p>
+    </div>
+    <div class="sheet-actions">
+      ${tg.list.length > 1 ? `<button class="btn light small" id="nextBtn">Suivant</button>` : ""}
+      ${o ? `<button class="btn light small" id="seeCard">Voir</button>` : ""}
+      <button class="btn" id="actBtn" ${enabled ? "" : "disabled"}>${label}</button>
+    </div>`;
+  $("actBtn").onclick = () => act(it.i);
+  if (o) $("seeCard").onclick = () => openCard(it.i);
+  if (tg.list.length > 1) $("nextBtn").onclick = () => { ui.cycle++; renderSheet(); render(); };
+}
+function act(id) {
+  const it = BYID.get(id); if (!it) return;
+  const P = proj(S.pos.lat, S.pos.lon); if (distTo(it, P) > it.rad) return;
+  const ms = marketStatus(it); if (ms && !ms.open && !S.test && !S.owned[id]) return;
+  const d0 = today(), o = S.owned[id];
+  if (!o) {
+    const si = S.scouts.findIndex(s => s.id === id);
+    let reward = REWARD[it.t] || 10; if (si >= 0) { reward *= 2; S.scouts.splice(si, 1); }
+    S.owned[id] = { tier: it.t, lvl: 1, first: d0, last: d0, at: Date.now() };
+    S.ecus += reward;
+    const msgs = checkCollections(it);
+    save(); refreshAll();
+    showReveal(it, { kicker: `Nouvelle carte · ${FAMS[famOf(it)].name}`, title: TIERS[it.t], sub: `+${reward} écus${si >= 0 ? " (repérage accompli, gain doublé)" : ""}` }, msgs);
+  } else if (o.last !== d0 && o.lvl < MAX_LEVEL) {
+    o.lvl += 1; o.last = d0; S.ecus += 5; save(); refreshAll();
+    showReveal(it, { kicker: "Visite du jour", title: `Niveau ${o.lvl}`, sub: "+5 écus" });
+  }
+}
+function checkCollections(it) {
+  const msgs = [];
+  for (let c = 0; c < COLS.length; c++) {
+    const [fam, name, , idxs] = COLS[c];
+    if (S.done[c] || fam !== famOf(it)) continue;
+    if (idxs.every(i => S.owned[ITEMS[i].i])) { S.done[c] = true; S.ecus += 50; msgs.push(`Collection complète : ${name} (+50 écus)`); }
+  }
+  return msgs;
+}
+
+/* ---------- Modale ---------- */
+let pendingToasts = [];
+function openModal(it, msgHTML, reveal) {
+  const tier = S.owned[it.i].tier;
+  $("modalMsg").innerHTML = msgHTML;
+  $("modalCard").innerHTML = cardHTML(it, { flippable: true, extraClass: reveal ? `reveal${tier >= 3 ? " glow" : ""}` : "" });
+  $("modalCard").firstElementChild.style.setProperty("--glow", getTierColor(tier));
+  $("flipBtn").textContent = "Retourner la carte";
+  $("modal").hidden = false; $("closeBtn").focus();
+}
+function showReveal(it, m, extra = []) { pendingToasts = extra; openModal(it, `<div class="k">${esc(m.kicker)}</div><div class="t" id="modalTitle">${esc(m.title)}</div><div class="s">${esc(m.sub)}</div>`, true); }
+function openCard(id) { const it = BYID.get(id), o = S.owned[id]; if (!o) return; openModal(it, `<div class="k">${esc(KINDS[it.k].l)}</div><div class="t" id="modalTitle">${esc(it.n)}</div><div class="s">Niveau ${o.lvl} · ${TIERS[o.tier]}</div>`, false); }
+function closeModal() { $("modal").hidden = true; if (pendingToasts.length) { toast(pendingToasts.join(" · ")); pendingToasts = []; } }
+$("closeBtn").onclick = closeModal;
+$("flipBtn").onclick = () => { const c = $("modalCard").querySelector(".card"); if (!c) return; c.classList.toggle("flipped"); $("flipBtn").textContent = c.classList.contains("flipped") ? "Voir le recto" : "Retourner la carte"; };
+$("modal").addEventListener("click", e => { if (e.target === $("modal")) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("modal").hidden) closeModal(); });
+
+/* ---------- Filtres de la carte ---------- */
+function renderLayers() {
+  const ownedBy = {}; for (const id in S.owned) { const it = BYID.get(id); if (it) ownedBy[famOf(it)] = (ownedBy[famOf(it)] || 0) + 1; }
+  $("layers").innerHTML = Object.entries(FAMS).map(([k, f]) => `<button class="chip" data-f="${k}" aria-pressed="${!S.hidden[k]}" style="--c:${f.color}"><i></i>${esc(f.name)}</button>`).join("");
+  $("layers").querySelectorAll(".chip").forEach(b => b.onclick = () => { const k = b.dataset.f; S.hidden[k] = !S.hidden[k]; if (!S.hidden[k]) delete S.hidden[k]; save(); renderLayers(); renderSheet(); render(); });
+}
+
+/* ---------- Collection ---------- */
+function renderCollection() {
+  if (!ui.ready) return;
+  const ownedIds = Object.keys(S.owned).filter(id => BYID.has(id));
+  const ownedBy = {}, tierCounts = [0, 0, 0, 0, 0];
+  for (const id of ownedIds) { const it = BYID.get(id); ownedBy[famOf(it)] = (ownedBy[famOf(it)] || 0) + 1; tierCounts[S.owned[id].tier]++; }
+  const fam = ui.fam;
+  const list = ownedIds.map(id => BYID.get(id)).filter(it => !fam || famOf(it) === fam).sort((a, b) => (S.owned[b.i].at || 0) - (S.owned[a.i].at || 0));
+  const cols = COLS.map((c, ci) => ({ c, ci, n: c[3].filter(i => S.owned[ITEMS[i].i]).length })).filter(x => !fam || x.c[0] === fam)
+    .sort((a, b) => (b.n > 0) - (a.n > 0) || (b.n / b.c[3].length) - (a.n / a.c[3].length) || a.c[3].length - b.c[3].length);
+  $("viewCollection").innerHTML = `
+    <h2>Ma collection</h2>
+    <p class="lede">${nf(ownedIds.length)} carte${ownedIds.length > 1 ? "s" : ""} sur ${nf(ITEMS.length)} lieux de Paris. Approchez-vous d'un lieu pour le capturer, revenez les jours suivants pour monter son niveau.</p>
+    <div class="tiers">${TIERS.map((n, i) => `<div class="tier" style="background:var(${TIER_VAR[i]})"><b>${nf(tierCounts[i])}</b><span>${n}</span></div>`).join("")}</div>
+    <div class="panel"><h3>Familles</h3><div class="fams">
+      <button class="fam" data-f="" aria-pressed="${!fam}" style="--c:var(--navy)"><i></i><strong>Toutes</strong><span class="n">${nf(ownedIds.length)} / ${nf(ITEMS.length)}</span></button>
+      ${Object.entries(FAMS).map(([k, f]) => { const n = ownedBy[k] || 0, t = TOTALS[k] || 0; return `<button class="fam" data-f="${k}" aria-pressed="${fam === k}" style="--c:${f.color}"><i></i><strong>${esc(f.name)}</strong><span class="n">${nf(n)} / ${nf(t)}</span><span class="bar"><b style="width:${t ? Math.max(n ? 1 : 0, n / t * 100) : 0}%"></b></span></button>`; }).join("")}
+    </div></div>
+    <div class="panel"><h3>Collections${fam ? " · " + esc(FAMS[fam].name) : ""}</h3><div class="cols">${cols.map(({ c, ci, n }) => {
+      const tot = c[3].length, done = n === tot;
+      return `<div class="col${done ? " done" : ""}" style="--c:${FAMS[c[0]].color}"><strong>${esc(c[1])}</strong><span class="n">${done ? "Complète" : `${n}/${tot}`}</span><span class="bar"><i style="width:${Math.round(n / tot * 100)}%"></i></span><span class="sub">${esc(c[2])} · bonus 50 écus</span></div>`;
+    }).join("") || `<div class="empty">Pas encore de collection pour cette famille.</div>`}</div></div>
+    <div>
+      <div class="grid-head"><h3>Mes cartes${fam ? " · " + esc(FAMS[fam].name) : ""}</h3></div>
+      ${list.length ? `<div class="grid">${list.slice(0, ui.shown).map(it => `<button data-id="${esc(it.i)}" aria-label="${esc(it.n)}">${cardHTML(it)}</button>`).join("")}</div>${list.length > ui.shown ? `<button class="mini-btn ghost more" id="moreBtn">Afficher plus (${nf(list.length - ui.shown)})</button>` : ""}`
+        : `<div class="empty">Aucune carte${fam ? " dans cette famille" : ""} pour l'instant.<br>Sur la carte, touchez un endroit près d'un point coloré pour vous y placer, puis capturez.</div>`}
+    </div>
+    <p class="credits">Données : <a href="https://opendata.paris.fr" target="_blank" rel="noopener">Ville de Paris</a> (ODbL), <a href="https://data.iledefrance-mobilites.fr" target="_blank" rel="noopener">Île-de-France Mobilités</a>, <a href="https://www.wikidata.org" target="_blank" rel="noopener">Wikidata</a>, photos <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a> et Ville de Paris.${ML ? ` Fond de carte <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a>.` : ""}</p>
+    <div class="reset-row"><span>Progression enregistrée dans ce navigateur.</span>
+      <button class="mini-btn ghost" id="resetBtn">${ui.resetArmed ? "Confirmer la remise à zéro" : "Remettre à zéro"}</button>
+      ${ui.resetArmed ? `<button class="mini-btn ghost" id="resetCancel">Annuler</button>` : ""}
+    </div>`;
+  const root = $("viewCollection");
+  root.querySelectorAll(".fam").forEach(b => b.onclick = () => { ui.fam = b.dataset.f || null; ui.shown = 48; renderCollection(); });
+  root.querySelectorAll(".grid > button").forEach(b => b.onclick = () => openCard(b.dataset.id));
+  if ($("moreBtn")) $("moreBtn").onclick = () => { ui.shown += 48; renderCollection(); };
+  $("resetBtn").onclick = () => {
+    if (!ui.resetArmed) { ui.resetArmed = true; renderCollection(); return; }
+    const keep = { pos: S.pos, hidden: S.hidden }; S = Object.assign(DEFAULT_STATE(), keep); ui.resetArmed = false; ui.sel = null;
+    save(); refreshAll(); toast("Progression remise à zéro.");
+  };
+  if (ui.resetArmed) $("resetCancel").onclick = () => { ui.resetArmed = false; renderCollection(); };
+}
+function showOnMap(id) { const it = BYID.get(id); if (!it) return; ui.sel = id; setMobile("map"); renderSheet(); centerOn(it.a, it.o, 40); }
+
+/* ---------- Repérage ---------- */
+function pruneScouts() { const d = today(); S.scouts = S.scouts.filter(s => s.until >= d && !S.owned[s.id] && BYID.has(s.id)); }
+function openBooster() {
+  const d0 = today(); if (S.lastBooster === d0) return;
+  const P = proj(S.pos.lat, S.pos.lon), taken = new Set(S.scouts.map(s => s.id));
+  const pool = [];
+  for (const i of candidates(P[0], P[1], CELL * 6)) { const it = ITEMS[i]; if (S.owned[it.i] || taken.has(it.i) || !visible(it)) continue; pool.push({ it, d: distTo(it, P) }); }
+  pool.sort((a, b) => a.d - b.d);
+  const pick = [], famUsed = new Set();
+  for (const c of pool) { if (pick.length >= BOOSTER_SIZE) break; const f = famOf(c.it); if (!famUsed.has(f)) { famUsed.add(f); pick.push(c); } }
+  for (const c of pool) { if (pick.length >= BOOSTER_SIZE) break; if (!pick.includes(c)) pick.push(c); }
+  if (!pick.length) { toast("Aucun lieu à repérer près d'ici. Déplacez-vous un peu."); return; }
+  pick.forEach(({ it }) => S.scouts.push({ id: it.i, until: d0 + SCOUT_DAYS - 1 }));
+  S.lastBooster = d0; save(); refreshAll();
+  toast(`${pick.length} lieux repérés autour de vous, de familles différentes. Ils sont entourés en vert sur la carte.`);
+}
+function renderReperage() {
+  if (!ui.ready) return;
+  const d0 = today(), P = proj(S.pos.lat, S.pos.lon);
+  const canOpen = S.lastBooster !== d0;
+  const scouts = S.scouts.map(s => ({ s, it: BYID.get(s.id) })).filter(x => x.it).map(x => ({ ...x, d: distTo(x.it, P) })).sort((a, b) => a.d - b.d);
+  $("viewReperage").innerHTML = `
+    <h2>Repérage du jour</h2>
+    <p class="lede">Chaque jour, ${BOOSTER_SIZE} lieux inconnus de familles différentes sont repérés autour de vous. Capturez-les dans les ${SCOUT_DAYS} jours pour doubler vos écus.</p>
+    ${canOpen ? `<button class="booster" id="boosterBtn"><span class="k">Pli du jour</span><span class="t">Repérage</span><span class="s">${BOOSTER_SIZE} lieux autour de votre position</span><span class="btn cta">Ouvrir</span></button>` : `<div class="empty">Repérage du jour ouvert. Le prochain arrive demain.</div>`}
+    <div><h3>En cours</h3>
+      ${scouts.length ? `<div class="scouts">${scouts.map(({ s, it, d }) => { const left = s.until - d0 + 1; return `<div class="scout"><div class="ring" style="--c:${famColor(it)}">?</div><div><strong>${esc(KINDS[it.k].l)}${it.site ? " · " + esc(it.site) : ""}</strong><span>${arrLabel(it.r)} · ${fmtDist(d)} · expire ${left <= 1 ? "ce soir" : `dans ${left} jours`}</span></div><button class="mini-btn" data-id="${esc(it.i)}">Carte</button></div>`; }).join("")}</div>` : `<div class="empty">Aucun lieu repéré pour l'instant.</div>`}
+    </div>`;
+  if (canOpen) $("boosterBtn").onclick = openBooster;
+  $("viewReperage").querySelectorAll(".scout button").forEach(b => b.onclick = () => showOnMap(b.dataset.id));
+  $("scoutBadge").hidden = !canOpen;
+}
+
+/* ---------- Navigation ---------- */
+function setMobile(m) {
+  ui.mobile = m === "map" ? "map" : "panel"; if (m !== "map") setView(m);
+  $("app").dataset.mobile = ui.mobile;
+  document.querySelectorAll(".tabbar button").forEach(b => { const on = (b.dataset.tab === "map" && ui.mobile === "map") || (ui.mobile === "panel" && b.dataset.tab === ui.view); if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  if (ui.mobile === "map") requestAnimationFrame(resize);
+}
+function setView(view) {
+  ui.view = view; $("viewCollection").hidden = view !== "collection"; $("viewReperage").hidden = view !== "reperage";
+  document.querySelectorAll(".side-tabs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === view)));
+  if (view === "reperage") renderReperage();
+}
+document.querySelectorAll(".tabbar button").forEach(b => b.onclick = () => setMobile(b.dataset.tab));
+document.querySelectorAll(".side-tabs button").forEach(b => b.onclick = () => setView(b.dataset.view));
+
+/* ---------- Mode test, jour suivant, GPS ---------- */
+function renderTestbar() { $("testbar").hidden = !TEST_ALLOWED; $("testToggle").setAttribute("aria-pressed", String(S.test)); $("testHint").textContent = S.test ? "Touchez la carte pour vous déplacer." : "Position GPS réelle."; $("nextDay").hidden = !S.test; }
+$("testToggle").onclick = () => { if (S.test) { startGPS(); return; } stopGPS(); S.test = true; renderTestbar(); renderSheet(); };
+$("gpsBtn").onclick = startGPS;
+$("nextDay").onclick = () => { S.dayOffset += 1; pruneScouts(); save(); refreshAll(); toast("Un jour passe. Nouveau repérage disponible, et vos cartes peuvent à nouveau monter de niveau."); };
+function gpsFail(msg) {
+  stopGPS();
+  if (TEST_ALLOWED) { S.test = true; ui.gps = "off"; renderTestbar(); toast(HOSTED ? msg : "Le GPS n'est pas disponible ici. Ouvrez la version hébergée sur votre téléphone, ou restez en mode test."); }
+  else { ui.gps = "denied"; toast(msg); }
+  renderSheet(); render();
+}
+function startGPS() {
+  if (!("geolocation" in navigator)) { gpsFail("Ce navigateur ne donne pas accès à la position."); return; }
+  if (ui.gpsWatch != null) return;
+  ui.gps = "wait"; renderSheet();
+  try {
+    ui.gpsWatch = navigator.geolocation.watchPosition(p => {
+      const { latitude: la, longitude: lo, accuracy } = p.coords;
+      ui.acc = accuracy; const first = ui.gps !== "ok"; ui.gps = "ok";
+      if (S.test) { S.test = false; renderTestbar(); toast("GPS activé."); }
+      if (first) { centerOn(la, lo, 40); const dc = Math.hypot(...proj(la, lo)) * MPU; if (dc > 9000) toast("Vous êtes hors de Paris : la carte reste consultable, les captures se font sur place."); }
+      movePlayer(la, lo);
+    }, err => gpsFail(err && err.code === 1 ? "Localisation refusée. Autorisez-la pour ce site dans les réglages du navigateur, puis touchez « Me localiser »." : "Position introuvable pour l'instant. Vérifiez que la localisation est activée."),
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+  } catch (e) { gpsFail("Le GPS n'est pas disponible ici."); }
+}
+function stopGPS() { if (ui.gpsWatch != null) { try { navigator.geolocation.clearWatch(ui.gpsWatch); } catch (e) {} ui.gpsWatch = null; } }
+$("zoomIn").onclick = () => zoomAt(v.W / 2, v.H / 2, 1.7);
+$("zoomOut").onclick = () => zoomAt(v.W / 2, v.H / 2, 1 / 1.7);
+$("meBtn").onclick = () => { if (!S.test && ui.gps !== "ok") startGPS(); centerOn(S.pos.lat, S.pos.lon, 45); };
+$("fitBtn").onclick = fit;
+
+/* ---------- Démarrage ---------- */
+function refreshAll() {
+  if (!ui.ready) return;
+  const n = Object.keys(S.owned).filter(id => BYID.has(id)).length;
+  $("cntCards").textContent = `${nf(n)} / ${nf(ITEMS.length)}`; $("cntEcus").textContent = nf(S.ecus);
+  renderLayers(); renderSheet(); renderCollection(); renderReperage(); renderTestbar(); render();
+}
+initBasemap();
+new ResizeObserver(resize).observe(wrap);
+resize(); setView("collection"); renderTestbar();
+let streetsLoaded = false;
+function loadStreets() {
+  if (streetsLoaded || ML || !ui.ready) return; streetsLoaded = true;
+  fetch("data/streets.json").then(r => r.json()).then(st => {
+    const P = new Path2D();
+    for (const e of st.streets) {
+      for (const r of e.r) {
+        let a = 0, b = 0;
+        for (let j = 0; j < r.length; j += 2) { a += r[j]; b += r[j + 1]; const q = proj(decLat(a), decLon(b)); j ? P.lineTo(q[0], q[1]) : P.moveTo(q[0], q[1]); }
+        P.closePath();
+      }
+      const it = e.i && BYID.get(e.i);
+      if (it && e.len > 0.4) { let ang = e.ang; if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI; STREET_LABELS.push({ x: it.p[0], y: it.p[1], ang, len: e.len, t: it.n }); }
+    }
+    STREET_PATH = P; render();
+  }).catch(() => { streetsLoaded = false; });
+}
+Promise.all([fetch("data/places.json").then(r => r.json()), fetch("data/map.json").then(r => r.json())])
+  .then(([pl, mp]) => {
+    prepare(pl, mp); ui.ready = true; pruneScouts();
+    $("loading").hidden = true;
+    refreshAll();
+    centerOn(S.pos.lat, S.pos.lon, 30);
+    if (!S.test) startGPS();
+    loadStreets();
+  })
+  .catch(() => { $("loading").textContent = "Impossible de charger les données. Rechargez la page."; });
+</script>
