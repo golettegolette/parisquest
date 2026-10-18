@@ -15068,14 +15068,9 @@ lieuculture:Q1507967,lieuculture,culture,3,48.87759,2.35095,50
 parc:Q246448,parc,nature,4,48.89306,2.39056,25
 theatre:Q247566,theatre,culture,3,48.89417,2.39333,50
 musee:Q178065,musee,culture,4,48.86064,2.35224,60
-pont:Q3368264,pont,eau,0,48.87083,2.36556,40
-pont:Q3368266,pont,eau,0,48.87389,2.36333,40
-pont:Q3368275,pont,eau,0,48.87167,2.365,40
-pont:Q3368301,pont,eau,0,48.87319,2.36386,40
 pont:Q3368303,pont,eau,1,48.8862,2.375,40
 pont:Q3368304,pont,eau,1,48.8697,2.38861,40
 pont:Q3368312,pont,eau,0,48.891,2.38462,40
-pont:Q3368313,pont,eau,0,48.86978,2.3665,40
 pont:Q3368330,pont,eau,1,48.881,2.3817,40
 musee:Q3373101,musee,culture,0,48.8625,2.34778,60
 theatre:Q3378907,theatre,culture,3,48.89157,2.39407,50
@@ -15156,7 +15151,6 @@ magasin:Q2010697,magasin,quartier,3,48.89083,2.39083,40
 disparu:Q2064737,disparu,patrimoine,1,48.89289,2.393,50
 enceinte:Q2105022,enceinte,patrimoine,3,48.8897,2.39611,50
 enceinte:Q2125122,enceinte,patrimoine,3,48.89889,2.35889,50
-pont:Q3390136,pont,eau,0,48.8826,2.3619,40
 culte:Q1328709,culte,patrimoine,2,48.8814,2.36774,50
 musee:Q3330111,musee,culture,2,48.8596,2.35959,60
 musee:Q3330333,musee,culture,0,48.8703,2.35008,60
@@ -15289,8 +15283,6 @@ disparu:Q28495432,disparu,patrimoine,0,48.86161,2.35657,50
 pont:Q3397401,pont,eau,1,48.8803,2.383,40
 pont:Q3397507,pont,eau,0,48.896,2.3968,40
 pont:Q3397562,pont,eau,1,48.8883,2.37944,40
-pont:Q3397654,pont,eau,0,48.87083,2.36556,40
-pont:Q3397655,pont,eau,1,48.87306,2.36397,40
 enceinte:Q3398901,enceinte,patrimoine,0,48.8836,2.39702,50
 enceinte:Q3398903,enceinte,patrimoine,2,48.8864,2.39415,50
 enceinte:Q3398924,enceinte,patrimoine,0,48.8616,2.34795,50
@@ -15341,9 +15333,7 @@ magasin:Q28952554,magasin,quartier,0,48.89611,2.38861,40
 tombe:Q29650332,tombe,memoire,1,48.86098,2.39676,15
 lieuculture:Q3391618,lieuculture,culture,0,48.8666,2.35349,50
 theatre:Q3393486,theatre,culture,1,48.8814,2.3685,50
-pont:Q3396524,pont,eau,0,48.87756,2.36561,40
 pont:Q3396604,pont,eau,1,48.8803,2.36081,40
-pont:Q3397319,pont,eau,0,48.87972,2.3675,40
 pont:Q3397320,pont,eau,0,48.8901,2.38287,40
 edifice:Q22921269,edifice,patrimoine,2,48.85873,2.35896,40
 hotelpart:Q22921270,hotelpart,patrimoine,0,48.86324,2.35721,40
@@ -15525,7 +15515,6 @@ edifice:Q1138556,edifice,patrimoine,3,48.89029,2.34269,40
 theatre:Q1138922,theatre,culture,4,48.88359,2.33413,50
 theatre:Q1139243,theatre,culture,3,48.86583,2.30167,50
 monument:Q591769,monument,patrimoine,2,48.8651,2.322,40
-pont:Q605912,pont,eau,2,48.86194,2.32472,40
 oeuvre:Q151952,oeuvre,culture,4,48.85994,2.33729,25
 theatre:Q1810868,theatre,culture,3,48.87236,2.30056,50
 edifice:Q1820514,edifice,patrimoine,2,48.88854,2.33189,40
@@ -15553,7 +15542,6 @@ musee:Q2023566,musee,culture,1,48.87167,2.28815,60
 hotelpart:Q2024100,hotelpart,patrimoine,4,48.87419,2.32641,40
 monument:Q523312,monument,patrimoine,3,48.87375,2.29513,40
 musee:Q537515,musee,culture,1,48.86282,2.28837,60
-pont:Q540781,pont,eau,4,48.85972,2.29222,40
 musee:Q1229917,musee,culture,3,48.86036,2.32444,60
 cafe:Q1235554,cafe,quartier,4,48.86731,2.32222,25
 musee:Q1265070,musee,culture,4,48.87183,2.3421,60
@@ -15571,7 +15559,6 @@ magasin:Q948531,magasin,quartier,4,48.86946,2.34041,40
 edifice:Q924480,edifice,patrimoine,4,48.88736,2.33708,40
 hotelpart:Q936633,hotelpart,patrimoine,4,48.86207,2.31868,40
 fontaine:Q579833,fontaine,eau,3,48.869,2.33431,30
-pont:Q589000,pont,eau,2,48.85939,2.33292,40
 hotelpart:Q904945,hotelpart,patrimoine,3,48.86674,2.32802,40
 disparu:Q913434,disparu,patrimoine,4,48.86278,2.34444,50
 theatre:Q915451,theatre,culture,4,48.87028,2.32833,50
@@ -15585,7 +15572,6 @@ musee:Q1319378,musee,culture,3,48.86303,2.33372,60
 hotelpart:Q1643072,hotelpart,patrimoine,3,48.88194,2.31042,40
 theatre:Q1649419,theatre,culture,3,48.87699,2.30104,50
 disparu:Q1728836,disparu,patrimoine,3,48.86849,2.33022,50
-pont:Q1758497,pont,eau,4,48.86,2.32972,40
 monument:Q1503331,monument,patrimoine,4,48.86548,2.32113,40
 musee:Q1579504,musee,culture,1,48.87167,2.28139,60
 edifice:Q217708,edifice,patrimoine,3,48.86879,2.30072,40
@@ -15602,15 +15588,12 @@ musee:Q614450,musee,culture,2,48.86611,2.31083,60
 cafe:Q614681,cafe,quartier,2,48.87139,2.31028,25
 culte:Q630008,culte,patrimoine,2,48.85897,2.31834,50
 enceinte:Q2319870,enceinte,patrimoine,4,48.87778,2.28222,50
-pont:Q2339845,pont,eau,1,48.879,2.32339,40
 sport:Q1542489,sport,quartier,3,48.85878,2.22963,60
 edifice:Q1546437,edifice,patrimoine,4,48.87056,2.27389,40
 lieuculture:Q1547286,lieuculture,culture,2,48.86306,2.33333,50
 disparu:Q1552859,disparu,patrimoine,4,48.86694,2.33194,50
 magasin:Q1583780,magasin,quartier,4,48.85889,2.34208,40
 culte:Q1589139,culte,patrimoine,2,48.89365,2.344,50
-pont:Q1621256,pont,eau,4,48.86333,2.30167,40
-pont:Q2274186,pont,eau,2,48.86306,2.29639,40
 theatre:Q2292251,theatre,culture,3,48.881,2.3285,50
 musee:Q2296362,musee,culture,3,48.878,2.33436,60
 theatre:Q2053705,theatre,culture,2,48.86806,2.3375,50
@@ -15619,7 +15602,6 @@ musee:Q2090916,musee,culture,1,48.87167,2.28139,60
 culte:Q1062732,culte,patrimoine,4,48.8737,2.32276,50
 cafe:Q1071456,cafe,quartier,2,48.87344,2.34365,25
 theatre:Q1071470,theatre,culture,0,48.87164,2.30611,50
-pont:Q1073098,pont,eau,3,48.86379,2.31036,40
 hotelpart:Q1075988,hotelpart,patrimoine,4,48.86103,2.33589,40
 hotelpart:Q329948,hotelpart,patrimoine,4,48.86333,2.33694,40
 theatre:Q330375,theatre,culture,4,48.87417,2.345,50
@@ -15634,9 +15616,7 @@ lieuculture:Q818517,lieuculture,culture,4,48.86389,2.32611,50
 galerie:Q826482,galerie,culture,4,48.87166,2.31388,40
 theatre:Q836007,theatre,culture,2,48.86361,2.33583,50
 theatre:Q386604,theatre,culture,2,48.8709,2.32038,50
-pont:Q390418,pont,eau,4,48.86361,2.31361,40
 monument:Q631104,monument,patrimoine,4,48.86167,2.33278,40
-pont:Q644398,pont,eau,3,48.86333,2.31944,40
 edifice:Q656054,edifice,patrimoine,4,48.86797,2.32889,40
 musee:Q656296,musee,culture,3,48.86583,2.32389,60
 culte:Q657944,culte,patrimoine,3,48.87944,2.33111,50
@@ -16343,7 +16323,6 @@ hotelpart:Q18214919,hotelpart,patrimoine,3,48.87486,2.34319,40
 magasin:Q18215126,magasin,quartier,2,48.86294,2.34037,40
 hotelpart:Q18380202,hotelpart,patrimoine,0,48.8592,2.31528,40
 eaulieu:Q18398250,eaulieu,eau,1,48.86978,2.28953,80
-pont:Q18575822,pont,eau,0,48.879,2.3233,40
 hotelpart:Q18745242,hotelpart,patrimoine,0,48.859,2.316,40
 hotelpart:Q19363332,hotelpart,patrimoine,3,48.8683,2.3292,40
 hotelpart:Q19363340,hotelpart,patrimoine,0,48.8679,2.3302,40
@@ -16423,7 +16402,6 @@ cinema:Q3220259,cinema,culture,3,48.8726,2.29958,40
 oeuvre:Q3220400,oeuvre,culture,0,48.8656,2.32361,25
 theatre:Q3222361,theatre,culture,2,48.8825,2.3395,50
 hotelpart:Q30281725,hotelpart,patrimoine,2,48.86461,2.23751,40
-pont:Q30741087,pont,eau,0,48.88982,2.31089,40
 parc:Q30741114,parc,nature,1,48.89503,2.31132,25
 culte:Q31889521,culte,patrimoine,1,48.88792,2.29479,50
 abbaye:Q36808269,abbaye,patrimoine,0,48.85891,2.28794,50
@@ -16514,12 +16492,10 @@ musee:Q1998638,musee,culture,1,48.85056,2.35194,60
 musee:Q2000339,musee,culture,2,48.85056,2.36222,60
 hotelpart:Q2059782,hotelpart,patrimoine,3,48.8575,2.34722,40
 parc:Q2060889,parc,nature,4,48.84957,2.3711,25
-pont:Q2073308,pont,eau,2,48.85167,2.35167,40
 enceinte:Q2081081,enceinte,patrimoine,0,48.8355,2.40669,50
 oeuvre:Q2849997,oeuvre,culture,0,48.84844,2.35942,25
 loisir:Q2859191,loisir,quartier,0,48.83531,2.40941,80
 magasin:Q2870258,magasin,quartier,0,48.84442,2.34924,40
-pont:Q963509,pont,eau,2,48.85278,2.3575,40
 parc:Q730948,parc,nature,4,48.84389,2.35972,25
 edifice:Q732312,edifice,patrimoine,4,48.83495,2.35312,40
 disparu:Q2885657,disparu,patrimoine,0,48.8398,2.40002,50
@@ -16533,7 +16509,6 @@ biblio:Q2901428,biblio,culture,0,48.83694,2.3825,50
 lieuculture:Q775591,lieuculture,culture,3,48.85405,2.35694,50
 monument:Q2467833,monument,patrimoine,2,48.8534,2.34878,40
 eaulieu:Q2574917,eaulieu,eau,2,48.81972,2.44917,80
-pont:Q1469250,pont,eau,2,48.8525,2.34833,40
 lieuculture:Q1469337,lieuculture,culture,3,48.85667,2.35139,50
 disparu:Q1476690,disparu,patrimoine,3,48.85278,2.36139,50
 disparu:Q1476769,disparu,patrimoine,2,48.85444,2.365,50
@@ -16570,13 +16545,9 @@ oeuvre:Q2813480,oeuvre,culture,0,48.82111,2.36889,25
 oeuvre:Q2821546,oeuvre,culture,0,48.84844,2.35955,25
 enceinte:Q3078275,enceinte,patrimoine,3,48.84221,2.44208,50
 musee:Q3094630,musee,culture,0,48.84182,2.35878,60
-pont:Q2307670,pont,eau,2,48.83333,2.38194,40
-pont:Q2307685,pont,eau,2,48.82806,2.38694,40
-pont:Q2307722,pont,eau,3,48.845,2.36611,40
 sport:Q2325845,sport,quartier,2,48.856,2.41294,60
 magasin:Q2348104,magasin,quartier,3,48.85296,2.34728,40
 theatre:Q2352779,theatre,culture,4,48.85722,2.34806,50
-pont:Q1140060,pont,eau,2,48.85278,2.35279,40
 culte:Q166670,culte,patrimoine,1,48.8525,2.35111,50
 culte:Q166691,culte,patrimoine,1,48.83681,2.35273,50
 disparu:Q167029,disparu,patrimoine,1,48.85806,2.34889,50
@@ -16607,7 +16578,6 @@ parc:Q3058451,parc,nature,1,48.8485,2.36275,25
 edifice:Q3064277,edifice,patrimoine,2,48.85175,2.34844,40
 eaulieu:Q1032646,eaulieu,eau,3,48.85,2.36667,80
 parc:Q1055404,parc,nature,4,48.8439,2.35972,25
-pont:Q1061959,pont,eau,2,48.85616,2.34862,40
 culte:Q1076198,culte,patrimoine,2,48.82149,2.36264,50
 abbaye:Q3001643,abbaye,patrimoine,0,48.8542,2.38417,50
 abbaye:Q3001670,abbaye,patrimoine,0,48.8547,2.38389,50
@@ -16643,7 +16613,6 @@ hotelpart:Q1643168,hotelpart,patrimoine,1,48.85753,2.36087,40
 culte:Q1663837,culte,patrimoine,2,48.85597,2.37625,50
 disparu:Q22248480,disparu,patrimoine,2,48.83031,2.38939,50
 disparu:Q1500914,disparu,patrimoine,2,48.84889,2.3825,50
-pont:Q1513866,pont,eau,3,48.83806,2.375,40
 oeuvre:Q3067736,oeuvre,culture,0,48.835,2.40916,25
 edifice:Q3068888,edifice,patrimoine,0,48.8223,2.4443,40
 oeuvre:Q3071557,oeuvre,culture,0,48.8484,2.35917,25
@@ -16725,7 +16694,6 @@ edifice:Q1144549,edifice,patrimoine,4,48.84722,2.35639,40
 edifice:Q1163431,edifice,patrimoine,4,48.8402,2.35256,40
 edifice:Q1374604,edifice,patrimoine,3,48.85333,2.35917,40
 culte:Q1383413,culte,patrimoine,4,48.85333,2.36625,50
-pont:Q1418458,pont,eau,3,48.85583,2.35083,40
 culte:Q2956622,culte,patrimoine,1,48.8443,2.3973,50
 culte:Q2956625,culte,patrimoine,1,48.8357,2.37347,50
 disparu:Q2956796,disparu,patrimoine,1,48.8531,2.34972,50
@@ -16771,10 +16739,7 @@ hotelpart:Q38571305,hotelpart,patrimoine,2,48.85159,2.36231,40
 cinema:Q42296601,cinema,culture,0,48.83302,2.35418,40
 hotelpart:Q369234,hotelpart,patrimoine,2,48.85481,2.35694,40
 eaulieu:Q384109,eaulieu,eau,2,48.84183,2.42324,80
-pont:Q1196667,pont,eau,3,48.85389,2.35444,40
 pont:Q1196669,pont,eau,2,48.82639,2.38917,40
-pont:Q1196676,pont,eau,2,48.8425,2.36889,40
-pont:Q1196688,pont,eau,2,48.85,2.35917,40
 disparu:Q1748506,disparu,patrimoine,4,48.84647,2.35573,50
 culte:Q1766069,culte,patrimoine,3,48.84589,2.34783,50
 parc:Q3162355,parc,nature,0,48.818,2.35596,25
@@ -16830,12 +16795,10 @@ mairie:Q3278483,mairie,patrimoine,0,48.8408,2.38833,50
 mairie:Q3278499,mairie,patrimoine,1,48.8561,2.35611,50
 culte:Q392564,culte,patrimoine,4,48.84194,2.355,50
 musee:Q479218,musee,culture,2,48.85485,2.3562,60
-pont:Q513655,pont,eau,2,48.85066,2.35552,40
 cafe:Q1810254,cafe,quartier,3,48.845,2.37333,25
 edifice:Q1826384,edifice,patrimoine,3,48.85799,2.36017,40
 eaulieu:Q1845956,eaulieu,eau,1,48.8523,2.35515,80
 disparu:Q1846120,disparu,patrimoine,1,48.8508,2.3591,50
-pont:Q1853517,pont,eau,2,48.83528,2.378,40
 musee:Q3100297,musee,culture,2,48.85515,2.35892,60
 cinema:Q3113488,cinema,culture,1,48.8475,2.35211,40
 cinema:Q3114848,cinema,culture,1,48.8305,2.3552,40
@@ -16955,8 +16918,6 @@ abbaye:Q111745852,abbaye,patrimoine,0,48.83621,2.45804,50
 musee:Q111874022,musee,culture,0,48.84747,2.35464,60
 edifice:Q113406379,edifice,patrimoine,2,48.84198,2.35589,40
 parc:Q87903804,parc,nature,1,48.85242,2.38138,25
-pont:Q3368265,pont,eau,0,48.8422,2.38804,40
-pont:Q3368276,pont,eau,1,48.84917,2.36722,40
 sport:Q3368772,sport,quartier,0,48.8386,2.37853,60
 eaulieu:Q3398456,eaulieu,eau,1,48.834,2.38136,80
 eaulieu:Q3398518,eaulieu,eau,0,48.8519,2.3497,80
@@ -16971,7 +16932,6 @@ disparu:Q3398946,disparu,patrimoine,2,48.85353,2.36859,50
 monument:Q3390564,monument,patrimoine,1,48.8539,2.35667,40
 pont:Q3396422,pont,eau,1,48.8468,2.36561,40
 pont:Q3396642,pont,eau,1,48.82361,2.3825,40
-pont:Q3396657,pont,eau,1,48.8471,2.36605,40
 eaulieu:Q3398352,eaulieu,eau,2,48.8392,2.38078,80
 eaulieu:Q3398399,eaulieu,eau,1,48.8474,2.36123,80
 eaulieu:Q3398444,eaulieu,eau,0,48.8401,2.37097,80
@@ -17166,7 +17126,6 @@ edifice:Q999763,edifice,patrimoine,4,48.84833,2.34306,40
 edifice:Q999774,edifice,patrimoine,2,48.84667,2.27917,40
 edifice:Q1010517,edifice,patrimoine,3,48.8572,2.33806,40
 parc:Q2422521,parc,nature,1,48.8338,2.3239,25
-pont:Q2426843,pont,eau,2,48.83936,2.26833,40
 sport:Q541391,sport,quartier,3,48.81716,2.34511,60
 edifice:Q544740,edifice,patrimoine,3,48.83556,2.27611,40
 edifice:Q546118,edifice,patrimoine,3,48.84833,2.34278,40
@@ -17209,11 +17168,8 @@ monument:Q1394918,monument,patrimoine,3,48.85056,2.34361,40
 culte:Q1092730,culte,patrimoine,2,48.8321,2.33503,50
 theatre:Q2234305,theatre,culture,3,48.8325,2.28611,50
 musee:Q2255375,musee,culture,2,48.84028,2.31139,60
-pont:Q2273701,pont,eau,2,48.85029,2.28007,40
 hotelpart:Q632845,hotelpart,patrimoine,4,48.85087,2.31574,40
 biblio:Q1316546,biblio,culture,4,48.85133,2.30995,50
-pont:Q1323635,pont,eau,3,48.85333,2.34694,40
-pont:Q1327827,pont,eau,3,48.85666,2.34677,40
 musee:Q1585909,musee,culture,1,48.84028,2.31917,60
 disparu:Q1596758,disparu,patrimoine,3,48.85359,2.30183,50
 sport:Q1613027,sport,quartier,4,48.84628,2.24937,60
@@ -17230,8 +17186,6 @@ edifice:Q273504,edifice,patrimoine,2,48.85575,2.30834,40
 edifice:Q273536,edifice,patrimoine,3,48.82244,2.33122,40
 sport:Q1274969,sport,quartier,2,48.85374,2.28891,60
 edifice:Q1515595,edifice,patrimoine,3,48.85135,2.3272,40
-pont:Q1329076,pont,eau,3,48.85417,2.34472,40
-pont:Q1329141,pont,eau,4,48.85833,2.33778,40
 musee:Q589336,musee,culture,2,48.84417,2.34361,60
 culte:Q591266,culte,patrimoine,2,48.8292,2.30796,50
 piscine:Q645095,piscine,eau,4,48.84517,2.25309,60
@@ -17257,7 +17211,6 @@ cafe:Q933962,cafe,quartier,0,48.84642,2.29551,25
 theatre:Q1133501,theatre,culture,4,48.8495,2.33875,50
 abbaye:Q1137929,abbaye,patrimoine,1,48.83472,2.34694,50
 cafe:Q1147912,cafe,quartier,4,48.85389,2.33306,25
-pont:Q291093,pont,eau,4,48.84639,2.27639,40
 eaulieu:Q292258,eaulieu,eau,4,48.85167,2.28194,80
 abbaye:Q306107,abbaye,patrimoine,2,48.8522,2.3276,50
 parc:Q309458,parc,nature,4,48.84694,2.33722,25
@@ -17296,7 +17249,6 @@ edifice:Q323767,edifice,patrimoine,4,48.84211,2.32198,40
 disparu:Q1937108,disparu,patrimoine,4,48.8575,2.33722,50
 hotelpart:Q1952743,hotelpart,patrimoine,3,48.85482,2.32329,40
 biblio:Q284001,biblio,culture,1,48.8556,2.3325,50
-pont:Q290355,pont,eau,4,48.85556,2.28778,40
 pont:Q2307584,pont,eau,2,48.85227,2.28306,40
 fantome:Q2338243,fantome,transport,1,48.85189,2.3295,60
 culte:Q2349221,culte,patrimoine,2,48.84106,2.29942,50
@@ -17409,7 +17361,6 @@ hotelpart:Q329852,hotelpart,patrimoine,4,48.84833,2.3375,40
 abbaye:Q333995,abbaye,patrimoine,3,48.85833,2.23389,50
 abbaye:Q334096,abbaye,patrimoine,3,48.85639,2.32194,50
 abbaye:Q334186,abbaye,patrimoine,4,48.85389,2.33444,50
-pont:Q335277,pont,eau,4,48.8575,2.34167,40
 hotelpart:Q3145517,hotelpart,patrimoine,2,48.8498,2.26652,40
 theatre:Q3058150,theatre,culture,0,48.82771,2.29363,50
 cinema:Q3058157,cinema,culture,3,48.8529,2.34414,40

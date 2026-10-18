@@ -1362,10 +1362,22 @@ function checkCollections(it) {
   const msgs = [];
   for (let c = 0; c < COLS.length; c++) {
     const [fam, name, , idxs] = COLS[c];
-    if (S.done[c] || fam !== famOf(it)) continue;
+    if (S.done[c] || !idxs.some(i => ITEMS[i] === it)) continue;
     if (idxs.every(i => S.owned[ITEMS[i].i])) { S.done[c] = true; msgs.push(`Série complète : ${name}`); }
   }
   return msgs;
+}
+// Lieux fusionnés (ponts en double) : les cartes d'une sauvegarde locale passent sur le lieu gardé
+function migrateMoved(mv) {
+  let n = 0;
+  for (const o in mv || {}) {
+    const a = S.owned[o]; if (!a) continue;
+    const b = S.owned[mv[o]];
+    S.owned[mv[o]] = b ? { ...b, copies: (b.copies || 1) + (a.copies || 1), lvl: Math.max(b.lvl || 1, a.lvl || 1), vis: (b.vis || 0) + (a.vis || 0), at: Math.min(b.at || Infinity, a.at || Infinity) } : { ...a, tier: BYID.get(mv[o]) ? BYID.get(mv[o]).t : a.tier };
+    delete S.owned[o]; n++;
+  }
+  if (S.profile && S.profile.show) S.profile.show = S.profile.show.map(id => (mv || {})[id] || id);
+  return n;
 }
 function recomputeDone() { S.done = {}; COLS.forEach(([, , , idxs], c) => { if (idxs.length && idxs.every(i => S.owned[ITEMS[i].i])) S.done[c] = true; }); }
 
@@ -2711,7 +2723,7 @@ function loadStreets() {
 Promise.all([fetch("data/places.json").then(r => r.json()), fetch("data/map.json").then(r => r.json()), fetch("data/quests.json").then(r => r.json()).catch(() => null)])
   .then(([pl, mp, qd]) => {
     prepare(pl, mp); if (qd) questsInit(qd); ui.ready = true;
-    if (!SB_CONF) recomputeDone();
+    if (!SB_CONF) { if (migrateMoved(pl.moved)) save(); recomputeDone(); }
     if (SB && ui.user) syncServer();
     $("loading").hidden = true;
     refreshAll();
