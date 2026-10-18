@@ -142,6 +142,8 @@ Les arrondissements et les lignes sont rangés dans l'ordre croissant. Chaque qu
 
 **Récompenses** : 15 × √n PQ par palier, arrondi à 5, au moins 20.
 
+**Pack Arrondissement** (19/10/2026) : tire ses 15 cartes parmi les lieux de l'arrondissement choisi, d'après l'arrondissement de chaque lieu (contours officiels, § 5).
+
 ## 9. Lieux retirés du jeu (historique)
 
 | Date | Quoi | Nombre | Raison | Joueurs |
