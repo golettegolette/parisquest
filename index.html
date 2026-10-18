@@ -482,7 +482,7 @@ sup { font-size: .62em; line-height: 0; }
 .op-cd b { display: block; height: 100%; width: 100%; background: var(--r4); transform-origin: left; animation: cd linear forwards; }
 @keyframes cd { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .op-next .stop { margin-left: 4px; }
-@media (prefers-reduced-motion: reduce) { .ocard.hint3 .pcover, .ocard.hint4 .pcover, .op-summary, .ocard.turn1 .oflip, .ocard.turn2 .oflip { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ocard.hint3 .pcover, .ocard.hint4 .pcover, .op-summary { animation: none; } }
 @keyframes miniIn { from { opacity: 0; transform: translateX(12px) scale(.94); } to { opacity: 1; transform: none; } }
 .op-next { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; color: var(--white); }
 .op-next .mpack { position: relative; width: 82px; aspect-ratio: 5 / 7; border: 0; padding: 0; background: none; cursor: pointer; }
@@ -526,13 +526,13 @@ sup { font-size: .62em; line-height: 0; }
 .ocard { position: absolute; inset: 0; perspective: 1400px; cursor: pointer; animation: ocIn .22s ease-out both; }
 /* Retournement en deux demi-tours : la carte pivote jusqu'à la tranche, on échange les faces, elle revient.
    Une seule face existe à la fois : pas de trou au milieu, et rien ne dépend de backface-visibility (capricieux sur iPhone). */
-.ocard .oflip { position: absolute; inset: 0; transform: perspective(1100px) rotateY(0deg); will-change: transform; }
-.ocard .pface { position: absolute; inset: 0; }
-.ocard.turn1 .oflip { animation: turn1 .14s cubic-bezier(.55,0,1,.45) forwards; }
-.ocard.turn2 .oflip { animation: turn2 .24s cubic-bezier(.15,.85,.35,1.12) both; }
-/* on s'arrête juste avant la tranche (82°) : la carte ne disparaît jamais complètement */
-@keyframes turn1 { from { transform: perspective(1100px) rotateY(0deg); } to { transform: perspective(1100px) rotateY(82deg) scale(1.03); } }
-@keyframes turn2 { from { transform: perspective(1100px) rotateY(-82deg) scale(1.03); } to { transform: perspective(1100px) rotateY(0deg); } }
+.ocard .oflip { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.ocard .pface { position: absolute; inset: 0; backface-visibility: visible; -webkit-backface-visibility: visible; }
+.ocard .pcover { transform: none; }   /* le verso n'est plus retourné : une seule face visible à la fois */
+/* la carte révélée ne se retourne pas elle-même pendant l'ouverture : on aplatit sa 3D interne */
+.ocard .card { perspective: none; }
+.ocard .card .flip { transform-style: flat; transition: none; }
+.ocard .card .flip > .face { backface-visibility: visible; -webkit-backface-visibility: visible; transition: none; }   /* sans ce délai hérité, la face apparaît tout de suite */
 .ocard.leave { animation: ocOut .2s ease-in forwards; }
 .ocard.back { animation: ocBack .2s ease-out both; }
 @keyframes ocIn { from { transform: translateY(14px) scale(.96); } to { transform: none; } }
@@ -1762,7 +1762,7 @@ function openBooster(cards, msgs, kind) {
   if (OP.msgs && OP.msgs.length && !$("opener").hidden) { toast(OP.msgs.slice(0, 2).join(" · ")); }
   $("opMain").classList.toggle("withmini", cards.some(c => c.isNew)); $("opMini").classList.remove("on");
   OP.cards = cards.map((c, k) => ({ ...c, k })).sort((a, b) => a.it.t - b.it.t || (b.isNew - a.isNew) || a.k - b.k);
-  OP.idx = 0; OP.up = OP.cards.map(() => false); OP.msgs = msgs; OP.kind = kind; OP.phase = "booster";
+  OP.idx = 0; OP.up = OP.cards.map(() => false); OP.msgs = msgs; OP.kind = kind; OP.phase = "booster"; OP.turning = false;
   clearTimeout(OP.tNext); clearTimeout(OP.tAuto); OP.stopAuto = false;
   $("opener").hidden = false; $("opNav").hidden = true; $("opAll").hidden = true;
   $("opTitle").innerHTML = `<div class="k">${kind === "parigo" ? "Pack PariGo" : kind === "daily" ? "Paquet du jour" : /^arr:/.test(kind || "") ? `Pack ${arrName(+kind.slice(4))}` : "Paquet"}</div><div class="t">${OP.cards.length} cartes</div>`;
@@ -1785,12 +1785,9 @@ function drawOp(anim) {
   const under = Array.from({ length: Math.min(4, left) }, (_, i) => `<div class="under" style="transform:translate(${(i + 1) * 4}px, ${(i + 1) * 5}px) rotate(${(i + 1) * 1.2}deg);z-index:${-i - 1}"></div>`).join("");
   $("opStage").innerHTML = `<div class="ostack">${under}<div class="ocard${up ? " up" : ""} t${c.it.t}${anim === "back" ? " back" : ""}" id="ocard"><div class="oflip"><div class="pface pcover">${coverHTML()}</div><div class="pface pfront"><span class="ptag${c.isNew ? " new" : ""}">${tagOf(c)}</span>${cardHTML(c.it)}</div></div></div></div>`;
   opChrome();
-  // carte face cachée : elle se retourne seule ; les Épiques et Légendaires se font un peu attendre (le dos brille)
+  // carte face cachée : verso PQ visible jusqu'à ce qu'on la touche ; le dos des Épiques et Légendaires brille
   clearTimeout(OP.tAuto);
-  if (!up && OP.phase === "stack") {
-    const el = $("ocard"); if (c.it.t >= 3) el.classList.add("hint" + c.it.t);
-    OP.tAuto = setTimeout(() => { if (OP.phase === "stack" && OP.cards[OP.idx] === c && !OP.up[OP.idx]) revealCurrent(); }, c.it.t >= 4 ? 900 : c.it.t >= 3 ? 650 : 260);
-  }
+  if (!up && OP.phase === "stack" && c.it.t >= 3) $("ocard").classList.add("hint" + c.it.t);
 }
 // titre, points de progression et mini-plan (sans toucher à la carte)
 function opChrome() {
@@ -1805,27 +1802,37 @@ const tagOf = c => c.capture ? "Capturée" : c.pending ? "À découvrir" : c.isN
 const lighten = hex => { const n = parseInt(hex.slice(1), 16), f = c => Math.min(255, Math.round(c + (255 - c) * .45)); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; };
 function revealCurrent() {
   clearTimeout(OP.tAuto);
-  const c = OP.cards[OP.idx]; OP.up[OP.idx] = true;
-  const el = $("ocard"); el.classList.remove("hint3", "hint4"); el.classList.add("turn1"); SND.flip();
-  // échange des faces dès la fin du premier demi-tour (événement d'animation, filet de sécurité à 220 ms)
-  let done = false;
-  const half = () => {
-    if (done) return; done = true;
+  const c = OP.cards[OP.idx]; if (OP.up[OP.idx] || OP.turning) return;
+  OP.up[OP.idx] = true;
+  const el = $("ocard"), fl = el.querySelector(".oflip"); el.classList.remove("hint3", "hint4"); SND.flip();
+  const after = () => {
     if (OP.phase !== "stack" || OP.cards[OP.idx] !== c || $("ocard") !== el) return;
-    el.classList.remove("turn1"); el.classList.add("up", "turn2");     // la face apparaît à mi-tour, sans re-dessiner la carte
     opChrome(); SND.reveal(c.it.t);
     const st = $("opStage");
     if (c.it.t === 4) { const f = document.createElement("div"); f.className = "oflash"; st.appendChild(f); setTimeout(() => f.remove(), 700); sparks(34, ["#FFE7A0", "#E9C46A", "#FFFFFF", "#FFF3C4"], 260); if (navigator.vibrate) try { navigator.vibrate([30, 40, 60]); } catch (e) {} }
     else if (c.it.t === 3) { const f = document.createElement("div"); f.className = "oflash epic"; st.appendChild(f); setTimeout(() => f.remove(), 700); sparks(16, ["#E3C2F0", "#B07CC6", "#FFFFFF"], 200); }
     else if (c.it.t === 2) sparks(8, ["#BFD3F5", "#FFFFFF"], 150);
   };
-  el.querySelector(".oflip").addEventListener("animationend", half, { once: true });
-  setTimeout(half, 220);
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!fl.animate || reduce) { el.classList.add("up"); after(); return; }
+  // Un seul plan qui pivote (pas de 3D imbriquée) : fiable sur iPhone comme sur Android
+  OP.turning = true; fl.classList.add("lift");
+  const P = "perspective(1000px) ";
+  const a1 = fl.animate([{ transform: P + "rotateY(0deg) scale(1)" }, { transform: P + "rotateY(84deg) scale(1.08)" }], { duration: 230, easing: "cubic-bezier(.4,0,.9,.6)", fill: "forwards" });
+  a1.onfinish = () => {
+    el.classList.add("up");                                   // la face apparaît quand la carte est de profil
+    const a2 = fl.animate([{ transform: P + "rotateY(-84deg) scale(1.08)" }, { transform: P + "rotateY(6deg) scale(1.02)", offset: .78 }, { transform: P + "rotateY(0deg) scale(1)" }],
+      { duration: 340, easing: "cubic-bezier(.15,.7,.3,1)", fill: "forwards" });
+    a2.onfinish = () => { OP.turning = false; fl.classList.remove("lift"); try { a1.cancel(); a2.cancel(); } catch (e) {} };
+    after();
+  };
+  setTimeout(() => { if (OP.turning && $("ocard") !== el) OP.turning = false; }, 900);
 }
 function opStep() {
   if (OP.phase === "summary") return;
   if (OP.phase === "booster") { showStack(); return; }
   if (OP.phase !== "stack") return;
+  if (OP.turning) return;
   if (!OP.up[OP.idx]) { revealCurrent(); return; }
   if (OP.idx < OP.cards.length - 1) { const el = $("ocard"); el.classList.add("leave"); OP.idx += 1; setTimeout(() => drawOp("in"), 150); }
   else if (OP.kind === "capture") closeOpener();
