@@ -471,7 +471,7 @@ sup { font-size: .62em; line-height: 0; }
 .ocard.hint3 .pcover { animation: hint3 .6s ease-in-out infinite alternate; }
 .ocard.hint4 .pcover { animation: hint4 .45s ease-in-out infinite alternate; }
 @keyframes hint3 { from { filter: drop-shadow(0 0 4px rgba(176,124,198,.5)); } to { filter: drop-shadow(0 0 18px rgba(176,124,198,.95)); } }
-@keyframes hint4 { from { filter: drop-shadow(0 0 6px rgba(233,196,106,.6)); transform: rotateY(180deg) rotate(-.6deg); } to { filter: drop-shadow(0 0 24px rgba(255,231,160,1)); transform: rotateY(180deg) rotate(.6deg); } }
+@keyframes hint4 { from { filter: drop-shadow(0 0 6px rgba(233,196,106,.6)); transform: rotate(-.6deg); } to { filter: drop-shadow(0 0 24px rgba(255,231,160,1)); transform: rotate(.6deg); } }
 .op-summary.out, .op-stage.out { animation: opOut .22s ease-in forwards; }
 @keyframes opOut { to { opacity: 0; transform: translateY(-16px) scale(.97); } }
 .op-summary { animation: opIn .25s ease-out; }
@@ -482,7 +482,7 @@ sup { font-size: .62em; line-height: 0; }
 .op-cd b { display: block; height: 100%; width: 100%; background: var(--r4); transform-origin: left; animation: cd linear forwards; }
 @keyframes cd { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .op-next .stop { margin-left: 4px; }
-@media (prefers-reduced-motion: reduce) { .ocard.hint3 .pcover, .ocard.hint4 .pcover, .op-summary { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ocard.hint3 .pcover, .ocard.hint4 .pcover, .op-summary, .ocard.turn1 .oflip, .ocard.turn2 .oflip { animation: none; } }
 @keyframes miniIn { from { opacity: 0; transform: translateX(12px) scale(.94); } to { opacity: 1; transform: none; } }
 .op-next { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; color: var(--white); }
 .op-next .mpack { position: relative; width: 82px; aspect-ratio: 5 / 7; border: 0; padding: 0; background: none; cursor: pointer; }
@@ -524,10 +524,15 @@ sup { font-size: .62em; line-height: 0; }
 .ostack { position: absolute; inset: 0; }
 .ostack .under { position: absolute; inset: 0; border-radius: 9px; background: var(--green); box-shadow: inset 0 0 0 3px var(--navy), 0 4px 10px rgba(0,0,0,.35); }
 .ocard { position: absolute; inset: 0; perspective: 1400px; cursor: pointer; animation: ocIn .22s ease-out both; }
-.ocard .oflip { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .42s cubic-bezier(.3,.7,.3,1); transform: rotateY(180deg); }
-.ocard.up .oflip { transform: none; }
-.ocard .pface { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.ocard .pcover { transform: rotateY(180deg); }
+/* Retournement en deux demi-tours : la carte pivote jusqu'à la tranche, on échange les faces, elle revient.
+   Une seule face existe à la fois : pas de trou au milieu, et rien ne dépend de backface-visibility (capricieux sur iPhone). */
+.ocard .oflip { position: absolute; inset: 0; transform: perspective(1100px) rotateY(0deg); will-change: transform; }
+.ocard .pface { position: absolute; inset: 0; }
+.ocard.turn1 .oflip { animation: turn1 .14s cubic-bezier(.55,0,1,.45) forwards; }
+.ocard.turn2 .oflip { animation: turn2 .24s cubic-bezier(.15,.85,.35,1.12) both; }
+/* on s'arrête juste avant la tranche (82°) : la carte ne disparaît jamais complètement */
+@keyframes turn1 { from { transform: perspective(1100px) rotateY(0deg); } to { transform: perspective(1100px) rotateY(82deg) scale(1.03); } }
+@keyframes turn2 { from { transform: perspective(1100px) rotateY(-82deg) scale(1.03); } to { transform: perspective(1100px) rotateY(0deg); } }
 .ocard.leave { animation: ocOut .2s ease-in forwards; }
 .ocard.back { animation: ocBack .2s ease-out both; }
 @keyframes ocIn { from { transform: translateY(14px) scale(.96); } to { transform: none; } }
@@ -638,7 +643,6 @@ sup { font-size: .62em; line-height: 0; }
 
 /* Retournement fiable sur mobile : WebKit et Chrome Android ignorent backface-visibility quand la face contient
    elle-meme de la 3D ou des animations. On bascule donc les faces a mi-course (angle de 90 degres). */
-.ocard .pcover, .ocard .pfront { transition: visibility 0s .086s; }
 .ocard .pfront, .ocard.up .pcover { visibility: hidden; }
 .ocard.up .pfront { visibility: visible; }
 .pcard .pcover, .pcard .pfront { transition: visibility 0s .123s; }
@@ -1778,17 +1782,22 @@ function showStack() {
 }
 function drawOp(anim) {
   const n = OP.cards.length, c = OP.cards[OP.idx], up = OP.up[OP.idx], left = n - OP.idx - 1;
-  if (up && c.isNew) { drawMini(c.it); $("opMini").classList.add("on"); } else $("opMini").classList.remove("on");
   const under = Array.from({ length: Math.min(4, left) }, (_, i) => `<div class="under" style="transform:translate(${(i + 1) * 4}px, ${(i + 1) * 5}px) rotate(${(i + 1) * 1.2}deg);z-index:${-i - 1}"></div>`).join("");
   $("opStage").innerHTML = `<div class="ostack">${under}<div class="ocard${up ? " up" : ""} t${c.it.t}${anim === "back" ? " back" : ""}" id="ocard"><div class="oflip"><div class="pface pcover">${coverHTML()}</div><div class="pface pfront"><span class="ptag${c.isNew ? " new" : ""}">${tagOf(c)}</span>${cardHTML(c.it)}</div></div></div></div>`;
-  $("opCount").innerHTML = OP.cards.map((x, k) => `<i class="${OP.up[k] ? "seen" : ""}${k === OP.idx ? " cur" : ""}" style="--c:${x.it.t ? getTierColor(x.it.t) : "rgba(246,242,232,.7)"}"></i>`).join("");
-  $("opCount").setAttribute("aria-label", `Carte ${OP.idx + 1} sur ${n}`);
+  opChrome();
   // carte face cachée : elle se retourne seule ; les Épiques et Légendaires se font un peu attendre (le dos brille)
   clearTimeout(OP.tAuto);
   if (!up && OP.phase === "stack") {
     const el = $("ocard"); if (c.it.t >= 3) el.classList.add("hint" + c.it.t);
-    OP.tAuto = setTimeout(() => { if (OP.phase === "stack" && OP.cards[OP.idx] === c && !OP.up[OP.idx]) revealCurrent(); }, c.it.t >= 4 ? 900 : c.it.t >= 3 ? 650 : 280);
+    OP.tAuto = setTimeout(() => { if (OP.phase === "stack" && OP.cards[OP.idx] === c && !OP.up[OP.idx]) revealCurrent(); }, c.it.t >= 4 ? 900 : c.it.t >= 3 ? 650 : 260);
   }
+}
+// titre, points de progression et mini-plan (sans toucher à la carte)
+function opChrome() {
+  const n = OP.cards.length, c = OP.cards[OP.idx], up = OP.up[OP.idx];
+  if (up && c.isNew) { drawMini(c.it); $("opMini").classList.add("on"); } else $("opMini").classList.remove("on");
+  $("opCount").innerHTML = OP.cards.map((x, k) => `<i class="${OP.up[k] ? "seen" : ""}${k === OP.idx ? " cur" : ""}" style="--c:${x.it.t ? getTierColor(x.it.t) : "rgba(246,242,232,.7)"}"></i>`).join("");
+  $("opCount").setAttribute("aria-label", `Carte ${OP.idx + 1} sur ${n}`);
   $("opPrev").disabled = OP.idx === 0;
   $("opTitle").innerHTML = up ? `<div class="k">${esc(KINDS[c.it.k].l)} · ${c.capture ? "capturée sur place" : c.pending ? `à découvrir · ${fmtDist(distTo(c.it, proj(S.pos.lat, S.pos.lon)))}` : c.isNew ? "nouvelle carte" : "doublon"}</div><div class="t tier-label" style="color:${c.it.t === 4 ? "#F7DE95" : c.it.t ? lighten(getTierColor(c.it.t)) : "#F6F2E8"}"><span style="display:block;font-size:.55em;letter-spacing:.2em">${"★".repeat(c.it.t + 1)}</span>${TIERS[c.it.t]}</div>` : `<div class="k">${OP.kind === "parigo" ? "Pack PariGo" : /^arr:/.test(OP.kind || "") ? `Pack ${arrShort(+OP.kind.slice(4))} arrondissement` : "Paquet"}</div><div class="t">Touchez pour retourner</div>`;
 }
@@ -1797,16 +1806,21 @@ const lighten = hex => { const n = parseInt(hex.slice(1), 16), f = c => Math.min
 function revealCurrent() {
   clearTimeout(OP.tAuto);
   const c = OP.cards[OP.idx]; OP.up[OP.idx] = true;
-  const el = $("ocard"); el.classList.remove("hint3", "hint4"); el.classList.add("up"); SND.flip();
-  setTimeout(() => {
-    if (OP.phase !== "stack" || OP.cards[OP.idx] !== c) return;
-    drawOp(); SND.reveal(c.it.t);
-    if (c.isNew) { drawMini(c.it); $("opMini").classList.add("on"); }
+  const el = $("ocard"); el.classList.remove("hint3", "hint4"); el.classList.add("turn1"); SND.flip();
+  // échange des faces dès la fin du premier demi-tour (événement d'animation, filet de sécurité à 220 ms)
+  let done = false;
+  const half = () => {
+    if (done) return; done = true;
+    if (OP.phase !== "stack" || OP.cards[OP.idx] !== c || $("ocard") !== el) return;
+    el.classList.remove("turn1"); el.classList.add("up", "turn2");     // la face apparaît à mi-tour, sans re-dessiner la carte
+    opChrome(); SND.reveal(c.it.t);
     const st = $("opStage");
     if (c.it.t === 4) { const f = document.createElement("div"); f.className = "oflash"; st.appendChild(f); setTimeout(() => f.remove(), 700); sparks(34, ["#FFE7A0", "#E9C46A", "#FFFFFF", "#FFF3C4"], 260); if (navigator.vibrate) try { navigator.vibrate([30, 40, 60]); } catch (e) {} }
     else if (c.it.t === 3) { const f = document.createElement("div"); f.className = "oflash epic"; st.appendChild(f); setTimeout(() => f.remove(), 700); sparks(16, ["#E3C2F0", "#B07CC6", "#FFFFFF"], 200); }
     else if (c.it.t === 2) sparks(8, ["#BFD3F5", "#FFFFFF"], 150);
-  }, 210);
+  };
+  el.querySelector(".oflip").addEventListener("animationend", half, { once: true });
+  setTimeout(half, 220);
 }
 function opStep() {
   if (OP.phase === "summary") return;
@@ -1852,15 +1866,11 @@ function goNextPack(nx) {
 function renderNextPack() {
   const el = $("opNextPack"); if (!el) return;
   clearTimeout(OP.tNext);
-  const nx = nextPackAction(), left = nx.left, auto = left && S.settings.autoNext !== false && !OP.stopAuto;
+  const nx = nextPackAction(), left = nx.left, auto = false;   // enchaînement automatique retiré (19/10/2026) : le joueur choisit
   el.dataset.left = left;
   el.innerHTML = `<button class="mpack" id="opNextBtn" ${left ? "" : "disabled"} aria-label="Ouvrir le paquet suivant"><div class="bp-top"></div><div class="bp-body"><b>PQ</b></div></button>
     <div><div class="t">${left ? esc(nx.label) : "Plus de paquet pour l'instant"}</div><small id="opNextTxt">${left ? (auto ? "Ouverture automatique…" : `${left} ${nx.unit}${left > 1 ? "s" : ""} en réserve · touchez pour ouvrir`) : nextText(nx.pi || packInfo())}</small>
     ${auto ? `<span class="op-cd"><b style="animation-duration:${AUTO_NEXT_MS}ms"></b></span>` : ""}</div>`;
-  let tg = $("autoNextBox");
-  if (!tg) { el.insertAdjacentHTML("afterend", `<label class="autonext" id="autoNextBox"><input type="checkbox" id="autoNextIn"> Enchaîner les paquets automatiquement</label>`); tg = $("autoNextBox"); }
-  $("autoNextIn").checked = S.settings.autoNext !== false;
-  $("autoNextIn").onchange = e => { S.settings.autoNext = e.target.checked; OP.stopAuto = false; save(); renderNextPack(); };
   if (left) $("opNextBtn").onclick = () => goNextPack(nx);
   if (auto) OP.tNext = setTimeout(() => { if (OP.phase === "summary" && !$("opener").hidden) goNextPack(nx); }, AUTO_NEXT_MS);
 }
