@@ -98,6 +98,6 @@ icon(512, True).save(SITE / "icons/icon-maskable-512.png")
 
 # Chaîne de données, pour mémoire
 PIPE = SITE / "pipeline"; PIPE.mkdir(exist_ok=True)
-for f in ["build2.py", "db.py", "wikidata.py", "ridership.py", "build_site.py", "build_server.py", "ponts.py", "acces.py", "lines.py", "quests.py", "requetes.sql", "parisquest.html"]:
+for f in ["build2.py", "db.py", "wikidata.py", "ridership.py", "build_site.py", "build_server.py", "ponts.py", "vestiges.py", "acces.py", "lines.py", "quests.py", "requetes.sql", "parisquest.html"]:
     shutil.copy(ROOT / f, PIPE / f)
 print("site prêt", VERSION)
