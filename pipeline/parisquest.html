@@ -1307,7 +1307,7 @@ function renderSheet() {
       ${it.ln ? `<p>${lineBadges(it)}</p>` : ""}
       <p>${sub}</p>
       <p><span class="dist">${within ? "Ici" : fmtDist(tg.d) + " · " + bearing(proj(S.pos.lat, S.pos.lon), it)}</span> &nbsp;${note}</p>
-      ${(it.x || {}).priv ? `<p class="privnote">Voie privée fermée au public : elle se capture depuis son entrée, inutile d'y entrer.</p>` : (it.x || {}).acc ? `<p class="privnote">Lieu en retrait de la rue : il se capture depuis l'espace public le plus proche.</p>` : ""}
+      ${(it.x || {}).priv ? `<p class="privnote">Voie privée fermée au public : elle se capture depuis son entrée, inutile d'y entrer.</p>` : it.k === "vestige" ? `<p class="privnote">${(it.x || {}).vis ? "Sous vos pieds : ce vestige est encore visible sur place." : "Sous vos pieds : le vestige est enfoui ou a disparu, rien à voir en surface, mais c'était ici."}</p>` : (it.x || {}).acc ? `<p class="privnote">Lieu en retrait de la rue : il se capture depuis l'espace public le plus proche.</p>` : ""}
     </div>
     <div class="sheet-actions">
       ${tg.list.length > 1 ? `<button class="btn light small" id="nextBtn">Suivant</button>` : ""}
@@ -1378,6 +1378,16 @@ function migrateMoved(mv) {
     delete S.owned[o]; n++;
   }
   if (S.profile && S.profile.show) S.profile.show = S.profile.show.map(id => (mv || {})[id] || id);
+  return n;
+}
+// Lieux retirés du jeu (vestiges sans découverte claire) : 10 PQ rendus par exemplaire, comme sur le serveur
+function dropRemoved(rm) {
+  let n = 0;
+  for (const id of rm || []) {
+    const o = S.owned[id]; if (!o) continue;
+    S.wallet.bought = (S.wallet.bought || 0) + 10 * (o.copies || 1); delete S.owned[id]; n++;
+  }
+  if (n && S.profile && S.profile.show) S.profile.show = S.profile.show.filter(id => !(rm || []).includes(id));
   return n;
 }
 function recomputeDone() { S.done = {}; COLS.forEach(([, , , idxs], c) => { if (idxs.length && idxs.every(i => S.owned[ITEMS[i].i])) S.done[c] = true; }); }
@@ -2745,7 +2755,7 @@ function loadStreets() {
 Promise.all([fetch("data/places.json").then(r => r.json()), fetch("data/map.json").then(r => r.json()), fetch("data/quests.json").then(r => r.json()).catch(() => null)])
   .then(([pl, mp, qd]) => {
     prepare(pl, mp); if (qd) questsInit(qd); ui.ready = true;
-    if (!SB_CONF) { if (migrateMoved(pl.moved)) save(); recomputeDone(); }
+    if (!SB_CONF) { const m = migrateMoved(pl.moved), r = dropRemoved(pl.removed); if (m || r) save(); recomputeDone(); if (r) setTimeout(() => toast(`${r} carte${r > 1 ? "s" : ""} retirée${r > 1 ? "s" : ""} du jeu, remboursée${r > 1 ? "s" : ""} en PQ.`), 1500); }
     if (SB && ui.user) syncServer();
     $("loading").hidden = true;
     refreshAll();

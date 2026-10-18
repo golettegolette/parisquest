@@ -151,6 +151,15 @@ THEMES = [
     ("Mémoire", "femmes", "Femmes illustres", "Ambassadrice des femmes illustres", "Les plaques des femmes illustres.", by("femme")),
     ("Mémoire", "tombes", "Tombes célèbres", "Pèlerin", "Les tombes des personnalités.", by("tombe")),
     ("Mémoire", "plaques", "Toutes les plaques", "Gardien des plaques", "Toutes les plaques commémoratives.", by("plaque")),
+    # Sous vos pieds (vestiges archéologiques, enfouis ou visibles)
+    ("Sous vos pieds", "vestiges", "Sous vos pieds", "Archéologue", "Tous les vestiges archéologiques : ce que les fouilles ont trouvé sous les rues de Paris.", by("vestige")),
+    ("Sous vos pieds", "visibles", "Encore visibles", "Œil de l'archéologue", "Les vestiges qu'on peut encore voir sur place.", by("vestige", lambda it: (it.get("x") or {}).get("vis"))),
+    ("Sous vos pieds", "lutece-monuments", "Les monuments de Lutèce", "Citoyen de Lutèce", "Thermes, forum, arènes, théâtre, temples, aqueduc et voies de la ville romaine.",
+     by("vestige", lambda it: it["n"].startswith(("Thermes", "Forum de Lutèce", "Arènes", "Théâtre antique", "Temple antique", "Aqueduc gallo", "Voie romaine")) or it["i"] in ("vestige:Q641548", "vestige:Q2669368"))),
+    ("Sous vos pieds", "necropoles", "Nécropoles et sarcophages", "Gardien des tombeaux", "Sarcophages, sépultures et anciens cimetières retrouvés sous la ville.",
+     by("vestige", lambda it: (it.get("x") or {}).get("ic") in ("sarcophagus", "stele"))),
+    ("Sous vos pieds", "enceintes-enfouies", "Les enceintes enfouies", "Bâtisseur de remparts", "Les tronçons des murailles successives de Paris retrouvés en fouille.",
+     by("vestige", lambda it: (it.get("x") or {}).get("ic") == "rampart")),
     # Patrimoine
     ("Patrimoine", "antiquite", "Lutèce antique", "Archéologue de Lutèce", "Les vestiges de l'Antiquité.", by("vestige", lambda it: "antiquite" in (it.get("x") or {}).get("per", []))),
     ("Patrimoine", "moyenage", "Paris médiéval", "Chevalier de Paris", "Les vestiges du Moyen Âge.", by("vestige", lambda it: "moyen_age" in (it.get("x") or {}).get("per", []))),
@@ -209,7 +218,7 @@ quest("Prestige", "series", "Séries complètes", "Maître des séries", "Termin
 
 # ---------- Classement, descriptions et contenu (affichage) ----------
 CATS = ["Arrondissements et quartiers", "Lignes de métro", "RER, tram et funiculaire", "Stations et gares", "Personnalités",
-        "Histoire et mémoire", "Patrimoine", "Nature", "Eau et ponts", "Culture", "Vie de quartier", "Rues et voies", "Grands défis"]
+        "Histoire et mémoire", "Sous vos pieds : vestiges archéologiques", "Patrimoine", "Nature", "Eau et ponts", "Culture", "Vie de quartier", "Rues et voies", "Grands défis"]
 SERIE_CAT = {0: "Nature", 1: "Nature", 2: "Nature", 3: "Nature", 4: "Nature", 5: "Eau et ponts", 6: "Eau et ponts", 7: "Eau et ponts",
              8: "Eau et ponts", 9: "Eau et ponts", 10: "Rues et voies", 11: "Rues et voies", 12: "Personnalités", 13: "Personnalités",
              14: "Personnalités", 15: "Personnalités", 16: "Personnalités", 17: "Personnalités", 18: "Histoire et mémoire",
@@ -219,7 +228,8 @@ SERIE_CAT = {0: "Nature", 1: "Nature", 2: "Nature", 3: "Nature", 4: "Nature", 5:
              35: "Stations et gares", 36: "RER, tram et funiculaire", 37: "Stations et gares"}
 PERSO = ["femmes", "serie-12", "serie-13", "serie-14", "serie-15", "plaque-1", "plaque-2", "plaque-3", "plaque-4", "plaque-5",
          "serie-16", "serie-17", "plaque-0", "plaque-6", "plaque-8", "tombes"]
-HIST = ["antiquite", "serie-20", "moyenage", "modernes", "serie-18", "serie-29", "serie-28", "plaque-7", "plaque-9", "plaque-10", "plaques"]
+SOUS = ["vestiges", "visibles", "lutece-monuments", "antiquite", "serie-20", "moyenage", "modernes", "necropoles", "enceintes-enfouies"]
+HIST = ["serie-18", "serie-29", "serie-28", "plaque-7", "plaque-9", "plaque-10", "plaques"]
 DESC = {
     "fontaines-monu": "Les fontaines sculptées des places et des jardins.",
     "piscines": "Les piscines de la Ville, des bassins Art déco aux plus récentes.",
@@ -244,9 +254,10 @@ DESC = {
     "femmes": "Les femmes illustres liées à un lieu de Paris.",
     "tombes": "Les tombes de personnalités dans les cimetières parisiens.",
     "plaques": "Toutes les plaques commémoratives de la Ville.",
-    "antiquite": "Arènes, thermes, forum : les traces de la Lutèce gallo-romaine.",
-    "moyenage": "Les vestiges du Moyen Âge : enceintes, églises, maisons.",
-    "modernes": "Les vestiges des XVIᵉ, XVIIᵉ et XVIIIᵉ siècles.",
+    "antiquite": "Tout ce que les fouilles ont retrouvé de la Lutèce gallo-romaine.",
+    "moyenage": "Les vestiges du Moyen Âge retrouvés sous la ville : églises, cimetières, enceintes, caves.",
+    "modernes": "Les vestiges des XVIᵉ, XVIIᵉ et XVIIIᵉ siècles retrouvés en fouille.",
+    "serie-20": "Les traces de la Lutèce d'avant Rome.",
     "hotels": "Les hôtels particuliers, demeures de l'aristocratie et de la grande bourgeoisie.",
     "culte": "Églises, temples, synagogues, mosquées et pagodes.",
     "cathedrales": "Les cathédrales de toutes les confessions.",
@@ -349,7 +360,9 @@ for q in Q:
     elif i.startswith("ligne-"): q["cat"] = "Lignes de métro" if LINES[i[6:]]["m"] == "metro" else "RER, tram et funiculaire"
     elif i == "funiculaire": q["cat"] = "RER, tram et funiculaire"
     elif q["cat"] == "Transports": q["cat"] = "Stations et gares"
+    elif i in SOUS: q["cat"] = "Sous vos pieds : vestiges archéologiques"
     elif i.startswith("serie-"): q["cat"] = SERIE_CAT[int(i[6:])]
+    elif i in SOUS: q["cat"] = "Sous vos pieds : vestiges archéologiques"
     elif i in PERSO: q["cat"] = "Personnalités"
     elif i in HIST: q["cat"] = "Histoire et mémoire"
     elif q["cat"] in ("Familles", "Prestige"): q["cat"] = "Grands défis"
@@ -364,7 +377,7 @@ for q in Q:
 # ordre : par catégorie, puis lignes et arrondissements dans l'ordre croissant, sinon ordre de création
 def lnum(c):
     m = re.match(r"([A-Z]+)(\d*)(.*)", c); return (m.group(1), int(m.group(2) or 0), m.group(3))
-FIRST = {"Personnalités": PERSO, "Histoire et mémoire": HIST}
+FIRST = {"Personnalités": PERSO, "Histoire et mémoire": HIST, "Sous vos pieds : vestiges archéologiques": SOUS}
 def key(iq):
     k, q = iq; i = q["id"]
     if i.startswith("arr-"): sub = (0, int(i[4:]))

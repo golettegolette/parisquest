@@ -29,7 +29,7 @@ RULES = [
     (r"arènes", "Arènes de Lutèce", "fp", "arena", False),
     (r"thermes", "Thermes", "mp", "column", True),
     (r"\bforum\b", "Forum de Lutèce", "ms", "column", False),
-    (r"\btemple\b", "Temple antique", "ms", "column", False),
+    (r"\b(?:un|le) temple\b(?! protestant)|temple (?:gallo|antique|romain|de mercure|dédié)", "Temple antique", "ms", "column", False),
     (r"théâtre antique|théâtre gallo", "Théâtre antique", "ms", "arena", False),
     (r"aqueduc", "Aqueduc", "ms", "aqueduct", True),
     (r"pirogue|embarcation|barque", "Pirogues", "fp", "boat", True),
@@ -69,7 +69,7 @@ RULES = [
 ]
 # lieu nommé dans la synthèse, pour préciser le titre : « Sarcophages de Saint-Marcel », « Hôtel Lambert »
 NAMED = re.compile(r"(?:[ée]glise|[ÉE]glise|chapelle|abbaye|prieuré|couvent|cloître|paroisse|bourg)\s+(?:de\s+|du\s+)?" + SAINT)
-HOTEL = re.compile(r"(?:[hH]ôtel)\s+(?:de\s+(?:la\s+)?|du\s+|des\s+|d')?((?:[A-ZÉ][a-zéèêëàâîïôûç'\-]+)(?:[\s-](?:de\s+|du\s+)?[A-ZÉ][a-zéèêëàâîïôûç'\-]+)?)")
+HOTEL = re.compile(r"(?:[hH]ôtel)\s+((?:de\s+(?:la\s+)?|du\s+|des\s+|d')?(?:[A-ZÉ][a-zéèêëàâîïôûç'\-]+)(?:[\s-](?:de\s+|du\s+)?[A-ZÉ][a-zéèêëàâîïôûç'\-]+)?)")
 # mots qui décrivent les travaux plutôt que la découverte (« lors de la construction de l'égout »)
 CONTEXTE = re.compile(r"lors d|occasion d|en creusant|pour réparer|raccordement|percement|établissement d|travaux|construction d|projet d|dans le cadre|emprise d|creusement d|aménagement d|agrandissement d|réseau d")
 MAJEUR = {"Arènes de Lutèce", "Thermes", "Forum de Lutèce", "Temple antique", "Théâtre antique", "Pirogues", "Trésor", "Aqueduc"}
@@ -111,13 +111,16 @@ def titre(r):
             return f"{title} de {named.group(1)}", ic
         if ic == "facade" and named and named.group(0)[:1].lower() in "ée":
             return f"Église {named.group(1)}"[:40], "church"
-        if ic in ("facade",) and hotel and hotel.group(1) not in ("Ville", "Dieu"):
+        if ic in ("facade",) and hotel and re.sub(r"^(de |du |des |d')", "", hotel.group(1)) not in ("Ville", "Dieu"):
             return f"Hôtel {hotel.group(1)}"[:40], "mansion"
+        if title == "Enceinte":
+            for pat2, title2, _, _, _ in RULES:
+                if title2 and title2.startswith(("Enceinte de", "Mur des")) and re.search(pat2, tl): return title2, ic
         if accord and p:
             per = p[0] if len(p) == 1 else proche(tl, pat, p)
             if per: title += " " + ADJ[per][G[g]]
         return title, ic
-    if hotel and hotel.group(1) not in ("Ville", "Dieu"): return f"Hôtel {hotel.group(1)}"[:40], "mansion"
+    if hotel and re.sub(r"^(de |du |des |d')", "", hotel.group(1)) not in ("Ville", "Dieu"): return f"Hôtel {hotel.group(1)}"[:40], "mansion"
     return None, "trowel"
 
 def norm(s):
@@ -136,7 +139,91 @@ for it in pl["items"]:
     it["n"] = t[0].upper() + t[1:]; x["ic"] = ic; n += 1
     stats[re.sub(r" (gallo-romaine?s?|médiéva\w+|modernes?|gauloise?s?|préhistoriques?|mérovingien\w*|du XIXᵉ siècle)$", "", it["n"])] += 1
     if len(ex[ic]) < 3: ex[ic].append(it["n"])
+# ---------- « Sous vos pieds » : on ne garde que le visible ou le clairement décrit ----------
+# Vestiges encore visibles depuis l'espace public (relu à la main dans les synthèses)
+VISIBLES = {"24", "1971", "524", "576", "1796"}
+# titre, illustration et, si les vestiges ont été déplacés, l'endroit où on les voit aujourd'hui
+MANUEL = {
+    "24": ("Tour de la Liberté de la Bastille", "rampart", (48.85132, 2.36178)),     # remontée au square Henri-Galli
+    "1971": ("Chapelle de la Vierge de Saint-Germain-des-Prés", "church", (48.85426, 2.33394)),   # square Laurent-Prache
+    "524": ("Crypte archéologique du parvis Notre-Dame", "vault", None),
+    "576": ("Rempart du Bas-Empire", "rampart", None),
+    "1796": ("Enceinte gallo-romaine de la Cité", "rampart", None),
+}
+EXCLU = {"2216"}     # synthèse trompeuse (parcelle hors de l'enceinte, rien de notable)
+VIS_WD = {"vestige:Q641548", "vestige:Q2669368"}          # arènes de Lutèce, thermes de Cluny
+VAGUE = ("Fondations", "Habitat", "Fosses", "Objets anciens", "Céramiques", "Fossé", "Ancienne canalisation",
+         "Vestiges", "Site archéologique", "Fouille archéologique")
+def garder(it):
+    if it["k"] != "vestige": return True
+    if not it["i"].startswith("vestige:") or not it["i"][8:].isdigit(): return True
+    sid = it["i"][8:]; r = SRC.get(sid) or {}
+    if sid in EXCLU: return False
+    if sid in VISIBLES: return True
+    syn = r.get("synthese") or ""
+    flou = re.search(r"indéterminée?s?|incertaine?s?|n'est pas précisé|non précisé|aucun contexte|difficile de se prononcer|aurait", syn) and len(syn) < 220
+    return (it.get("x") or {}).get("ic", "trowel") != "trowel" and len(syn) >= 70 and not flou and \
+        not any(it["n"] == v or it["n"].startswith(v + " ") for v in VAGUE)
+for it in pl["items"]:
+    if it["k"] == "vestige" and it["i"][8:] in MANUEL:
+        t, ic, pos = MANUEL[it["i"][8:]]
+        it["n"] = t; it["x"]["ic"] = ic
+        if pos: it["a"], it["o"] = pos; it["site"] = {"24": "Square Henri-Galli", "1971": "Square Laurent-Prache"}[it["i"][8:]]
+retires = [it["i"] for it in pl["items"] if not garder(it)]
+for it in pl["items"]:
+    if it["k"] == "vestige":
+        vis = it["i"] in VIS_WD or it["i"][8:] in VISIBLES
+        it.setdefault("x", {})["vis"] = 1 if vis else 0
+        it["s"] = "Visible sur place" if vis else "Enfoui ou disparu"
+pl["kinds"]["vestige"]["l"] = "Sous vos pieds"
+old_ids = [it["i"] for it in pl["items"]]
+gone = set(retires)
+keep = [it for it in pl["items"] if it["i"] not in gone]
+new_index = {it["i"]: k for k, it in enumerate(keep)}
+for c in pl["collections"]:
+    c[3] = sorted(new_index[old_ids[i]] for i in c[3] if old_ids[i] in new_index)
+pl["items"] = keep
+pl["removed"] = sorted(set(pl.get("removed", [])) | gone)
 json.dump(pl, open(PL, "w"), ensure_ascii=False, separators=(",", ":"))
+
+lit = lambda v: "'" + v.replace("'", "''") + "'"
+REFUND = 10   # PQ rendus par exemplaire retiré (1 paquet de 5 cartes ≈ 50 PQ en Boutique)
+sql = f"""-- Parisquest : « Sous vos pieds », vestiges archéologiques (généré par pipeline/vestiges.py).
+-- On ne garde que les vestiges visibles ou clairement décrits. Les cartes retirées sont remboursées
+-- ({REFUND} PQ par exemplaire, mises en vente comprises), les échanges en cours qui les contiennent sont annulés.
+-- À exécuter une fois dans Supabase (SQL Editor), puis relancer quests_data.sql. Peut être relancé sans risque.
+drop table if exists pg_temp.retire;
+create temporary table retire (id text primary key);
+insert into retire select unnest(array[{",".join(lit(i) for i in pl["removed"])}]) on conflict do nothing;
+delete from retire r where not exists (select 1 from public.places p where p.id = r.id);
+-- remboursement des cartes possédées
+update public.players p set ecus = p.ecus + {REFUND} * x.n
+  from (select c.user_id, sum(c.copies) n from public.user_cards c join retire r on r.id = c.place_id group by c.user_id) x
+  where p.user_id = x.user_id;
+-- ventes au Marché : l'enchérisseur récupère sa mise, le vendeur est remboursé de sa carte
+update public.players p set ecus = p.ecus + x.n
+  from (select bidder, sum(current_bid) n from public.listings l join retire r on r.id = l.place_id
+        where l.status = 'open' and l.bidder is not null group by bidder) x where p.user_id = x.bidder;
+update public.players p set ecus = p.ecus + {REFUND} * x.n
+  from (select seller, count(*) n from public.listings l join retire r on r.id = l.place_id where l.status = 'open' group by seller) x
+  where p.user_id = x.seller;
+delete from public.listings l using retire r where l.place_id = r.id;
+update public.trades t set status = 'cancelled', decided_at = now()
+  where t.status = 'open' and (t.give && (select array_agg(id) from retire) or t.want && (select array_agg(id) from retire));
+update public.profiles p set showcase = (select coalesce(array_agg(x), '{{}}') from unnest(p.showcase) x where x not in (select id from retire))
+  where p.showcase && (select array_agg(id) from retire);
+delete from public.defense_decks d where d.cards && (select array_agg(id) from retire);
+update public.messages m set place_id = null from retire r where m.place_id = r.id;
+update public.players p set last_visit_place = null from retire r where p.last_visit_place = r.id;
+delete from public.visit_log v using retire r where v.place_id = r.id;
+delete from public.user_cards c using retire r where c.place_id = r.id;
+delete from public.place_tags t using retire r where t.place_id = r.id;
+delete from public.places p using retire r where p.id = r.id;
+-- vestiges remontés ailleurs : la carte se capture là où on les voit aujourd'hui
+""" + "".join(f"update public.places set lat = {pos[0]}, lon = {pos[1]} where id = 'vestige:{k}';\n" for k, (_, _, pos) in MANUEL.items() if pos) + """select count(*) as vestiges_retires from retire;
+"""
+(ROOT / "site" / "supabase" / "vestiges_retires.sql").write_text(sql)
+print(len(retires), "vestiges retirés ;", sum(1 for it in keep if it["k"] == "vestige"), "gardés dont",
+      sum(1 for it in keep if it["k"] == "vestige" and it["x"].get("vis")), "visibles")
 print(n, "vestiges renommés ;", len(stats), "titres différents")
-for k, v in stats.most_common(45): print(f"  {v:4}  {k}")
-print({k: v for k, v in ex.items()})
+for k, v in stats.most_common(12): print(f"  {v:4}  {k}")
