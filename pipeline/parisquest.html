@@ -101,6 +101,7 @@ sup { font-size: .62em; line-height: 0; }
   padding: 5px 10px 5px 7px; background: rgba(246,242,232,.93); color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--joint); font-size: 13px; font-weight: 600;
 }
+.chip.legend .dash { width: 18px; height: 0; border-top: 2.5px dashed rgba(181,134,42,.95); }
 .chip i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--white); }
 .chip[aria-pressed="false"] { opacity: .5; }
 .chip.ownsw { gap: 7px; padding: 5px 11px 5px 6px; background: var(--white); color: var(--navy); box-shadow: inset 0 0 0 1.5px var(--navy); opacity: 1; }
@@ -411,10 +412,16 @@ sup { font-size: .62em; line-height: 0; }
 .card.r1 .face { background: linear-gradient(140deg, #5FA383, #2D6448 45%, #3F7D62); }
 .card.r2 .face { background: linear-gradient(140deg, #7FA8E8, #2D63B0 40%, #1E4C8F 75%, #4E82D0); }
 .card.r3 .face { background: linear-gradient(140deg, #C792DA, #7A3F8F 40%, #5B2C6E 70%, #A66BBE); box-shadow: 0 0 .7em rgba(122,63,143,.55), 0 .15em .5em rgba(10,16,30,.25); }
-.card.r4 .face { background: linear-gradient(120deg, #8C6418, #E9C46A 22%, #FFF3C4 35%, #C79A3A 50%, #FFE7A0 66%, #A97B22 82%, #E9C46A); background-size: 260% 260%; animation: foil 4s linear infinite; box-shadow: 0 0 1em rgba(233,196,106,.75), 0 .15em .5em rgba(10,16,30,.25); }
+.card.r4 .face { background: linear-gradient(120deg, #8C6418, #E9C46A 22%, #FFF3C4 35%, #C79A3A 50%, #FFE7A0 66%, #A97B22 82%, #E9C46A); background-size: 260% 260%; background-position: 30% 50%; box-shadow: 0 0 1em rgba(233,196,106,.75), 0 .15em .5em rgba(10,16,30,.25); }
 .card.r4 .face-in { box-shadow: inset 0 0 0 .12em #F7DE95; }
-.card.r3 .face-in::after, .card.r4 .face-in::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.26) 45%, rgba(255,255,255,.05) 52%, transparent 62%); background-size: 260% 100%; animation: sheen 3.6s ease-in-out infinite; mix-blend-mode: screen; z-index: 3; }
-.card.r4 .face-in::after { background: linear-gradient(110deg, transparent 28%, rgba(255,240,190,.45) 44%, rgba(255,255,255,.12) 52%, transparent 64%); background-size: 240% 100%; animation-duration: 2.6s; }
+.card.r3 .face-in::after, .card.r4 .face-in::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.26) 45%, rgba(255,255,255,.05) 52%, transparent 62%); background-size: 260% 100%; background-position: 130% 0; mix-blend-mode: screen; z-index: 3; }
+.card.r4 .face-in::after { background: linear-gradient(110deg, transparent 28%, rgba(255,240,190,.45) 44%, rgba(255,255,255,.12) 52%, transparent 64%); background-size: 240% 100%; background-position: 130% 0; }
+/* L'éclat des Épiques et Légendaires ne joue qu'une fois : quand la carte est révélée à l'ouverture d'un paquet ou présentée en grand.
+   Ailleurs (collection, vitrine, Marché), la carte reste dorée ou violette mais immobile. */
+.ocard.up .card.r4 .face, #modal:not(.pack) #modalCard .card.r4 .face, #modal.pack .pcard.open .card.r4 .face { animation: foil 2.4s ease-out 1 both; }
+.ocard.up .card.r3 .face-in::after, .ocard.up .card.r4 .face-in::after,
+#modal:not(.pack) #modalCard .card.r3 .face-in::after, #modal:not(.pack) #modalCard .card.r4 .face-in::after,
+#modal.pack .pcard.open .card.r3 .face-in::after, #modal.pack .pcard.open .card.r4 .face-in::after { animation: sheen 2.2s ease-in-out .3s 1 both; }
 .stars { letter-spacing: .02em; margin-right: .3em; }
 .card.r4 .c-band { background: linear-gradient(90deg, #8C6418, #E9C46A, #8C6418) !important; color: #2B1E05; }
 @keyframes foil { 0% { background-position: 0% 50%; } 100% { background-position: 260% 50%; } }
@@ -1426,8 +1433,10 @@ function renderLayers() {
   const ownedBy = {}; for (const id in S.owned) { const it = BYID.get(id); if (it) ownedBy[famOf(it)] = (ownedBy[famOf(it)] || 0) + 1; }
   // interrupteur « Mes cartes » : n'afficher que les lieux possédés
   $("layers").innerHTML = `<button class="chip ownsw" id="ownSw" aria-pressed="${!S.settings.unowned}" aria-label="N'afficher que mes cartes"><span class="sw"></span>Mes cartes</button>`
-    + Object.entries(FAMS).map(([k, f]) => `<button class="chip" data-f="${k}" aria-pressed="${!S.hidden[k]}" style="--c:${f.color}"><i></i>${esc(f.name)}</button>`).join("");
+    + Object.entries(FAMS).map(([k, f]) => `<button class="chip" data-f="${k}" aria-pressed="${!S.hidden[k]}" style="--c:${f.color}"><i></i>${esc(f.name)}</button>`).join("")
+    + (MONDE_PATHS.length && !S.hidden.patrimoine ? `<button class="chip legend" id="lgUnesco" aria-label="Que sont les pointillés dorés ?"><b class="dash"></b>UNESCO</button>` : "");
   $("ownSw").onclick = () => { S.settings.unowned = !S.settings.unowned; save(); renderLayers(); renderSheet(); render(); toast(S.settings.unowned ? "Tous les lieux sont affichés." : "Seules vos cartes sont affichées."); };
+  if ($("lgUnesco")) $("lgUnesco").onclick = () => toast("Pointillés dorés : sites du patrimoine mondial de l'UNESCO (rives de la Seine, tour Saint-Jacques, immeuble Molitor). Leur carte se capture n'importe où à l'intérieur.");
   $("layers").querySelectorAll(".chip[data-f]").forEach(b => b.onclick = () => { const k = b.dataset.f; S.hidden[k] = !S.hidden[k]; if (!S.hidden[k]) delete S.hidden[k]; save(); renderLayers(); renderSheet(); render(); });
 }
 
