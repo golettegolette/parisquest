@@ -10,15 +10,14 @@ Pour essayer sans se déplacer, ajoutez `?test` à l'adresse : un mode test appa
 
 ## Règles
 
-- **Paquets** : un paquet de 5 cartes toutes les 5 minutes (2 minutes avec le Pass PariGo), jusqu'à 10 en réserve, 5 offerts au départ. Ouverture animée : le paquet se déchire, les cartes apparaissent face cachée de la moins rare à la plus rare ; on les retourne au toucher ou avec les flèches du clavier.
-- **Rareté** : chaque carte tirée a 60 % de chances d'être Commune, 25 % Peu commune, 10 % Rare, 4 % Épique, 1 % Légendaire. Le palier d'un lieu est fixé par centiles à l'intérieur de son type : un lieu célèbre (nombre d'éditions Wikipédia qui en parlent) est plus prestigieux, une station très fréquentée (validations Île-de-France Mobilités) est plus rare. Cadre de couleur et étoiles selon la rareté, reflets pour les Épiques, feuille d'or animée pour les Légendaires.
-- **Doublons** : un lieu déjà possédé ajoute un exemplaire (×2, ×3…) et rapporte 5 écus.
-- **Visites** : aller sur place valide une carte possédée (+10 écus). Première visite : sceau « Visité ». Ensuite, une visite par jour fait monter la carte d'un niveau, jusqu'au niveau 5.
-- **Collections** : 38 séries thématiques, 50 écus à la complétion. **Succès** : 13 objectifs à paliers (10, 25, 60, 150 écus).
-- **Bataille** : deck de 5 cartes, 5 terrains annoncés, +30 % pour la famille du terrain.
-- **Boutique** : 10 paquets pour 0,99 € (ajoutés à la réserve, sans limite) ; Pass PariGo à 4 € par mois (un paquet toutes les 2 minutes et un Pack PariGo offert chaque jour) ; Pack PariGo à 1,49 € (20 cartes, 32 / 28 / 22 / 13 / 5 %, une Épique ou mieux garantie) ; écus de 0,99 € à 9,99 € pour le Marché. Les écus ne sont jamais reconvertibles en argent.
-- **Jouer ensemble** (avec le serveur) : pseudo unique, amis par pseudo ou code ami, messages privés, échanges de n'importe quelle carte, Marché aux enchères en écus (5 % de commission), classements, guildes de 20 joueurs avec objectif hebdomadaire, batailles contre le deck de défense d'un ami. Une carte cédée repart au niveau 1, sans sceau « Visité ».
-- **Après un paquet** : le paquet suivant s'ouvre directement depuis l'écran d'ouverture, ou s'affiche grisé avec le chrono. Chaque nouvelle carte montre une mini-carte du quartier.
+- **Le principe** : collectionnez Paris en le parcourant. Chaque lieu réel est une carte, et on la gagne en y allant.
+- **Capture** : sur place, n'importe quel lieu se capture (le téléphone vérifie que vous êtes à portée, le serveur aussi). La carte entre dans la collection déjà visitée. Ensuite, une visite par jour la fait monter d'un niveau, jusqu'au niveau 5.
+- **Paquet du jour** : un paquet gratuit par jour (3 en réserve au plus), avec 5 lieux tirés près de vous. Ces cartes sont « à découvrir » : elles apparaissent sur la carte et deviennent à vous quand vous allez les capturer.
+- **Rareté** : 60 % Commune, 25 % Peu commune, 10 % Rare, 4 % Épique, 1 % Légendaire dans les paquets. Le palier d'un lieu est fixé par centiles dans son type (notoriété Wikipédia, fréquentation des stations). Sur la carte, les lieux Rares et mieux à moins de 400 m sont entourés de leur couleur.
+- **Score** : Commune 1 point, Peu commune 2, Rare 5, Épique 15, Légendaire 50, doublés si la carte a été visitée sur place.
+- **Classements** : Paris, par arrondissement et entre amis. Le premier collectionneur d'un arrondissement en est le Maître.
+- **Séries** : 38 collections thématiques. **Succès** : objectifs à paliers.
+- **Garde-fous** : 60 visites par jour au maximum, visite refusée si le déplacement depuis la précédente suppose plus de 50 km/h. La position sert à vérifier la portée et à tirer les lieux proches ; elle n'est jamais enregistrée.
 
 Tant que le serveur n'est pas branché, le jeu tourne en démo locale : la progression et le compteur restent dans le navigateur et ne sont pas protégés. Avec le serveur (dossier `supabase/`), les paquets, le tirage et la collection sont gérés côté serveur et impossibles à tromper. La position du joueur n'est jamais enregistrée.
 

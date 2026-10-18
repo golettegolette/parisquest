@@ -485,6 +485,17 @@ sup { font-size: .62em; line-height: 0; }
 @keyframes spark { 0% { transform: translate(-50%, -50%) scale(.4); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.1) rotate(200deg); opacity: 0; } }
 .op-summary { width: min(860px, 100%); max-height: calc(100vh - 170px); overflow-y: auto; padding: 12px 4px; }
 .tier-label { font-family: var(--f-plaque); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+/* Direction A : lieux à découvrir, titres */
+.pend-list { display: flex; flex-direction: column; gap: 4px; }
+.pend-row { display: grid; grid-template-columns: 12px 1fr auto; gap: 10px; align-items: center; border: 0; background: var(--white); border-radius: 8px; padding: 8px 10px; text-align: left; box-shadow: inset 0 0 0 1px var(--joint); }
+.pend-row i { width: 12px; height: 12px; border-radius: 50%; background: var(--white); box-shadow: inset 0 0 0 3px var(--c); }
+.pend-row span { font-weight: 600; color: var(--navy); line-height: 1.25; }
+.pend-row small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-2); }
+.pend-row b { font-family: var(--f-plaque); font-weight: 600; color: var(--green-2); white-space: nowrap; }
+.titles { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.title-badge { display: inline-block; font-family: var(--f-plaque); font-weight: 700; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: #2B1E05; background: linear-gradient(90deg, #E9C46A, #FFF3C4, #E9C46A); padding: 3px 9px; border-radius: 5px; }
+.title-badge.small { font-size: 10.5px; padding: 1px 6px; vertical-align: 1px; }
+.op-hint { color: #F6F2E8; opacity: .85; font-size: 14px; text-align: center; margin: 0 0 12px; }
 /* Onglet Paquets : le paquet au centre */
 .pk-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: min(52vh, 500px); padding: 6px 0 0; text-align: center; }
 .pk-pack { position: relative; isolation: isolate; width: min(46vw, 210px); aspect-ratio: 5 / 7; border: 0; padding: 0; background: none; cursor: pointer; margin-bottom: 10px; -webkit-tap-highlight-color: transparent; }
@@ -560,7 +571,7 @@ sup { font-size: .62em; line-height: 0; }
     <div class="counters">
       <div class="counter"><b id="cntCards">0</b><span>cartes</span></div>
       <div class="counter"><b id="cntPacks">0</b><span id="cntNext">paquets</span></div>
-      <button class="counter" id="cntEcusBtn" style="border:0;font:inherit" aria-label="Boutique"><b id="cntEcus">0</b><span>écus</span></button>
+      <button class="counter" id="cntEcusBtn" style="border:0;font:inherit" aria-label="Classement"><b id="cntEcus">0</b><span>score</span></button>
     </div>
   </header>
 
@@ -598,7 +609,7 @@ sup { font-size: .62em; line-height: 0; }
   <nav class="tabbar" aria-label="Navigation">
     <button data-tab="map" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/></svg>Carte</button>
     <button data-tab="collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="11" height="15" rx="2"/><path d="M17 6.5 20.5 8 17 19"/></svg>Collection</button>
-    <button data-tab="packs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="7" width="12" height="14" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v12"/></svg><span>Paquets<span class="badge" id="packBadge" hidden>0</span></span></button>
+    <button data-tab="packs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="7" width="12" height="14" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v12"/></svg><span>Paquet<span class="badge" id="packBadge" hidden>0</span></span></button>
       <button data-tab="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Menu<span class="badge" id="menuBadge" hidden>0</span></span></button>
 </nav>
 </div>
@@ -657,6 +668,9 @@ const PARIGO_SIZE = 20, PARIGO_ODDS = [.32, .28, .22, .13, .05];
    Pack PariGo = 20 cartes, ~1 Légendaire et ~2,6 Épiques attendues, peu de Communes (qualité). */
 const PRICE = { p10: "0,99 €", parigo: "1,49 €", pass: "4 € / mois" };
 const ECU_OFFERS = [{ id: "e500", ecus: 500, eur: "0,99 €" }, { id: "e1200", ecus: 1200, eur: "1,99 €", bonus: "+20 %" }, { id: "e3500", ecus: 3500, eur: "4,99 €", bonus: "+40 %", hl: true }, { id: "e8000", ecus: 8000, eur: "9,99 €", bonus: "+60 %" }];
+/* Direction A : « Collectionne Paris en le parcourant ». Un paquet du jour (5 lieux à découvrir, 3 en réserve au plus) ;
+   les cartes se gagnent en capturant les lieux sur place. Score : points par rareté, doublés si la carte a été visitée. */
+const DAILY_CAP = 3, PTS = [1, 2, 5, 15, 50];
 const TIER_ODDS = [.60, .25, .10, .04, .01]; // chance par carte : Commune → Légendaire (identique côté serveur)
 const CONIFERS = new Set(["Pinus", "Taxus", "Araucaria", "Taxodium", "Cedrus", "Sequoia", "Sequoiadendron", "Abies", "Picea", "Cupressus", "Metasequoia", "Larix", "Calocedrus", "Cryptomeria", "Thuja", "Juniperus", "Pseudotsuga", "Cephalotaxus", "Chamaecyparis", "Torreya"]);
 const DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
@@ -674,7 +688,7 @@ const SB_CONF = window.PQ_SUPABASE && window.PQ_SUPABASE.url ? window.PQ_SUPABAS
 const TEST_ALLOWED = !SB_CONF && (!HOSTED || /[?&]test\b/.test(location.search));
 const passActive = () => SB_CONF ? !!(ui.server && ui.server.passUntil && ui.server.passUntil > Date.now() + ui.clockOffset) : S.pass && S.pass.until > Date.now();
 const packPeriod = () => passActive() ? PASS_PERIOD : PACK_PERIOD;
-const DEFAULT_STATE = () => ({ pos: { lat: 48.8600, lon: 2.3565 }, owned: {}, packs: { n: PACK_START, anchor: Date.now(), seen: Date.now(), bonus: 0 }, parigo: { n: 0, freeOn: "" }, scouts: [], dayOffset: 0, done: {}, hidden: {}, test: !HOSTED, profile: { name: "", show: [], since: Date.now() }, stats: { packs: 0, won: 0, lost: 0 }, settings: { unowned: true, hiacc: true, sound: true }, wallet: { bought: 0, spent: 0 }, pass: { until: 0 }, achSeen: {}, deck: [] });
+const DEFAULT_STATE = () => ({ pos: { lat: 48.8600, lon: 2.3565 }, owned: {}, packs: { n: PACK_START, anchor: Date.now(), seen: Date.now(), bonus: 0 }, parigo: { n: 0, freeOn: "" }, scouts: [], dayOffset: 0, done: {}, hidden: {}, pending: {}, daily: { n: 1, day: "" }, test: !HOSTED, profile: { name: "", show: [], since: Date.now() }, stats: { packs: 0, won: 0, lost: 0 }, settings: { unowned: true, hiacc: true, sound: true }, wallet: { bought: 0, spent: 0 }, pass: { until: 0 }, achSeen: {}, deck: [] });
 function load() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -690,7 +704,7 @@ if (!TEST_ALLOWED) { S.test = false; S.dayOffset = 0; }
 if (!HOSTED) S.test = true;
 S.scouts = [];
 S.packs.bonus = S.packs.bonus || 0;
-{ const d = DEFAULT_STATE(); for (const k of ["profile", "stats", "settings", "wallet", "pass", "parigo"]) S[k] = Object.assign(d[k], S[k] || {}); S.achSeen = S.achSeen || {}; S.deck = S.deck || []; }
+{ const d = DEFAULT_STATE(); for (const k of ["profile", "stats", "settings", "wallet", "pass", "parigo"]) S[k] = Object.assign(d[k], S[k] || {}); S.achSeen = S.achSeen || {}; S.deck = S.deck || []; S.pending = S.pending || {}; S.daily = S.daily || { n: 1, day: "" }; }
 const ui = { sel: null, cycle: 0, mobile: "map", view: "collection", fam: null, col: null, famOpen: false, colOpen: false, shown: 48, resetArmed: false, gpsWatch: null, ready: false, gps: "off", acc: null, firstFix: true, user: null, server: null, clockOffset: 0, opening: false, visiting: false, lastRefresh: 0 };
 /* Jour de jeu (date de Paris). Avec le serveur, on suit son horloge, pas celle du téléphone. */
 const todayKey = () => new Date(Date.now() + (SB_CONF ? ui.clockOffset : S.dayOffset * 86400000)).toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" });
@@ -970,11 +984,22 @@ function drawOverlay(s, tx, ty, W, H) {
     ctx.lineWidth = small ? 1 : 2; ctx.strokeStyle = "#F6F2E8"; ctx.stroke();
     if (!small) { ctx.beginPath(); ctx.arc(x, y, rOwn * .38, 0, 6.283); ctx.fillStyle = getTierColor(S.owned[it.i].tier); ctx.fill(); }
   }
-  for (const id of []) {
+  // raretés proches : anneau de couleur autour des lieux Rares et mieux, à moins de 400 m (zoom suffisant)
+  if (s >= 30) for (const i of candidates(P[0], P[1], 400 / MPU)) {
+    const it = ITEMS[i]; if (it.t < 2 || S.owned[it.i] || S.pending[it.i] || !visible(it) || distTo(it, P) > 400) continue;
+    const x = it.p[0] * s + tx, y = it.p[1] * s + ty;
+    ctx.beginPath(); ctx.arc(x, y, rFree + 4, 0, 6.283); ctx.lineWidth = it.t >= 3 ? 3 : 2; ctx.strokeStyle = getTierColor(it.t); ctx.stroke();
+  }
+  // lieux à découvrir (paquet du jour) : cible aux couleurs de la rareté
+  for (const id in S.pending) {
     const it = BYID.get(id); if (!it || !visible(it)) continue;
     const x = it.p[0] * s + tx, y = it.p[1] * s + ty;
-    ctx.beginPath(); ctx.arc(x, y, Math.max(8, rFree + 6), 0, 6.283); ctx.lineWidth = 3; ctx.strokeStyle = "#2D6448"; ctx.stroke();
-    ctx.lineWidth = 1; ctx.strokeStyle = "#F6F2E8"; ctx.stroke();
+    if (x < -pad || y < -pad || x > W + pad || y > H + pad) continue;
+    const r = Math.max(9, rOwn + 4);
+    ctx.beginPath(); ctx.arc(x, y, r + 2.5, 0, 6.283); ctx.fillStyle = "#172B4D"; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fillStyle = "#F6F2E8"; ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = getTierColor(it.t); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y, r * .42, 0, 6.283); ctx.fillStyle = getTierColor(it.t); ctx.fill();
   }
   const sel = ui.sel && BYID.get(ui.sel);
   if (sel) { const x = sel.p[0] * s + tx, y = sel.p[1] * s + ty; ctx.beginPath(); ctx.arc(x, y, Math.max(11, rOwn + 5), 0, 6.283); ctx.lineWidth = 3; ctx.strokeStyle = "#F6F2E8"; ctx.stroke(); ctx.lineWidth = 1.2; ctx.strokeStyle = "#172B4D"; ctx.stroke(); }
@@ -1128,29 +1153,34 @@ function onTap(px, py) {
 }
 function movePlayer(lat, lon) { S.pos = { lat, lon }; ui.cycle = 0; save(); renderSheet(); render(); }
 
-/* ---------- Cible et visite ----------
-   Les cartes s'obtiennent dans les paquets. Aller sur place « visite » une carte possédée :
-   sceau Visité à la première visite, puis un niveau par jour de visite, jusqu'au niveau 5. */
+/* ---------- Cible, capture et visite ----------
+   Direction A : n'importe quel lieu se capture sur place et entre dans la collection, déjà visité.
+   Les cartes du paquet du jour sont « à découvrir » jusqu'à leur capture. Ensuite, une visite par jour
+   fait monter la carte d'un niveau, jusqu'au niveau 5. */
 let targetCache = null;
 const canVisit = (o, day) => o && o.last !== day && !(o.vis && o.lvl >= MAX_LEVEL);
 function inRangeList() {
   const P = proj(S.pos.lat, S.pos.lon), out = [], day = todayKey();
   for (const i of candidates(P[0], P[1], 1.5)) { const it = ITEMS[i]; if (!visible(it)) continue; const d = distTo(it, P); if (d <= it.rad) out.push({ it, d }); }
-  const rank = it => { const o = S.owned[it.i]; return canVisit(o, day) ? 0 : o ? 1 : 2; };
-  out.sort((a, b) => rank(a.it) - rank(b.it) || a.d - b.d);
+  const rank = it => { const o = S.owned[it.i]; return S.pending[it.i] ? 0 : !o ? 1 : canVisit(o, day) ? 2 : 3; };
+  out.sort((a, b) => rank(a.it) - rank(b.it) || (rank(a.it) === 1 ? b.it.t - a.it.t : 0) || a.d - b.d);
   return out;
 }
 function nearestToVisit() {
-  const P = proj(S.pos.lat, S.pos.lon), day = todayKey();
+  const P = proj(S.pos.lat, S.pos.lon);
+  // d'abord la carte à découvrir la plus proche (paquet du jour), puis le lieu à capturer le plus proche
+  let best = null, bd = Infinity;
+  for (const id in S.pending) { const it = BYID.get(id); if (!it || !visible(it)) continue; const d = distTo(it, P); if (d < bd) { bd = d; best = it; } }
+  if (best && bd <= 6000) return { it: best, d: bd, why: "Carte à découvrir la plus proche" };
   for (let r = CELL; r <= CELL * 48; r *= 2) {
-    let best = null, bd = Infinity;
-    for (const i of candidates(P[0], P[1], r)) { const it = ITEMS[i]; if (!canVisit(S.owned[it.i], day) || !visible(it)) continue; const d = distTo(it, P); if (d < bd) { bd = d; best = it; } }
-    if (best && bd <= r * MPU) return { it: best, d: bd };
+    best = null; bd = Infinity;
+    for (const i of candidates(P[0], P[1], r)) { const it = ITEMS[i]; if (S.owned[it.i] || !visible(it)) continue; const d = distTo(it, P); if (d < bd) { bd = d; best = it; } }
+    if (best && bd <= r * MPU) return { it: best, d: bd, why: "Lieu à capturer le plus proche" };
   }
   return null;
 }
 function currentTarget() {
-  const key = `${S.pos.lat},${S.pos.lon},${ui.sel},${ui.cycle},${JSON.stringify(S.hidden)},${Object.keys(S.owned).length}`;
+  const key = `${S.pos.lat},${S.pos.lon},${ui.sel},${ui.cycle},${JSON.stringify(S.hidden)},${Object.keys(S.owned).length},${Object.keys(S.pending).length}`;
   if (targetCache && targetCache.key === key) return targetCache.v;
   const P = proj(S.pos.lat, S.pos.lon);
   let v2 = null;
@@ -1158,7 +1188,7 @@ function currentTarget() {
   else {
     const list = inRangeList();
     if (list.length) { const k = ui.cycle % list.length; v2 = { ...list[k], why: list.length > 1 ? `À portée · ${k + 1} sur ${list.length}` : "À portée", list }; }
-    else { const nv = nearestToVisit(); if (nv) v2 = { ...nv, why: "Carte à visiter la plus proche", list: [] }; }
+    else { const nv = nearestToVisit(); if (nv) v2 = { ...nv, list: [] }; }
   }
   targetCache = { key, v: v2 };
   return v2;
@@ -1176,24 +1206,27 @@ function renderSheet() {
   const tg = currentTarget();
   if (!tg) {
     const empty = !Object.keys(S.owned).length;
-    sheet.innerHTML = `<div class="sheet-text"><div class="eyebrow">${empty ? "Bienvenue" : "Rien à visiter autour"}</div><h2>${empty ? "Ouvrez votre premier paquet" : "Explorez la carte"}</h2><p>${empty ? "Chaque paquet contient 5 lieux de Paris. Allez-y ensuite pour les faire monter de niveau." : "Touchez un point pour voir le lieu, ou ouvrez de nouveaux paquets."}</p></div>
+    sheet.innerHTML = `<div class="sheet-text"><div class="eyebrow">${empty ? "Bienvenue" : "Rien autour"}</div><h2>${empty ? "Ouvrez votre paquet du jour" : "Explorez la carte"}</h2><p>${empty ? "Il contient 5 lieux près de vous, à découvrir sur place. Chaque lieu de Paris se capture en y allant." : "Touchez un point pour voir le lieu, ou ouvrez votre paquet du jour."}</p></div>
       <div class="sheet-actions"><button class="btn" id="goPacks">Paquets</button></div>`;
     $("goPacks").onclick = () => setMobile("packs"); return;
   }
   const it = tg.it, o = S.owned[it.i], within = tg.d <= it.rad, day = todayKey(), ms = marketStatus(it);
   let label = "Visiter", enabled = false, note;
-  if (!o) { label = "À obtenir"; note = "Pas encore dans votre collection : elle peut sortir d'un paquet."; }
-  else if (!within) note = `Approchez-vous à moins de ${it.rad} m pour la visiter.` + (!S.test && ui.acc > 40 ? ` GPS précis à ${Math.round(ui.acc)} m près.` : "");
+  const pend = !o && !!S.pending[it.i], gpsNote = !S.test && ui.acc > 40 ? ` GPS précis à ${Math.round(ui.acc)} m près.` : "";
+  if (!o && !within) { label = "Capturer"; note = (pend ? "Carte de votre paquet du jour. " : "") + `Approchez-vous à moins de ${it.rad} m pour la capturer.` + gpsNote; }
+  else if (!o && ms && !ms.open && !S.test) { label = "Capturer"; note = `Le marché est fermé. ${ms.text}.`; }
+  else if (!o) { enabled = true; label = "Capturer"; note = pend ? "Vous y êtes : la carte de votre paquet vous attend." : `Vous y êtes : capturez cette carte ${TIERS[it.t]}.`; }
+  else if (!within) note = `Approchez-vous à moins de ${it.rad} m pour la visiter.` + gpsNote;
   else if (ms && !ms.open && !S.test) note = `Le marché est fermé. ${ms.text}.`;
   else if (o.vis && o.lvl >= MAX_LEVEL) { label = "Niveau max"; note = "Cette carte a atteint le niveau maximum."; }
   else if (o.last === day) { label = "Revenez demain"; note = `Niveau ${o.lvl}. Une visite par jour fait monter la carte d'un niveau.`; }
   else { enabled = true; label = o.vis ? `Niveau ${o.lvl + 1}` : "Valider la visite"; note = o.vis ? "Nouvelle visite : la carte gagne un niveau." : "Vous y êtes : première visite."; }
   const kd = KINDS[it.k];
-  const named = !!o || it.k === "rue" || ui.sel === it.i;
+  const named = !!o || pend || within || it.k === "rue" || ui.sel === it.i;
   const title = esc(named ? it.n : kd.l);
   const sub = [named && it.n !== kd.l ? esc(kd.l) : "", it.site && it.site !== it.n ? esc(it.site) : "", it.r ? arrLabel(it.r) : ""].filter(Boolean).join(" · ");
   sheet.innerHTML = `<div class="sheet-text">
-      <div class="eyebrow" style="--c:${famColor(it)}"><span class="dot"></span>${esc(tg.why)} · ${esc(FAMS[kd.f].name)}${o ? " · " + TIERS[o.tier] : ""}</div>
+      <div class="eyebrow" style="--c:${famColor(it)}"><span class="dot"></span>${esc(tg.why)} · ${esc(FAMS[kd.f].name)} · ${TIERS[o ? o.tier : it.t]}${pend ? " · à découvrir" : ""}</div>
       <h2>${title}</h2>
       <p>${sub}</p>
       <p><span class="dist">${within ? "Ici" : fmtDist(tg.d) + " · " + bearing(proj(S.pos.lat, S.pos.lon), it)}</span> &nbsp;${note}</p>
@@ -1208,17 +1241,27 @@ function renderSheet() {
   if (tg.list.length > 1) $("nextBtn").onclick = () => { ui.cycle++; renderSheet(); render(); };
 }
 async function visitCard(id) {
-  const it = BYID.get(id), o = S.owned[id]; if (!it || !o || ui.visiting) return;
+  const it = BYID.get(id); let o = S.owned[id]; if (!it || ui.visiting) return;
   const P = proj(S.pos.lat, S.pos.lon); if (distTo(it, P) > it.rad) return;
   const ms = marketStatus(it); if (ms && !ms.open && !S.test) return;
-  const day = todayKey(); if (!canVisit(o, day)) return;
+  const day = todayKey(); if (o && !canVisit(o, day)) return;
+  const wasPending = !o && !!S.pending[id];
+  let captured = false;
   if (SB) {
+    if (!ui.user) { toast("Connectez-vous pour capturer des cartes (onglet Paquet)."); setMobile("packs"); return; }
     ui.visiting = true;
     const { data, error } = await SB.rpc("visit_place", { p_id: id, p_lat: S.pos.lat, p_lon: S.pos.lon, p_acc: ui.acc });
     ui.visiting = false;
-    if (error) { toast(error.message || "Visite refusée par le serveur."); return; }
-    o.lvl = data.level; o.vis = data.visits; o.last = data.last_visit;
-  } else { o.vis = (o.vis || 0) + 1; o.lvl = o.vis === 1 ? (o.lvl || 1) : Math.min(MAX_LEVEL, (o.lvl || 1) + 1); o.last = day; }
+    if (error) { toast(capFirst(error.message || "Visite refusée par le serveur.")); return; }
+    if (data.captured) { captured = true; o = S.owned[id] = { tier: data.tier != null ? data.tier : it.t, lvl: data.level, copies: 1, vis: data.visits, last: data.last_visit, at: Date.now() }; delete S.pending[id]; }
+    else { o.lvl = data.level; o.vis = data.visits; o.last = data.last_visit; }
+    if (ui.server && data.score != null) ui.server.score = data.score;
+  } else if (!o) { captured = true; o = S.owned[id] = { tier: it.t, lvl: 1, copies: 1, vis: 1, last: day, at: Date.now() }; delete S.pending[id]; }
+  else { o.vis = (o.vis || 0) + 1; o.lvl = o.vis === 1 ? (o.lvl || 1) : Math.min(MAX_LEVEL, (o.lvl || 1) + 1); o.last = day; }
+  if (captured) {
+    const msgs = [...checkCollections(it), ...checkAchievements()]; save(); refreshAll();
+    openBooster([{ it, isNew: true, capture: true, wasPending }], msgs, "capture"); return;
+  }
   const am = checkAchievements(); save(); refreshAll();
   showReveal(it, o.vis === 1
     ? { kicker: "Première visite", title: "Visité", sub: "La carte porte désormais le sceau « Visité ». Revenez un autre jour pour la faire monter de niveau." }
@@ -1232,6 +1275,8 @@ function ecusEarned() {
   for (let c = 0; c < COLS.length; c++) if (S.done[c]) e += 50;
   return e + achEcus();
 }
+function localScore() { let n = 0; for (const id in S.owned) { const o = S.owned[id]; if (BYID.has(id)) n += PTS[o.tier] * (o.vis ? 2 : 1); } return n; }
+function score() { return SB_CONF && ui.server && ui.server.score != null ? ui.server.score : localScore(); }
 function ecus() {
   if (SB_CONF && ui.server && ui.server.ecus != null) return ui.server.ecus;
   return ecusEarned() + (S.wallet.bought || 0) - (S.wallet.spent || 0);
@@ -1241,7 +1286,7 @@ function checkCollections(it) {
   for (let c = 0; c < COLS.length; c++) {
     const [fam, name, , idxs] = COLS[c];
     if (S.done[c] || fam !== famOf(it)) continue;
-    if (idxs.every(i => S.owned[ITEMS[i].i])) { S.done[c] = true; msgs.push(`Collection complète : ${name} (+50 écus)`); }
+    if (idxs.every(i => S.owned[ITEMS[i].i])) { S.done[c] = true; msgs.push(`Série complète : ${name}`); }
   }
   return msgs;
 }
@@ -1295,13 +1340,17 @@ function renderCollection() {
   const list = ownedIds.map(id => BYID.get(id)).filter(it => (!fam || famOf(it) === fam) && (!colSet || colSet.has(it.i))).sort((a, b) => (S.owned[b.i].tier - S.owned[a.i].tier) || ((S.owned[b.i].at || 0) - (S.owned[a.i].at || 0)));
   const cols = COLS.map((c, ci) => ({ c, ci, n: c[3].filter(i => S.owned[ITEMS[i].i]).length })).filter(x => !fam || x.c[0] === fam)
     .sort((a, b) => (b.n > 0) - (a.n > 0) || (b.n / b.c[3].length) - (a.n / a.c[3].length) || a.c[3].length - b.c[3].length);
+  const PP = proj(S.pos.lat, S.pos.lon), pend = Object.keys(S.pending).map(id => BYID.get(id)).filter(Boolean).map(it => ({ it, d: distTo(it, PP) })).sort((a, b) => a.d - b.d);
+  const pendHTML = pend.length ? `<div class="panel pend"><h3>À découvrir · ${pend.length}</h3><p class="lede" style="font-size:13px;margin-bottom:8px">Les lieux de vos paquets du jour. Allez-y pour les capturer.</p>
+    <div class="pend-list">${pend.slice(0, 15).map(({ it, d }) => `<button class="pend-row" data-pend="${esc(it.i)}" style="--c:${getTierColor(it.t)}"><i></i><span>${esc(it.n)}<small>${esc(KINDS[it.k].l)} · ${TIERS[it.t]}${it.r ? " · " + arrLabel(it.r) : ""}</small></span><b>${fmtDist(d)}</b></button>`).join("")}</div></div>` : "";
   const chev = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
   const famN = fam ? ownedBy[fam] || 0 : ownedIds.length, famT = fam ? TOTALS[fam] || 0 : ITEMS.length;
   const doneN = cols.filter(x => x.n === x.c[3].length).length;
   const colN = colSel ? colSel[3].filter(i => S.owned[ITEMS[i].i]).length : 0;
   $("viewCollection").innerHTML = `
     <h2>Ma collection</h2>
-    <p class="lede">${nf(ownedIds.length)} carte${ownedIds.length > 1 ? "s" : ""} sur ${nf(ITEMS.length)} lieux de Paris.</p>
+    <p class="lede">${nf(ownedIds.length)} carte${ownedIds.length > 1 ? "s" : ""} sur ${nf(ITEMS.length)} lieux de Paris · ${nf(score())} points.</p>
+    ${pendHTML}
     <div class="tiers">${TIERS.map((n, i) => `<div class="tier" style="background:var(${TIER_VAR[i]})"><b>${nf(tierCounts[i])}</b><span>${n}</span></div>`).join("")}</div>
     <div class="dds">
       <details class="panel dd" id="ddFam" ${ui.famOpen ? "open" : ""}>
@@ -1335,6 +1384,7 @@ function renderCollection() {
   root.querySelectorAll(".cols .col").forEach(b => b.onclick = () => { ui.col = b.dataset.c === "" ? null : +b.dataset.c; ui.colOpen = false; ui.shown = 48; renderCollection(); });
   root.querySelectorAll("[data-clear]").forEach(b => b.onclick = () => { if (b.dataset.clear === "fam") ui.fam = null; else ui.col = null; ui.shown = 48; renderCollection(); });
   root.querySelectorAll(".grid > button").forEach(b => b.onclick = () => openCard(b.dataset.id));
+  root.querySelectorAll("[data-pend]").forEach(b => b.onclick = () => showOnMap(b.dataset.pend));
   if ($("moreBtn")) $("moreBtn").onclick = () => { ui.shown += 48; renderCollection(); };
 }
 function showOnMap(id) { const it = BYID.get(id); if (!it) return; ui.sel = id; setMobile("map"); renderSheet(); centerOn(it.a, it.o, 40); }
@@ -1352,42 +1402,63 @@ function localAccrue() {
   const per = packPeriod(), k = Math.floor((now - P.anchor) / per);
   if (k > 0) { P.n = Math.min(PACK_CAP, P.n + k); P.anchor = P.n >= PACK_CAP ? now : P.anchor + k * per; }
 }
-function packInfo() {
-  if (SB_CONF) { const st = ui.server; return st ? { n: st.packs, bonus: st.bonus || 0, nextAt: st.nextAt == null ? null : st.nextAt - ui.clockOffset } : { n: 0, bonus: 0, nextAt: null, off: true }; }
-  localAccrue(); return { n: S.packs.n, bonus: S.packs.bonus || 0, nextAt: S.packs.n >= PACK_CAP ? null : S.packs.anchor + packPeriod() };
+/* Paquet du jour (version locale) : un par jour de Paris, 3 en réserve au plus. */
+function localDaily() {
+  const d = todayKey(), D = S.daily;
+  if (!D.day) { D.day = d; return; }
+  if (d > D.day) { D.n = Math.min(DAILY_CAP, D.n + Math.round((Date.parse(d) - Date.parse(D.day)) / 86400000)); D.day = d; }
 }
-const mmss = ms => { const t = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
-const nextText = pi => pi.off ? "Connectez-vous pour recevoir vos paquets." : pi.nextAt == null ? "Réserve pleine : ouvrez un paquet pour relancer le compteur." : `Prochain paquet dans ${mmss(pi.nextAt - Date.now())}`;
-const stackHTML = n => Array.from({ length: PACK_CAP }, (_, i) => `<i class="${i < n ? "on" : ""}"></i>`).join("");
-function applyServerState(js) { ui.server = { packs: js.packs, bonus: js.bonus_packs || 0, parigo: js.parigo_packs || 0, parigoFree: !!js.parigo_free, nextAt: js.next_at ? Date.parse(js.next_at) : null, ecus: js.ecus, passUntil: js.pass_until ? Date.parse(js.pass_until) : 0 }; ui.clockOffset = Date.parse(js.server_now) - Date.now(); }
+const nextMidnight = () => { const p = new Date(Date.now() + (SB_CONF ? 0 : S.dayOffset * 86400000)); const n = new Date(p); n.setHours(24, 0, 0, 0); return n.getTime() - (SB_CONF ? 0 : S.dayOffset * 86400000); };
+function packInfo() {
+  if (SB_CONF) { const st = ui.server; return st ? { n: st.daily, bonus: 0, nextAt: st.nextAt == null ? null : st.nextAt - ui.clockOffset } : { n: 0, bonus: 0, nextAt: null, off: true }; }
+  localDaily(); return { n: S.daily.n, bonus: 0, nextAt: S.daily.n >= DAILY_CAP ? null : nextMidnight() };
+}
+const mmss = ms => { const t = Math.max(0, Math.ceil(ms / 1000)); if (t >= 3600) return `${Math.floor(t / 3600)} h ${String(Math.floor(t % 3600 / 60)).padStart(2, "0")}`; return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
+const nextText = pi => pi.off ? "Connectez-vous pour recevoir votre paquet du jour." : pi.nextAt == null ? `Réserve pleine (${DAILY_CAP} paquets) : ouvrez-en un.` : `Prochain paquet dans ${mmss(pi.nextAt - Date.now())}`;
+const stackHTML = n => Array.from({ length: DAILY_CAP }, (_, i) => `<i class="${i < n ? "on" : ""}"></i>`).join("");
+function applyServerState(js) { ui.server = { daily: js.daily_packs || 0, nextAt: js.next_at ? Date.parse(js.next_at) : null, ecus: js.ecus, score: js.score, visitsToday: js.visits_today || 0, bonus: 0, parigo: 0, parigoFree: false, passUntil: 0 }; ui.clockOffset = Date.parse(js.server_now) - Date.now(); }
+/* Tirage local du paquet du jour : lieux non possédés, près du joueur (1,5 km puis 4 km), en descendant de palier si besoin. */
+function localDraw(pos) {
+  const out = [], taken = id => S.owned[id] || S.pending[id] || out.includes(id);
+  const P = pos ? proj(pos.lat, pos.lon) : null;
+  for (let k = 0; k < PACK_SIZE; k++) {
+    const t = drawTier(); let pick = null;
+    if (P) for (const rad of [1500, 4000]) {
+      for (let tt = t; tt >= 0 && !pick; tt--) {
+        const L = [...candidates(P[0], P[1], rad / MPU)].map(i => ITEMS[i]).filter(it => it.t === tt && !taken(it.i) && distTo(it, P) <= rad);
+        if (L.length) pick = L[Math.floor(rnd() * L.length)];
+      }
+      if (pick) break;
+    }
+    for (let tt = t; tt >= 0 && !pick; tt--) { const L = TIER_POOL[tt].map(i => ITEMS[i]).filter(it => !taken(it.i)); if (L.length) pick = L[Math.floor(rnd() * L.length)]; }
+    if (!pick) break;
+    out.push(pick.i);
+  }
+  return out;
+}
 async function openPack() {
   if (ui.opening || !ui.ready) return;
   ui.opening = true;
   try {
     let drawn;
+    // la position sert seulement au tirage (lieux proches) ; elle n'est pas enregistrée
+    const pos = S.test || ui.gps === "ok" ? S.pos : null;
+    if (!pos) { toast("Activez la localisation : le paquet du jour tire 5 lieux près de vous."); startGPS(); return; }
     if (SB_CONF) {
-      if (!SB || !ui.user) { toast("Connectez-vous pour ouvrir des paquets."); return; }
-      const { data, error } = await SB.rpc("open_pack");
-      if (error) { toast(/aucun paquet/i.test(error.message) ? "Aucun paquet disponible pour l'instant." : "Le serveur n'a pas répondu. Réessayez."); await refreshServer(); return; }
-      applyServerState(data); drawn = data.cards.map(c => ({ id: c.id, isNew: c.new }));
+      if (!SB || !ui.user) { toast("Connectez-vous pour ouvrir votre paquet du jour."); return; }
+      const { data, error } = await SB.rpc("open_daily_pack", pos ? { p_lat: pos.lat, p_lon: pos.lon } : {});
+      if (error) { toast(/plus de paquet/i.test(error.message) ? "Plus de paquet aujourd'hui : le prochain arrive à minuit." : "Le serveur n'a pas répondu. Réessayez."); await refreshServer(); return; }
+      applyServerState(data); drawn = data.cards.map(c => c.id);
     } else {
-      localAccrue(); const P = S.packs;
-      if (P.n < 1 && !(P.bonus > 0)) { toast("Aucun paquet disponible pour l'instant."); return; }
-      if (P.n >= 1) { if (P.n >= PACK_CAP) P.anchor = Date.now(); P.n -= 1; } else P.bonus -= 1;   // la réserve gratuite d'abord : le chrono repart plus tôt
-      drawn = [];
-      for (let k = 0; k < PACK_SIZE; k++) { const pool = TIER_POOL[drawTier()]; const it = ITEMS[pool[Math.floor(rnd() * pool.length)]]; drawn.push({ id: it.i, isNew: !S.owned[it.i] && !drawn.some(d => d.id === it.i) }); }
+      localDaily();
+      if (S.daily.n < 1) { toast("Plus de paquet aujourd'hui : le prochain arrive à minuit."); return; }
+      S.daily.n -= 1; drawn = localDraw(pos);
     }
     const cards = [];
-    for (const d of drawn) {
-      const it = BYID.get(d.id); if (!it) continue;
-      const o = S.owned[it.i];
-      if (o) o.copies = (o.copies || 1) + 1; else S.owned[it.i] = { tier: it.t, lvl: 1, copies: 1, vis: 0, last: null, at: Date.now() };
-      cards.push({ it, isNew: d.isNew });
-    }
+    for (const id of drawn) { const it = BYID.get(id); if (!it || S.owned[id]) continue; S.pending[id] = { at: Date.now() }; cards.push({ it, isNew: true, pending: true }); }
     S.stats.packs += 1;
-    const msgs = []; for (const c of cards) msgs.push(...checkCollections(c.it));
-    msgs.push(...checkAchievements());
-    save(); refreshAll(); openBooster(cards, msgs, "standard");
+    const msgs = checkAchievements();
+    save(); refreshAll(); openBooster(cards, msgs, "daily");
   } finally { ui.opening = false; }
 }
 /* Pack PariGo : 20 cartes, tirage avec PARIGO_ODDS, au moins une Épique garantie.
@@ -1478,7 +1549,8 @@ function openBooster(cards, msgs, kind) {
   OP.cards = cards.map((c, k) => ({ ...c, k })).sort((a, b) => a.it.t - b.it.t || (b.isNew - a.isNew) || a.k - b.k);
   OP.idx = 0; OP.up = OP.cards.map(() => false); OP.msgs = msgs; OP.kind = kind; OP.phase = "booster";
   $("opener").hidden = false; $("opNav").hidden = true; $("opAll").hidden = true;
-  $("opTitle").innerHTML = `<div class="k">${kind === "parigo" ? "Pack PariGo" : "Paquet"}</div><div class="t">${OP.cards.length} cartes</div>`;
+  $("opTitle").innerHTML = `<div class="k">${kind === "parigo" ? "Pack PariGo" : kind === "daily" ? "Paquet du jour" : "Paquet"}</div><div class="t">${OP.cards.length} cartes</div>`;
+  if (kind === "capture") { OP.phase = "booster"; showStack(); $("opNav").hidden = true; $("opAll").hidden = true; setTimeout(() => { if (OP.phase === "stack" && !OP.up[0]) revealCurrent(); }, 250); return; }
   $("opStage").innerHTML = `<div class="bpack${kind === "parigo" ? " parigo" : ""}" id="bpack"><div class="bp-top"></div><div class="bp-body"><small>Paris</small><b>PQ</b><span>${kind === "parigo" ? "PariGo · 20 cartes" : "5 cartes"}</span></div></div>`;
   const bp = $("bpack");
   clearTimeout(OP.t1); clearTimeout(OP.t2); clearTimeout(OP.t3);
@@ -1496,12 +1568,13 @@ function drawOp(anim) {
   const n = OP.cards.length, c = OP.cards[OP.idx], up = OP.up[OP.idx], left = n - OP.idx - 1;
   if (up && c.isNew) { drawMini(c.it); $("opMini").classList.add("on"); } else $("opMini").classList.remove("on");
   const under = Array.from({ length: Math.min(4, left) }, (_, i) => `<div class="under" style="transform:translate(${(i + 1) * 4}px, ${(i + 1) * 5}px) rotate(${(i + 1) * 1.2}deg);z-index:${-i - 1}"></div>`).join("");
-  $("opStage").innerHTML = `<div class="ostack">${under}<div class="ocard${up ? " up" : ""} t${c.it.t}${anim === "back" ? " back" : ""}" id="ocard"><div class="oflip"><div class="pface pcover">${coverHTML()}</div><div class="pface pfront"><span class="ptag${c.isNew ? " new" : ""}">${c.isNew ? "Nouvelle" : "Doublon"}</span>${cardHTML(c.it)}</div></div></div></div>`;
+  $("opStage").innerHTML = `<div class="ostack">${under}<div class="ocard${up ? " up" : ""} t${c.it.t}${anim === "back" ? " back" : ""}" id="ocard"><div class="oflip"><div class="pface pcover">${coverHTML()}</div><div class="pface pfront"><span class="ptag${c.isNew ? " new" : ""}">${tagOf(c)}</span>${cardHTML(c.it)}</div></div></div></div>`;
   $("ocard").onclick = opStep;
   $("opCount").textContent = `${OP.idx + 1} / ${n}`;
   $("opPrev").disabled = OP.idx === 0;
-  $("opTitle").innerHTML = up ? `<div class="k">${esc(KINDS[c.it.k].l)} · ${c.isNew ? "nouvelle carte" : "doublon"}</div><div class="t tier-label" style="color:${c.it.t === 4 ? "#F7DE95" : c.it.t ? lighten(getTierColor(c.it.t)) : "#F6F2E8"}"><span style="display:block;font-size:.55em;letter-spacing:.2em">${"★".repeat(c.it.t + 1)}</span>${TIERS[c.it.t]}</div>` : `<div class="k">${OP.kind === "parigo" ? "Pack PariGo" : "Paquet"}</div><div class="t">Touchez pour retourner</div>`;
+  $("opTitle").innerHTML = up ? `<div class="k">${esc(KINDS[c.it.k].l)} · ${c.capture ? "capturée sur place" : c.pending ? `à découvrir · ${fmtDist(distTo(c.it, proj(S.pos.lat, S.pos.lon)))}` : c.isNew ? "nouvelle carte" : "doublon"}</div><div class="t tier-label" style="color:${c.it.t === 4 ? "#F7DE95" : c.it.t ? lighten(getTierColor(c.it.t)) : "#F6F2E8"}"><span style="display:block;font-size:.55em;letter-spacing:.2em">${"★".repeat(c.it.t + 1)}</span>${TIERS[c.it.t]}</div>` : `<div class="k">${OP.kind === "parigo" ? "Pack PariGo" : "Paquet"}</div><div class="t">Touchez pour retourner</div>`;
 }
+const tagOf = c => c.capture ? "Capturée" : c.pending ? "À découvrir" : c.isNew ? "Nouvelle" : "Doublon";
 const lighten = hex => { const n = parseInt(hex.slice(1), 16), f = c => Math.min(255, Math.round(c + (255 - c) * .45)); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; };
 function revealCurrent() {
   const c = OP.cards[OP.idx]; OP.up[OP.idx] = true;
@@ -1521,19 +1594,23 @@ function opStep() {
   if (OP.phase !== "stack") return;
   if (!OP.up[OP.idx]) { revealCurrent(); return; }
   if (OP.idx < OP.cards.length - 1) { const el = $("ocard"); el.classList.add("leave"); OP.idx += 1; setTimeout(() => drawOp("in"), 150); }
+  else if (OP.kind === "capture") closeOpener();
   else opSummary();
 }
 function opBack() { if (OP.phase === "summary") { const sum = $("opSum"); if (sum) sum.remove(); $("opMain").style.display = ""; $("opStage").style.display = ""; OP.phase = "stack"; $("opNav").hidden = false; $("opAll").hidden = false; drawOp("back"); return; } if (OP.phase === "stack" && OP.idx > 0) { OP.idx -= 1; drawOp("back"); } }
 function opSummary() {
   OP.phase = "summary"; OP.up = OP.up.map(() => true); $("opNav").hidden = true; $("opAll").hidden = true; $("opMain").style.display = "none";
   const best = Math.max(...OP.cards.map(c => c.it.t)), nNew = OP.cards.filter(c => c.isNew).length;
-  $("opTitle").innerHTML = `<div class="k">${nNew} nouvelle${nNew > 1 ? "s" : ""} · ${OP.cards.length - nNew} doublon${OP.cards.length - nNew > 1 ? "s" : ""}</div><div class="t">Meilleure : ${TIERS[best]}</div>`;
+  if (OP.kind === "daily") { const P = proj(S.pos.lat, S.pos.lon), near = Math.min(...OP.cards.map(c => distTo(c.it, P)));
+    $("opTitle").innerHTML = `<div class="k">${OP.cards.length} lieux à découvrir · le plus proche à ${fmtDist(near)}</div><div class="t">Meilleure : ${TIERS[best]}</div>`; }
+  else $("opTitle").innerHTML = `<div class="k">${nNew} nouvelle${nNew > 1 ? "s" : ""} · ${OP.cards.length - nNew} doublon${OP.cards.length - nNew > 1 ? "s" : ""}</div><div class="t">Meilleure : ${TIERS[best]}</div>`;
   $("opStage").innerHTML = ""; $("opStage").style.display = "none";
   const sum = document.createElement("div"); sum.className = "op-summary"; sum.id = "opSum";
-  sum.innerHTML = `<div class="pack-grid">${OP.cards.map(c => `<button class="pcard open" data-id="${esc(c.it.i)}"><div class="pflip"><div class="pface pfront"><span class="ptag${c.isNew ? " new" : ""}">${c.isNew ? "Nouvelle" : "Doublon"}</span>${cardHTML(c.it)}</div></div></button>`).join("")}</div>`;
+  sum.innerHTML = `<div class="pack-grid">${OP.cards.map(c => `<button class="pcard open" data-id="${esc(c.it.i)}"><div class="pflip"><div class="pface pfront"><span class="ptag${c.isNew ? " new" : ""}">${tagOf(c)}</span>${cardHTML(c.it)}</div></div></button>`).join("")}</div>`;
   sum.insertAdjacentHTML("beforeend", `<div class="op-next" id="opNextPack"></div>`);
   $("opMain").after(sum);
-  sum.querySelectorAll("[data-id]").forEach(b => b.onclick = () => { closeOpener(); openCard(b.dataset.id); });
+  sum.querySelectorAll("[data-id]").forEach(b => b.onclick = () => { closeOpener(); if (S.pending[b.dataset.id]) showOnMap(b.dataset.id); else openCard(b.dataset.id); });
+  if (OP.kind === "daily") sum.insertAdjacentHTML("afterbegin", `<p class="op-hint">Touchez une carte pour la voir sur la carte de Paris, puis allez-y pour la capturer.</p>`);
   renderNextPack();
 }
 /* Paquet suivant, directement depuis l'écran d'ouverture : prêt à ouvrir, ou grisé avec le chrono. */
@@ -1542,7 +1619,7 @@ function renderNextPack() {
   const pi = packInfo(), left = pi.off ? 0 : pi.n + (pi.bonus || 0);
   el.dataset.left = left;
   el.innerHTML = `<button class="mpack" id="opNextBtn" ${left ? "" : "disabled"} aria-label="Ouvrir le paquet suivant"><div class="bp-top"></div><div class="bp-body"><b>PQ</b></div></button>
-    <div><div class="t">${left ? "Paquet suivant" : "Plus de paquet"}</div><small id="opNextTxt">${left ? `${left} paquet${left > 1 ? "s" : ""} en réserve · touchez pour ouvrir` : nextText(pi)}</small></div>`;
+    <div><div class="t">${left ? "Paquet suivant" : "Plus de paquet aujourd'hui"}</div><small id="opNextTxt">${left ? `${left} paquet${left > 1 ? "s" : ""} en réserve · touchez pour ouvrir` : nextText(pi)}</small></div>`;
   if (left) $("opNextBtn").onclick = () => { openPack(); };
 }
 function updateNextPack() {
@@ -1600,32 +1677,29 @@ function renderPacks() {
   let account = "";
   if (SB_CONF && !ui.user) account = `<div class="panel login"><h3>Connexion</h3><p class="lede" style="font-size:14px">Votre collection et vos paquets sont gardés sur le serveur. Entrez votre e-mail : vous recevrez un lien de connexion, sans mot de passe.</p><input type="email" id="loginEmail" placeholder="vous@exemple.fr" autocomplete="email"><button class="btn" id="loginBtn">Recevoir le lien</button></div>`;
   else if (SB_CONF) account = `<div class="acct"><span>Connecté : ${esc(ui.user.email || "")}</span><button class="mini-btn ghost" id="logoutBtn">Se déconnecter</button></div>`;
-  else account = `<p class="credits">Démo locale : le compteur tourne dans ce navigateur et n'est pas protégé. Une fois le serveur branché, il sera impossible à tromper.</p>`;
+  else account = `<p class="credits">Démo locale : la progression reste dans ce navigateur et n'est pas protégée.</p>`;
   const tot = pi.n + (pi.bonus || 0), behind = Math.min(2, Math.max(0, tot - 1));
   const clock = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>`;
   $("viewPacks").innerHTML = `
     <h2>Paquets</h2>
-    ${SB_CONF && !ui.user ? `<p class="lede">Un paquet de ${PACK_SIZE} cartes toutes les ${packPeriod() / 60000} minutes, jusqu'à ${PACK_CAP} en réserve.</p>${account}` : `
+    ${SB_CONF && !ui.user ? `<p class="lede">Collectionnez Paris en le parcourant : chaque lieu se capture sur place, et un paquet du jour vous donne 5 lieux à découvrir près de vous.</p>${account}` : `
     <div class="pk-hero">
       <button class="pk-pack" id="packBtn" ${tot < 1 ? "disabled" : ""} aria-label="${tot ? "Ouvrir un paquet" : "Aucun paquet disponible"}">
         ${behind > 0 ? `<span class="pk-behind b2"></span>` : ""}${behind > 1 ? `<span class="pk-behind b3"></span>` : ""}
-        <span class="bp-top"></span><span class="bp-body"><small>Paris</small><b>PQ</b><span>${PACK_SIZE} cartes</span></span>
+        <span class="bp-top"></span><span class="bp-body"><small>Paquet du jour</small><b>PQ</b><span>${PACK_SIZE} lieux</span></span>
       </button>
       <div class="pk-cta">${tot ? "Touchez pour ouvrir" : "Prochain paquet bientôt"}</div>
-      <div class="pk-count"><b id="packN">${pi.n}</b><span>/ ${PACK_CAP} paquets</span></div>
+      <div class="pk-count"><b id="packN">${pi.n}</b><span>/ ${DAILY_CAP} paquet${DAILY_CAP > 1 ? "s" : ""}</span></div>
       <div class="pk-pips" id="packStack">${stackHTML(pi.n)}</div>
       ${pi.bonus ? `<div class="pk-sub">+ ${pi.bonus} paquet${pi.bonus > 1 ? "s" : ""} acheté${pi.bonus > 1 ? "s" : ""}</div>` : ""}
       <div class="pk-timer">${clock}<span id="packNext">${nextText(pi)}</span></div>
-      ${passActive() ? `<div class="pk-sub"><span class="badge-pass">Pass PariGo</span> un paquet toutes les ${packPeriod() / 60000} minutes</div>` : ""}
+      <div class="pk-sub" style="max-width:34ch">Les 5 lieux sont à découvrir : allez-y pour les capturer. Tout lieu de Paris se capture aussi sur place, sans paquet.</div>
     </div>
-    <div class="pk-actions">
-      <button class="buy10" id="buy10"><span>Acheter 10 paquets</span><span>${PRICE.p10}</span></button>
-      ${(() => { const pg = parigoInfo(); return pg.free || pg.stock ? `<button class="buy10" id="openParigoP" style="box-shadow:inset 0 0 0 2px var(--r4);background:linear-gradient(90deg,#FFF3C4,#F6F2E8)"><span>${pg.free ? "Pack PariGo du jour" : `Pack PariGo (${pg.stock})`}</span><span>Ouvrir</span></button>` : ""; })()}
-      <button class="mini-btn ghost" id="toShop">Boutique : Pass et Pack PariGo</button>
-    </div>
+    ${Object.keys(S.pending).length ? `<div class="pk-actions"><button class="mini-btn ghost" id="toPending">Mes ${Object.keys(S.pending).length} lieux à découvrir</button></div>` : ""}
     <div class="pk-odds"><span class="h">Chances par carte</span><div class="row">${TIERS.map((n, i) => `<span><i style="background:var(${TIER_VAR[i]})"></i>${n} ${String(TIER_ODDS[i] * 100).replace(".", ",")} %</span>`).join("")}</div></div>
     ${account}`}`;
   if ($("packBtn")) $("packBtn").onclick = openPack;
+  if ($("toPending")) $("toPending").onclick = () => { ui.fam = null; ui.col = null; setMobile("collection"); };
   if ($("toShop")) $("toShop").onclick = () => setMobile("shop");
   if ($("buy10")) $("buy10").onclick = () => checkout("p10");
   if ($("openParigoP")) $("openParigoP").onclick = buyParigoPack;
@@ -1674,14 +1748,14 @@ async function setUser(u) {
 }
 async function syncServer() {
   if (!SB || !ui.user || !ui.ready) return;
-  const owned = {};
+  const owned = {}, pending = {};
   for (let from = 0; ; from += 1000) {
-    const { data, error } = await SB.from("user_cards").select("place_id,copies,level,visits,first_at,last_visit").order("place_id").range(from, from + 999);
+    const { data, error } = await SB.from("user_cards").select("place_id,copies,level,visits,first_at,last_visit,pending").order("place_id").range(from, from + 999);
     if (error) { toast("Synchronisation impossible. Réessayez plus tard."); return; }
-    for (const r of data) { const it = BYID.get(r.place_id); if (it) owned[r.place_id] = { tier: it.t, lvl: r.level, copies: r.copies, vis: r.visits, last: r.last_visit, at: Date.parse(r.first_at) }; }
+    for (const r of data) { const it = BYID.get(r.place_id); if (!it) continue; if (r.pending) pending[r.place_id] = { at: Date.parse(r.first_at) }; else owned[r.place_id] = { tier: it.t, lvl: r.level, copies: r.copies, vis: r.visits, last: r.last_visit, at: Date.parse(r.first_at) }; }
     if (data.length < 1000) break;
   }
-  S.owned = owned; recomputeDone(); save();
+  S.owned = owned; S.pending = pending; recomputeDone(); save();
   await refreshServer(); refreshAll();
   if (!SOC.profile) { const { data } = await SB.rpc("my_profile"); SOC.profile = data || {}; if (SOC.profile.pseudo) { S.profile.name = SOC.profile.pseudo; if (SOC.profile.showcase) S.profile.show = SOC.profile.showcase; } }
   socialPoll();
@@ -1689,7 +1763,7 @@ async function syncServer() {
 if (/[?&]achat=ok\b/.test(location.search)) { setTimeout(() => toast("Paiement reçu. Vos écus ou votre Pass arrivent dans quelques secondes."), 1500); setTimeout(() => refreshServer(), 4000); setTimeout(() => refreshServer(), 10000); }
 async function refreshServer() {
   if (!SB || !ui.user) return;
-  const { data, error } = await SB.rpc("pack_state");
+  const { data, error } = await SB.rpc("game_state");
   if (!error) applyServerState(data);
   renderPacks();
 }
@@ -1730,17 +1804,25 @@ const ICO = {
   settings: '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
 };
 const icon = (id, sz = 22) => ICO[id] ? `<svg class="ico" width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[id]}</svg>` : "";
+/* Direction A : la version 1 garde l'essentiel. Le reste revient quand il y aura une communauté (le code est conservé). */
+const OFF_V1 = new Set(["trades", "market", "guild", "battle", "shop"]);
+for (let k = SECTIONS.length - 1; k >= 0; k--) if (OFF_V1.has(SECTIONS[k].id)) SECTIONS.splice(k, 1);
+for (const x of SECTIONS) {
+  if (x.id === "packs") { x.name = "Paquet du jour"; x.sub = "5 lieux à découvrir près de vous, chaque jour"; }
+  if (x.id === "collection") x.sub = "Vos cartes, séries et lieux à découvrir";
+  if (x.id === "leaderboard") x.sub = "Meilleurs collectionneurs et Maîtres d'arrondissement";
+}
 const SEC = Object.fromEntries(SECTIONS.map(x => [x.id, x]));
 const viewEl = id => id === "collection" ? $("viewCollection") : id === "packs" ? $("viewPacks") : $("view-" + id);
 (function buildSections() {
-  $("moreViews").outerHTML = ["menu", ...SECTIONS.map(x => x.id).filter(id => id !== "collection" && id !== "packs")].map(id => `<section class="view" id="view-${id}" hidden></section>`).join("");
+  $("moreViews").outerHTML = ["menu", ...SECTIONS.map(x => x.id).filter(id => id !== "collection" && id !== "packs"), ...OFF_V1].map(id => `<section class="view" id="view-${id}" hidden></section>`).join("");
   $("sideTabs").innerHTML = SECTIONS.map(x => `<button data-view="${x.id}" class="${x.srv && !SB_CONF ? "srv" : ""}" aria-pressed="false">${icon(x.id, 15)}${esc(x.name)}</button>`).join("");
 })();
 const RENDER = {
   collection: () => renderCollection(), packs: () => renderPacks(), menu: renderMenu, catalog: renderCatalog, battle: renderBattle,
   achievements: renderAchievements, profile: renderProfile, settings: renderSettings, shop: renderShop,
   trades: () => SOCIAL() ? renderTrades() : renderServerView("trades"), market: () => SOCIAL() ? renderMarket() : renderServerView("market"),
-  leaderboard: () => SOCIAL() ? renderLeaderboard() : renderServerView("leaderboard"),
+  leaderboard: () => renderLeaderboard(),
   friends: () => SOCIAL() ? renderFriends() : renderServerView("friends"), messages: () => SOCIAL() ? renderMessages() : renderServerView("messages"),
   guild: () => SOCIAL() ? renderGuild() : renderServerView("guild"),
 };
@@ -1801,32 +1883,30 @@ function collStats() {
 }
 const ACH = [
   { id: "cards", name: "Collectionneur", desc: "Cartes différentes", steps: [10, 100, 1000, 5000], v: s => s.cards },
-  { id: "packs", name: "Ouvreur de paquets", desc: "Paquets ouverts", steps: [1, 25, 250, 1000], v: s => S.stats.packs },
+  { id: "packs", name: "Fidèle", desc: "Paquets du jour ouverts", steps: [1, 7, 30, 100], v: s => S.stats.packs },
   { id: "rare", name: "Œil exercé", desc: "Cartes Rares", steps: [5, 50, 250], v: s => s.tiers[2] },
   { id: "epic", name: "Épique !", desc: "Cartes Épiques", steps: [1, 10, 50], v: s => s.tiers[3] },
   { id: "legend", name: "Légende de Paris", desc: "Cartes Légendaires", steps: [1, 5, 25], v: s => s.tiers[4] },
-  { id: "visit", name: "Arpenteur", desc: "Cartes visitées sur place", steps: [1, 10, 100, 500], v: s => s.visited },
+  { id: "visit", name: "Arpenteur", desc: "Cartes capturées ou visitées sur place", steps: [1, 10, 100, 500], v: s => s.visited },
   { id: "lvl5", name: "Habitué", desc: "Cartes visitées au niveau 5", steps: [1, 10, 50], v: s => s.lvl5 },
-  { id: "dup", name: "Doublons", desc: "Exemplaires en double", steps: [10, 100, 500], v: s => s.dup },
   { id: "fams", name: "Tour des familles", desc: "Familles représentées (sur 8)", steps: [3, 6, 8], v: s => s.fams },
   { id: "arrs", name: "Tour des arrondissements", desc: "Arrondissements représentés (sur 20)", steps: [5, 10, 20], v: s => s.arrs },
   { id: "spec", name: "Spécialiste", desc: "Cartes dans votre famille préférée", steps: [50, 250, 1000], v: s => s.maxFam },
   { id: "sets", name: "Séries complètes", desc: "Collections terminées", steps: [1, 5, 15, 38], v: s => s.done },
-  { id: "won", name: "Combattant", desc: "Batailles gagnées", steps: [1, 10, 50, 200], v: s => S.stats.won },
 ];
 const ACH_REWARD = [10, 25, 60, 150];
 function achLevels(st = collStats()) { return ACH.map(a => { const v = a.v(st); const lvl = a.steps.filter(x => v >= x).length; return { a, v, lvl }; }); }
 function achEcus() { let e = 0; for (const { lvl } of achLevels()) for (let i = 0; i < lvl; i++) e += ACH_REWARD[i]; return e; }
 function checkAchievements() {
   const msgs = [];
-  for (const { a, lvl } of achLevels()) { const seen = S.achSeen[a.id] || 0; if (lvl > seen) { S.achSeen[a.id] = lvl; msgs.push(`Succès : ${a.name} ${"I".repeat(lvl)} (+${ACH_REWARD[lvl - 1]} écus)`); } }
+  for (const { a, lvl } of achLevels()) { const seen = S.achSeen[a.id] || 0; if (lvl > seen) { S.achSeen[a.id] = lvl; msgs.push(`Succès : ${a.name} ${"I".repeat(lvl)}`); } }
   return msgs;
 }
 function renderAchievements() {
   if (!ui.ready) return;
   const L = achLevels(), got = L.reduce((n, x) => n + x.lvl, 0), tot = ACH.reduce((n, a) => n + a.steps.length, 0);
   viewEl("achievements").innerHTML = `<h2>Succès</h2>
-    <p class="lede">${got} paliers obtenus sur ${tot}. Chaque palier rapporte des écus : ${ACH_REWARD.join(", ")} selon le niveau.</p>
+    <p class="lede">${got} paliers obtenus sur ${tot}.</p>
     <div class="panel">${L.map(({ a, v, lvl }) => { const next = a.steps[lvl], max = lvl >= a.steps.length, prev = lvl ? a.steps[lvl - 1] : 0;
       const pct = max ? 100 : Math.min(100, Math.round((v - prev) / (next - prev) * 100));
       return `<div class="ach${max ? " max" : ""}"><strong>${esc(a.name)}<span class="medals">${a.steps.map((_, i) => `<i class="${i < lvl ? "on" : ""}"></i>`).join("")}</span></strong><span class="lv">${max ? "Terminé" : `${nf(v)} / ${nf(next)}`}</span><p>${esc(a.desc)}</p><span class="bar"><i style="width:${pct}%"></i></span></div>`; }).join("")}</div>`;
@@ -1842,11 +1922,12 @@ function renderProfile() {
   viewEl("profile").innerHTML = `<h2>Profil</h2>
     <div class="panel"><h3>Pseudo</h3><div class="btn-row"><input class="field" id="pName" maxlength="24" value="${esc(S.profile.name)}" placeholder="Votre pseudo" style="flex:1 1 180px"><button class="mini-btn" id="pSave">Enregistrer</button></div>
       <p class="lede" style="font-size:13px;margin-top:6px">${passActive() ? `<span class="badge-pass">PariGo</span> ` : ""}${esc(name)} · membre depuis le ${since}${SB_CONF ? (SOC.profile && SOC.profile.friend_code ? ` · code ami <b>${esc(SOC.profile.friend_code)}</b>` : "") : " · le pseudo deviendra public avec le serveur"}</p></div>
+    <div class="panel" id="pTitles"><h3>Titres</h3><p class="lede" style="font-size:13px">${SOCIAL() ? "Chargement…" : "Le premier collectionneur d'un arrondissement en devient le Maître. Les titres s'affichent une fois connecté."}</p></div>
     <div class="panel"><h3>Vitrine</h3><p class="lede" style="font-size:13px;margin-bottom:10px">Vos 3 plus belles cartes, visibles par vos amis.</p>
       <div class="showcase">${[0, 1, 2].map(i => { const id = show[i]; return id ? `<button class="slot full" data-slot="${i}" aria-label="Changer">${cardHTML(BYID.get(id))}</button>` : `<button class="slot" data-slot="${i}">Choisir</button>`; }).join("")}</div>
       <div id="showPick"></div></div>
     <div class="panel"><h3>Statistiques</h3><div class="stats">
-      ${[[st.cards, "cartes différentes"], [`${(st.cards / ITEMS.length * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`, "de Paris collectionné"], [st.copies, "exemplaires"], [st.visited, "cartes visitées"], [S.stats.packs, "paquets ouverts"], [ecus(), "écus"], [`${S.stats.won} / ${S.stats.won + S.stats.lost}`, "batailles gagnées"], [st.done, "séries complètes"], [achLevels().reduce((n, x) => n + x.lvl, 0), "paliers de succès"], [fav ? FAMS[fav[0]].name : "–", "famille préférée"]]
+      ${[[score(), "points de score"], [st.cards, "cartes"], [`${(st.cards / ITEMS.length * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`, "de Paris collectionné"], [st.visited, "lieux visités"], [Object.keys(S.pending).length, "lieux à découvrir"], [st.arrs, "arrondissements explorés"], [st.done, "séries complètes"], [achLevels().reduce((n, x) => n + x.lvl, 0), "paliers de succès"], [S.stats.packs, "paquets du jour ouverts"], [fav ? FAMS[fav[0]].name : "–", "famille préférée"]]
         .map(([b, sp]) => `<div class="stat"><b>${typeof b === "number" ? nf(b) : esc(b)}</b><span>${sp}</span></div>`).join("")}
     </div><div class="tiers" style="margin-top:10px">${TIERS.map((n, i) => `<div class="tier" style="background:var(${TIER_VAR[i]})"><b>${nf(st.tiers[i])}</b><span>${n}</span></div>`).join("")}</div></div>`;
   $("pSave").onclick = async () => {
@@ -1855,6 +1936,12 @@ function renderProfile() {
     S.profile.name = v; save(); renderProfile(); toast("Pseudo enregistré.");
   };
   viewEl("profile").querySelectorAll("[data-slot]").forEach(b => b.onclick = () => openShowPicker(+b.dataset.slot));
+  if (SOCIAL()) SB.rpc("my_stats").then(({ data }) => {
+    const el = $("pTitles"); if (!el || !data) return;
+    const t = data.titles || [];
+    el.innerHTML = `<h3>Titres</h3><p class="lede" style="font-size:14px">${data.rank ? `${data.rank}<sup>${data.rank === 1 ? "er" : "e"}</sup> collectionneur de Paris · ` : ""}${nf(data.score)} points</p>
+      <div class="titles">${t.length ? t.map(a => `<span class="title-badge">Maître du ${a}<sup>${a === 1 ? "er" : "e"}</sup></span>`).join("") : `<span class="lede" style="font-size:13px">Pas encore de titre : devenez le premier collectionneur d'un arrondissement.</span>`}</div>`;
+  });
 }
 function cardPicker(target, onPick, exclude = new Set()) {
   const list = Object.keys(S.owned).map(id => BYID.get(id)).filter(Boolean).sort((a, b) => power(b) - power(a));
@@ -2235,14 +2322,35 @@ async function renderMarket() {
 
 /* ----- Classement ----- */
 async function renderLeaderboard() {
-  const el = viewEl("leaderboard"); if (!(await socialGate("leaderboard"))) return;
-  const K = [["cards", "Cartes"], ["legend", "Légendaires"], ["visits", "Visites"], ["wins", "Victoires"]];
-  const [ok, d] = await rpc2("leaderboard", { p_kind: SOC.lbKind }); if (!ok) return;
-  el.innerHTML = `<h2>Classement</h2>
-    <div class="tabsrow">${K.map(([k, n]) => `<button class="mini-btn${SOC.lbKind === k ? "" : " ghost"}" data-k="${k}">${n}</button>`).join("")}</div>
-    ${d.me ? `<p class="lede" style="margin-top:4px">Vous êtes <b>${d.me.rank}<sup>${d.me.rank === 1 ? "er" : "e"}</sup></b> sur ${nf(d.players)} joueurs, avec ${nf(d.me.value)}.</p>` : ""}
-    <div class="panel"><div class="lb-table">${d.top.map(r => `<div class="lb-row${r.me ? " me" : ""}"><b>${r.rank}</b><span>${esc(r.pseudo)}</span><b>${nf(r.value)}</b></div>`).join("") || `<div class="empty">Personne pour l'instant.</div>`}</div></div>`;
-  el.querySelectorAll("[data-k]").forEach(b => b.onclick = () => { SOC.lbKind = b.dataset.k; renderLeaderboard(); });
+  const el = viewEl("leaderboard");
+  const rules = `<p class="credits">Score : Commune 1 point, Peu commune 2, Rare 5, Épique 15, Légendaire 50, doublés quand la carte a été capturée ou visitée sur place. Les lieux à découvrir ne comptent pas encore.</p>`;
+  if (!SOCIAL()) {
+    el.innerHTML = `<h2>Classement</h2><div class="panel"><h3>Votre score</h3><p class="lede"><b>${nf(score())}</b> points · ${nf(Object.keys(S.owned).length)} cartes</p></div>
+      <div class="panel"><p class="lede" style="font-size:14px">${SB_CONF ? "Connectez-vous (onglet Paquet) pour vous comparer aux autres collectionneurs de Paris et de votre arrondissement." : "Le classement des collectionneurs arrive avec la version en ligne."}</p></div>${rules}`;
+    return;
+  }
+  if (!(await socialGate("leaderboard"))) return;
+  SOC.lbScope = SOC.lbScope || "paris";
+  if (!SOC.lbArr) { const P = proj(S.pos.lat, S.pos.lon); let best = null, bd = Infinity; for (const i of candidates(P[0], P[1], CELL * 2)) { const it = ITEMS[i]; if (!it.r) continue; const d = distTo(it, P); if (d < bd) { bd = d; best = it; } } SOC.lbArr = best ? +best.r : 1; }
+  const T = [["paris", "Paris"], ["arr", "Arrondissement"], ["friends", "Amis"], ["masters", "Maîtres"]];
+  const head = `<h2>Classement</h2><div class="tabsrow">${T.map(([k, n]) => `<button class="mini-btn${SOC.lbScope === k ? "" : " ghost"}" data-k="${k}">${n}</button>`).join("")}</div>`;
+  const ord = a => `${a}<sup>${a === 1 ? "er" : "e"}</sup>`;
+  if (SOC.lbScope === "masters") {
+    const [ok, m] = await rpc2("arr_masters"); if (!ok) return;
+    const by = Object.fromEntries((m || []).map(x => [x.arr, x]));
+    el.innerHTML = `${head}<p class="lede" style="margin-top:4px">Le premier collectionneur de chaque arrondissement en est le Maître.</p>
+      <div class="panel"><div class="lb-table">${Array.from({ length: 20 }, (_, i) => i + 1).map(a => { const x = by[a]; return `<div class="lb-row${x && x.me ? " me" : ""}"><b>${ord(a)}</b><span>${x ? esc(x.pseudo) : `<em style="color:var(--ink-2)">Libre : soyez le premier</em>`}</span><b>${x ? nf(x.score) : ""}</b></div>`; }).join("")}</div></div>${rules}`;
+  } else {
+    const args = SOC.lbScope === "arr" ? { p_scope: "arr", p_arr: SOC.lbArr } : { p_scope: SOC.lbScope };
+    const [ok, d] = await rpc2("collectors", args); if (!ok) return;
+    const where = SOC.lbScope === "arr" ? `du ${ord(SOC.lbArr)}` : SOC.lbScope === "friends" ? "entre amis" : "de Paris";
+    el.innerHTML = `${head}
+      ${SOC.lbScope === "arr" ? `<select class="field" id="lbArr" aria-label="Arrondissement" style="max-width:220px">${Array.from({ length: 20 }, (_, i) => i + 1).map(a => `<option value="${a}" ${a === SOC.lbArr ? "selected" : ""}>${a === 1 ? "1er" : a + "e"} arrondissement</option>`).join("")}</select>` : ""}
+      ${d.me ? `<p class="lede" style="margin-top:4px">Vous êtes <b>${ord(d.me.rank)}</b> ${where} sur ${nf(d.players)} collectionneur${d.players > 1 ? "s" : ""}, avec ${nf(d.me.score)} points.${SOC.lbScope === "arr" && d.me.rank === 1 && d.me.score > 0 ? ` Vous êtes le Maître du ${ord(SOC.lbArr)}.` : ""}</p>` : ""}
+      <div class="panel"><div class="lb-table">${d.top.map(r => `<div class="lb-row${r.me ? " me" : ""}"><b>${r.rank}</b><span>${esc(r.pseudo)}${SOC.lbScope === "arr" && r.rank === 1 && r.score > 0 ? ` <span class="title-badge small">Maître</span>` : ""}<small style="display:block;color:var(--ink-2);font-size:12px">${nf(r.cards)} carte${r.cards > 1 ? "s" : ""} · ${nf(r.visited)} visitée${r.visited > 1 ? "s" : ""}</small></span><b>${nf(r.score)}</b></div>`).join("") || `<div class="empty">Personne pour l'instant : soyez le premier.</div>`}</div></div>${rules}`;
+    if ($("lbArr")) $("lbArr").onchange = e => { SOC.lbArr = +e.target.value; renderLeaderboard(); };
+  }
+  el.querySelectorAll("[data-k]").forEach(b => b.onclick = () => { SOC.lbScope = b.dataset.k; renderLeaderboard(); });
 }
 
 /* ----- Guilde ----- */
@@ -2363,13 +2471,13 @@ $("zoomIn").onclick = () => zoomAt(v.W / 2, v.H / 2, 1.7);
 $("zoomOut").onclick = () => zoomAt(v.W / 2, v.H / 2, 1 / 1.7);
 $("meBtn").onclick = () => { if (!S.test && ui.gps !== "ok") startGPS(); centerOn(S.pos.lat, S.pos.lon, 45); };
 $("fitBtn").onclick = fit;
-$("cntEcusBtn").onclick = () => setMobile("shop");
+$("cntEcusBtn").onclick = () => setMobile("leaderboard");
 
 /* ---------- Démarrage ---------- */
 function refreshAll() {
   if (!ui.ready) return;
   const n = Object.keys(S.owned).filter(id => BYID.has(id)).length;
-  $("cntCards").textContent = nf(n); $("cntEcus").textContent = nf(ecus());
+  $("cntCards").textContent = nf(n); $("cntEcus").textContent = nf(score());
   renderLayers(); renderSheet(); (RENDER[ui.view] || renderCollection)(); tickUI(packInfo()); renderTestbar(); render();
 }
 initBasemap();

@@ -23,3 +23,17 @@ out = ROOT / "site" / "supabase" / "places.csv"
 with open(out, "w", newline="") as f:
     w = csv.writer(f); w.writerow(["id", "kind", "family", "tier", "lat", "lon", "reach_m"]); w.writerows(rows)
 print(len(rows), "lieux →", out, f"{out.stat().st_size / 1e6:.2f} Mo")
+
+# Arrondissement de chaque lieu, pour le classement par arrondissement (à exécuter après direction_a.sql)
+import collections
+g = collections.defaultdict(list)
+for it in pl["items"]:
+    r = it.get("r")
+    if r and str(r).isdigit() and 1 <= int(r) <= 20: g[int(r)].append(it["i"])
+lines = ["-- Parisquest : arrondissement de chaque lieu (à exécuter après direction_a.sql). Généré par pipeline/build_server.py."]
+for a in sorted(g):
+    lines.append(f"update public.places set arr = {a} where id = any('{{" + ",".join('"' + i + '"' for i in g[a]) + "}'::text[]);")
+lines.append("select arr, count(*) from public.places group by arr order by arr;")
+out2 = ROOT / "site" / "supabase" / "places_arr.sql"
+out2.write_text("\n".join(lines) + "\n")
+print(sum(len(v) for v in g.values()), "lieux avec arrondissement →", out2)
