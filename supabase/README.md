@@ -44,6 +44,7 @@ Le webhook vérifie la signature de Stripe, et `credit_purchase` ne crédite jam
 - `vestiges_retires.sql` : retire les vestiges archéologiques ni visibles ni clairement décrits, rembourse 10 PQ par exemplaire (ventes au Marché comprises) et annule les échanges en cours qui les contiennent (généré par `pipeline/vestiges.py`). Peut être relancé.
 - `acces.sql` : voies privées fermées placées à leur entrée, rayons de capture allongés pour les lieux loin de la rue (généré par `pipeline/build_server.py` après `pipeline/acces.py`). Peut être relancé.
 - `boutique_arr.sql` : Pack Arrondissement (15 cartes d'un arrondissement choisi) : `open_arr_pack(arr)` pour le joueur, `credit_arr_pack` réservée au webhook de paiement. À exécuter après `quetes.sql`. Peut être relancé.
+- `dev_illimite.sql` : règle TEMPORAIRE de développement, paquets illimités (paquets, Packs PariGo et Packs Arrondissement rechargés à chaque action) pour les comptes de la table `dev_accounts` (le compte de Timothée, reconnu par son e-mail de connexion). `dev_illimite_off.sql` l'arrête.
 - `quests_data.sql` : les quêtes et leurs lieux (généré par `pipeline/quests.py`, après `pipeline/lines.py` pour les lignes de transport).
 
 - `schema.sql` : tables, sécurité (Row Level Security) et les fonctions : `pack_state`, `open_pack`, `open_parigo_pack`, `visit_place`, `credit_purchase` (réservée au webhook).
