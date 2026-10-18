@@ -2013,11 +2013,18 @@ async function syncServer() {
   }
   S.owned = owned; S.pending = pending; recomputeDone(); save();
   await refreshServer(); refreshAll();
-  SOC.qboard = null;
+  SOC.qboard = null; SOC.qskip = new Set();
+  loadQuestBoard();
   if (!SOC.profile) { const { data } = await SB.rpc("my_profile"); SOC.profile = data || {}; if (SOC.profile.pseudo) { S.profile.name = SOC.profile.pseudo; if (SOC.profile.showcase) S.profile.show = SOC.profile.showcase; } }
   socialPoll();
 }
 if (/[?&]achat=ok\b/.test(location.search)) { setTimeout(() => toast("Paiement reçu. Vos PQ ou votre Pass arrivent dans quelques secondes."), 1500); setTimeout(() => refreshServer(), 4000); setTimeout(() => refreshServer(), 10000); }
+async function loadQuestBoard() {
+  if (!SOCIAL()) return;
+  const { data, error } = await SB.rpc("quest_board");
+  SOC.qboard = !error && data ? data : { mine: {}, counts: {}, first: {} };
+  updateQuestBadge(); if (ui.view === "quests") renderQuests(); else if (ui.view === "menu" && typeof renderMenu === "function") renderMenu();
+}
 async function refreshServer() {
   if (!SB || !ui.user) return;
   const { data, error } = await SB.rpc("pack_state");
@@ -2223,7 +2230,7 @@ function questProgress() {
   return P;
 }
 const qClaimed = id => SOCIAL() ? (SOC.qboard && SOC.qboard.mine[id]) || 0 : S.qclaims[id] || 0;
-function claimable(P = questProgress()) { let n = 0; for (const q of QUESTS) { const done = qClaimed(q.id); if (done < q.steps.length && P[q.id] >= q.steps[done]) n++; } return n; }
+function claimable(P = questProgress()) { if (SOCIAL() && !SOC.qboard) return 0; let n = 0; for (const q of QUESTS) { if (SOC.qskip && SOC.qskip.has(q.id)) continue; const done = qClaimed(q.id); if (done < q.steps.length && P[q.id] >= q.steps[done]) n++; } return n; }
 function updateQuestBadge() {
   if (!QUESTS.length) return;
   SOC.badges = SOC.badges || {}; SOC.badges.quests = claimable();
@@ -2237,7 +2244,13 @@ async function claimQuest(id) {
   if (step <= done) return;
   let reward = 0, first = false;
   if (SOCIAL()) {
-    const [ok, d] = await rpc2("claim_quest", { p_quest: id, p_step: step }); if (!ok) return;
+    const { data: d, error } = await SB.rpc("claim_quest", { p_quest: id, p_step: step });
+    if (error) {
+      const m = String(error.message || "").replace(/^ERROR:\s*/, "");
+      SOC.qskip = SOC.qskip || new Set(); SOC.qskip.add(id); updateQuestBadge(); if (ui.view === "quests") renderQuests();
+      toast(/inconnue/.test(m) ? "Cette quête n'est pas encore installée sur le serveur." : /pas encore/.test(m) ? `Le serveur compte moins de cartes pour cette quête (${m.replace(/^pas encore : /, "")}).` : capFirst(m));
+      return;
+    }
     reward = d.reward; first = d.first; if (ui.server) ui.server.ecus = d.ecus;
     SOC.qboard = SOC.qboard || { mine: {}, counts: {}, first: {} }; SOC.qboard.mine[id] = step;
   } else if (SB_CONF) { toast("Connectez-vous pour récupérer vos récompenses (onglet Paquets)."); return; }
