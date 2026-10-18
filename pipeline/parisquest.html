@@ -103,6 +103,12 @@ sup { font-size: .62em; line-height: 0; }
 }
 .chip i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px var(--white); }
 .chip[aria-pressed="false"] { opacity: .5; }
+.chip.ownsw { gap: 7px; padding: 5px 11px 5px 6px; background: var(--white); color: var(--navy); box-shadow: inset 0 0 0 1.5px var(--navy); opacity: 1; }
+.chip.ownsw .sw { position: relative; width: 26px; height: 15px; border-radius: 8px; background: var(--stone-3); transition: background .2s; flex: none; }
+.chip.ownsw .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--white); transition: transform .2s; }
+.chip.ownsw[aria-pressed="true"] { background: var(--navy); color: var(--white); box-shadow: none; }
+.chip.ownsw[aria-pressed="true"] .sw { background: var(--green-2); }
+.chip.ownsw[aria-pressed="true"] .sw::after { transform: translateX(11px); }
 .chip[aria-pressed="false"] i { background: transparent; box-shadow: inset 0 0 0 2px var(--c); }
 
 .tools { position: absolute; top: 10px; right: max(12px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 6px; }
@@ -1033,7 +1039,7 @@ function drawOverlay(s, tx, ty, W, H) {
     if (!small) { ctx.beginPath(); ctx.arc(x, y, rOwn * .38, 0, 6.283); ctx.fillStyle = getTierColor(S.owned[it.i].tier); ctx.fill(); }
   }
   // raretés proches : anneau de couleur autour des lieux Rares et mieux, à moins de 400 m (zoom suffisant)
-  if (s >= 30 && !QS) for (const i of candidates(P[0], P[1], 400 / MPU)) {
+  if (s >= 30 && !QS && S.settings.unowned) for (const i of candidates(P[0], P[1], 400 / MPU)) {
     const it = ITEMS[i]; if (it.t < 2 || S.owned[it.i] || S.pending[it.i] || !visible(it) || distTo(it, P) > 400) continue;
     const x = it.p[0] * s + tx, y = it.p[1] * s + ty;
     ctx.beginPath(); ctx.arc(x, y, rFree + 4, 0, 6.283); ctx.lineWidth = it.t >= 3 ? 3 : 2; ctx.strokeStyle = getTierColor(it.t); ctx.stroke();
@@ -1375,8 +1381,11 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("modal"
 /* ---------- Filtres de la carte ---------- */
 function renderLayers() {
   const ownedBy = {}; for (const id in S.owned) { const it = BYID.get(id); if (it) ownedBy[famOf(it)] = (ownedBy[famOf(it)] || 0) + 1; }
-  $("layers").innerHTML = Object.entries(FAMS).map(([k, f]) => `<button class="chip" data-f="${k}" aria-pressed="${!S.hidden[k]}" style="--c:${f.color}"><i></i>${esc(f.name)}</button>`).join("");
-  $("layers").querySelectorAll(".chip").forEach(b => b.onclick = () => { const k = b.dataset.f; S.hidden[k] = !S.hidden[k]; if (!S.hidden[k]) delete S.hidden[k]; save(); renderLayers(); renderSheet(); render(); });
+  // interrupteur « Mes cartes » : n'afficher que les lieux possédés
+  $("layers").innerHTML = `<button class="chip ownsw" id="ownSw" aria-pressed="${!S.settings.unowned}" aria-label="N'afficher que mes cartes"><span class="sw"></span>Mes cartes</button>`
+    + Object.entries(FAMS).map(([k, f]) => `<button class="chip" data-f="${k}" aria-pressed="${!S.hidden[k]}" style="--c:${f.color}"><i></i>${esc(f.name)}</button>`).join("");
+  $("ownSw").onclick = () => { S.settings.unowned = !S.settings.unowned; save(); renderLayers(); renderSheet(); render(); toast(S.settings.unowned ? "Tous les lieux sont affichés." : "Seules vos cartes sont affichées."); };
+  $("layers").querySelectorAll(".chip[data-f]").forEach(b => b.onclick = () => { const k = b.dataset.f; S.hidden[k] = !S.hidden[k]; if (!S.hidden[k]) delete S.hidden[k]; save(); renderLayers(); renderSheet(); render(); });
 }
 
 /* ---------- Collection ---------- */
