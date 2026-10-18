@@ -60,22 +60,27 @@ sup { font-size: .62em; line-height: 0; }
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   background: var(--stone); border-bottom: 1px solid var(--joint);
 }
-.logo {
-  display: inline-flex; flex-direction: column; align-items: center;
-  background: var(--navy); color: var(--white); border-radius: 7px; padding: 4px 14px 5px; margin: 3px; line-height: 1;
-  box-shadow: 0 0 0 3px var(--green), inset 0 0 0 1.5px var(--white), 0 2px 0 3px rgba(0,0,0,.15);
-}
-.logo small { font-family: var(--f-plaque); font-weight: 500; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
-.logo strong { font-family: var(--f-plaque); font-weight: 700; font-size: 22px; letter-spacing: .06em; text-transform: uppercase; }
+.logo { display: block; line-height: 0; margin-right: auto; }
+.logo-svg { width: 168px; height: auto; display: block; filter: drop-shadow(0 2px 0 rgba(0,0,0,.14)); }
+.logo-svg .lg-main { font-family: var(--f-plaque); font-weight: 700; font-size: 25px; fill: #F6F2E8; letter-spacing: .04em; }
+.logo-svg .lg-top { font-family: var(--f-plaque); font-weight: 700; font-size: 10.5px; fill: #F6F2E8; letter-spacing: .14em; }
+.burger { display: none; position: relative; border: 0; background: var(--navy); color: var(--white); width: 40px; height: 40px; border-radius: 8px; padding: 0; place-items: center; box-shadow: 0 0 0 2px var(--green); flex: none; }
+.burger svg { width: 22px; height: 22px; }
+.burger[aria-current="page"] { background: var(--green); }
+.burger .badge { position: absolute; top: -6px; right: -7px; min-width: 18px; padding: 0 4px; border-radius: 9px; background: var(--r4); color: var(--navy); font-family: var(--f-plaque); font-weight: 700; font-size: 11px; line-height: 18px; text-align: center; }
+@media (max-width: 899px) { .burger { display: grid; } }
+.pqi { display: inline-block; width: 1.05em; height: 1.05em; vertical-align: -.17em; margin-left: .18em; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14.5' fill='%232D6448'/%3E%3Ccircle cx='16' cy='16' r='12' fill='%23172B4D'/%3E%3Ccircle cx='16' cy='16' r='10.3' fill='none' stroke='%23F6F2E8' stroke-width='1'/%3E%3Cpath d='M8.6 21.5V10.5h3.6c2.3 0 3.6 1.2 3.6 3.2s-1.3 3.2-3.6 3.2h-1.5v4.6Zm2.1-6.4h1.4c1.1 0 1.6-.5 1.6-1.4s-.5-1.4-1.6-1.4h-1.4Z' fill='%23F6F2E8'/%3E%3Cpath d='M21 21.7c-2.7 0-4.4-2.2-4.4-5.7s1.7-5.7 4.4-5.7 4.4 2.2 4.4 5.7c0 1.9-.5 3.4-1.4 4.4l1.4 1.5-1.3 1.1-1.5-1.6c-.5.2-1 .3-1.6.3Zm0-1.9c.3 0 .6 0 .8-.2l-1.2-1.3 1.3-1.1 1.1 1.2c.4-.6.6-1.5.6-2.4 0-2.4-.9-3.8-2.6-3.8s-2.6 1.4-2.6 3.8.9 3.8 2.6 3.8Z' fill='%23F6F2E8'/%3E%3C/svg%3E") center / contain no-repeat; flex: none; }
+.pqi.lead { margin: 0 .22em 0 0; }
+.counter b span { font-size: inherit; letter-spacing: 0; text-transform: none; color: inherit; }
+.counter b .pqi { width: .82em; height: .82em; vertical-align: -.06em; }
 .counters { display: flex; gap: 8px; font-variant-numeric: tabular-nums; }
 .counter { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.05; padding: 4px 10px; border-radius: 6px; background: var(--stone-2); box-shadow: inset 0 0 0 1px var(--joint); }
 .counter b { font-family: var(--f-plaque); font-size: 19px; font-weight: 700; color: var(--navy); white-space: nowrap; }
 .counter span { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
 @media (max-width: 440px) {
   .top { gap: 8px; }
-  .logo { padding: 3px 9px 4px; }
-  .logo strong { font-size: 18px; }
-  .logo small { font-size: 8.5px; }
+  .logo-svg { width: 124px; }
+  .burger { width: 36px; height: 36px; }
   .counters { gap: 5px; }
   .counter { padding: 3px 7px; }
   .counter b { font-size: 16px; }
@@ -358,7 +363,7 @@ sup { font-size: .62em; line-height: 0; }
 .scout strong { display: block; color: var(--navy); font-weight: 600; line-height: 1.2; }
 .scout span { font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
-.tabbar { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--navy); box-shadow: 0 -3px 0 var(--green); padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); position: relative; z-index: 6; }
+.tabbar { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--navy); box-shadow: 0 -3px 0 var(--green); padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); position: relative; z-index: 6; }
 .tabbar button { border: 0; background: none; color: rgba(246,242,232,.65); padding: 9px 4px 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-family: var(--f-plaque); font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
 .tabbar button svg { width: 22px; height: 22px; }
 .tabbar button[aria-current="page"] { color: var(--white); }
@@ -638,11 +643,12 @@ sup { font-size: .62em; line-height: 0; }
 
 <div class="app" id="app" data-mobile="map">
   <header class="top">
-    <div class="logo" aria-label="Parisquest"><small>Collectionnez Paris</small><strong>Parisquest</strong></div>
+    <button class="burger" id="burgerBtn" data-tab="menu" aria-label="Menu : quêtes, Marché, profil et autres onglets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="badge" id="menuBadge" hidden>0</span></button>
+    <div class="logo"><svg class="logo-svg" viewBox="0 0 200 74" role="img" aria-label="Parisquest"><path d="M3 23 H66 V18 C70 18 72 15 76 10 C84 2 116 2 124 10 C128 15 130 18 134 18 V23 H197 Q199 23 199 25 V69 Q199 71 197 71 H3 Q1 71 1 69 V25 Q1 23 3 23 Z" fill="#172B4D" stroke="#2D6448" stroke-width="3.2" stroke-linejoin="round"/><path d="M7.5 27.5 H192.5 V66.5 H7.5 Z M70.5 27.5 V22 C75 21.5 77 19 80.5 14.5 C87 7.5 113 7.5 119.5 14.5 C123 19 125 21.5 129.5 22 V27.5" fill="none" stroke="#F6F2E8" stroke-width="1.3" stroke-linejoin="round"/><text x="100" y="23" text-anchor="middle" class="lg-top">PQ</text><text x="100" y="56" text-anchor="middle" class="lg-main" textLength="166" lengthAdjust="spacingAndGlyphs">PARISQUEST</text></svg></div>
     <div class="counters">
       <div class="counter"><b id="cntCards">0</b><span>cartes</span></div>
       <div class="counter"><b id="cntPacks">0</b><span id="cntNext">paquets</span></div>
-      <button class="counter" id="cntEcusBtn" style="border:0;font:inherit" aria-label="Boutique"><b id="cntEcus">0</b><span>PQ</span></button>
+      <button class="counter" id="cntEcusBtn" style="border:0;font:inherit" aria-label="Boutique"><b><i class="pqi lead" aria-hidden="true"></i><span id="cntEcus">0</span></b><span>PQ</span></button>
     </div>
   </header>
 
@@ -680,9 +686,8 @@ sup { font-size: .62em; line-height: 0; }
 
   <nav class="tabbar" aria-label="Navigation">
     <button data-tab="map" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/></svg>Carte</button>
-    <button data-tab="collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="11" height="15" rx="2"/><path d="M17 6.5 20.5 8 17 19"/></svg>Collection</button>
     <button data-tab="packs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="7" width="12" height="14" rx="2"/><path d="M8 4h10a2 2 0 0 1 2 2v12"/></svg><span>Paquets<span class="badge" id="packBadge" hidden>0</span></span></button>
-      <button data-tab="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Menu<span class="badge" id="menuBadge" hidden>0</span></span></button>
+    <button data-tab="collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="11" height="15" rx="2"/><path d="M17 6.5 20.5 8 17 19"/></svg>Collection</button>
 </nav>
 </div>
 
@@ -739,6 +744,8 @@ const PARIGO_SIZE = 20, PARIGO_ODDS = [.32, .28, .22, .13, .05];
    Équilibre : 10 paquets = 50 cartes, ~0,5 Légendaire et ~2 Épiques attendues (volume) ;
    Pack PariGo = 20 cartes, ~1 Légendaire et ~2,6 Épiques attendues, peu de Communes (qualité). */
 const PRICE = { p10: "0,99 €", parigo: "1,49 €", pass: "4 € / mois" };
+// montant en PQ avec le jeton (affichage seulement ; les messages texte gardent « PQ »)
+const PQ = n => `${nf(n)}<i class="pqi" role="img" aria-label="PQ"></i>`;
 const ECU_OFFERS = [{ id: "e500", ecus: 500, eur: "0,99 €" }, { id: "e1200", ecus: 1200, eur: "1,99 €", bonus: "+20 %" }, { id: "e3500", ecus: 3500, eur: "4,99 €", bonus: "+40 %", hl: true }, { id: "e8000", ecus: 8000, eur: "9,99 €", bonus: "+60 %" }];
 /* Direction A : « Collectionne Paris en le parcourant ». Un paquet du jour (5 lieux à découvrir, 3 en réserve au plus) ;
    les cartes se gagnent en capturant les lieux sur place. Score : points par rareté, doublés si la carte a été visitée. */
@@ -1493,7 +1500,7 @@ function renderCollection() {
         <div class="dd-body cols">
           <button class="col all" data-c="" aria-pressed="${!colSel}"><strong>Toutes les collections${fam ? " · " + esc(FAMS[fam].name) : ""}</strong><span class="n">${doneN} / ${cols.length}</span></button>
           ${cols.map(({ c, ci, n }) => { const tot = c[3].length, done = n === tot;
-            return `<button class="col${done ? " done" : ""}" data-c="${ci}" aria-pressed="${ui.col === ci}" style="--c:${FAMS[c[0]].color}"><strong>${esc(c[1])}</strong><span class="n">${done ? "Complète" : `${n}/${tot}`}</span><span class="bar"><i style="width:${Math.round(n / tot * 100)}%"></i></span><span class="sub">${esc(c[2])} · bonus 50 PQ</span></button>`;
+            return `<button class="col${done ? " done" : ""}" data-c="${ci}" aria-pressed="${ui.col === ci}" style="--c:${FAMS[c[0]].color}"><strong>${esc(c[1])}</strong><span class="n">${done ? "Complète" : `${n}/${tot}`}</span><span class="bar"><i style="width:${Math.round(n / tot * 100)}%"></i></span><span class="sub">${esc(c[2])} · bonus ${PQ(50)}</span></button>`;
           }).join("") || `<div class="empty">Pas encore de collection pour cette famille.</div>`}
         </div>
       </details>
@@ -2113,7 +2120,7 @@ function questRow(q, P) {
     ${q.what || (q.ex && q.ex.length) ? `<p class="qwhat">${q.what ? `<b>À collectionner :</b> ${esc(q.what)}` : ""}${q.ex && q.ex.length ? `${q.what ? "<br>" : ""}<b>À voir :</b> ${q.ex.map(esc).join(", ")}` : ""}</p>` : ""}
     <div class="qbar-p"><b style="width:${have / q.total * 100}%"></b>${q.steps.length > 1 ? ticks : ""}</div>
     <div class="qfoot"><span>${fin ? `<span class="title-badge small">${esc(q.title)}</span>` : `Titre : ${esc(q.title)}${q.steps.length > 1 ? ` · palier ${MEDALS[done]} à ${nf(next)}` : ""}`}${cnt ? ` · ${nf(cnt[cnt.length - 1] || 0)} joueur${(cnt[cnt.length - 1] || 0) > 1 ? "s" : ""} l'ont finie` : ""}${first ? ` · premier : ${esc(first)}` : ""}</span>
-      ${ready ? `<button class="mini-btn qclaim" data-claim="${q.id}">Récupérer +${nf(q.rewards.slice(done).filter((_, k) => have >= q.steps[done + k]).reduce((a, b) => a + b, 0))} PQ</button>` : fin ? "" : `<span class="qrew">${nf(rest)} PQ à gagner</span>`}</div>
+      ${ready ? `<button class="mini-btn qclaim" data-claim="${q.id}">Récupérer +${PQ(q.rewards.slice(done).filter((_, k) => have >= q.steps[done + k]).reduce((a, b) => a + b, 0))}</button>` : fin ? "" : `<span class="qrew">${PQ(rest)} à gagner</span>`}</div>
   </div>`;
 }
 async function renderQuests() {
@@ -2355,7 +2362,7 @@ function renderShop() {
   const buyLabel = PAY_READY ? "Acheter" : DEMO_BUY ? "Simuler l'achat" : "Bientôt";
   const oddsRow = (label, odds) => `<span>${label}</span>${odds.map(o => `<span>${String(Math.round(o * 1000) / 10).replace(".", ",")} %</span>`).join("")}`;
   viewEl("shop").innerHTML = `<h2>Boutique</h2>
-    <p class="lede">Solde : <b>${nf(ecus())} PQ</b>${pa ? ` · <span class="badge-pass">Pass PariGo</span>` : ""}</p>
+    <p class="lede">Solde : <b>${PQ(ecus())}</b>${pa ? ` · <span class="badge-pass">Pass PariGo</span>` : ""}</p>
     <div class="premium"><h3>Pass PariGo</h3><div class="big">4 € / mois</div>
       <ul><li>Un paquet toutes les <b>2 minutes</b> au lieu de 10</li><li><b>Un Pack PariGo offert chaque jour</b></li><li>Badge PariGo sur votre profil</li><li>Sans engagement, résiliable à tout moment</li></ul>
       ${pa ? `<p style="margin:0;font-size:14px">Actif jusqu'au ${new Date(until).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.</p>` : `<button class="btn" id="buyPass">${PAY_READY ? "S'abonner" : DEMO_BUY ? "Simuler l'abonnement" : "Bientôt disponible"}</button>`}</div>
@@ -2364,7 +2371,7 @@ function renderShop() {
       <div class="odds"><span></span>${TIERS.map((n, i) => `<span class="h" style="background:var(${TIER_VAR[i]})">${n.replace("Peu commune", "Peu com.")}</span>`).join("")}${oddsRow("Paquet", TIER_ODDS)}${oddsRow("PariGo", PARIGO_ODDS)}</div>
       <div class="btn-row">${pg.free || pg.stock ? `<button class="btn" id="openParigo">${pg.free ? "Ouvrir mon Pack du jour" : `Ouvrir (${pg.stock} en stock)`}</button>` : ""}<button class="btn${pg.free || pg.stock ? " light" : ""}" id="buyParigo" ${PAY_READY || DEMO_BUY ? "" : "disabled"}>${PAY_READY ? `Acheter · ${PRICE.parigo}` : DEMO_BUY ? `Simuler l'achat · ${PRICE.parigo}` : "Bientôt disponible"}</button></div></div>`; })()}
     <div class="panel"><h3>Paquets</h3><div class="shop-grid"><div class="offer hl"><b>10 paquets</b><small>Ajoutés à votre réserve, sans limite</small><span class="price">${PRICE.p10}</span><button class="mini-btn" data-sku="p10" ${PAY_READY || DEMO_BUY ? "" : "disabled"}>${buyLabel}</button></div></div></div>
-    <div class="panel"><h3>PQ</h3><div class="shop-grid">${ECU_OFFERS.map(o => `<div class="offer${o.hl ? " hl" : ""}"><b>${nf(o.ecus)} PQ</b><small>${o.bonus ? `${o.bonus} d'PQ` : "Pour commencer"}</small><span class="price">${o.eur}</span><button class="mini-btn" data-sku="${o.id}" ${PAY_READY || DEMO_BUY ? "" : "disabled"}>${buyLabel}</button></div>`).join("")}</div>
+    <div class="panel"><h3>PQ</h3><div class="shop-grid">${ECU_OFFERS.map(o => `<div class="offer${o.hl ? " hl" : ""}"><b>${PQ(o.ecus)}</b><small>${o.bonus ? `${o.bonus} de PQ` : "Pour commencer"}</small><span class="price">${o.eur}</span><button class="mini-btn" data-sku="${o.id}" ${PAY_READY || DEMO_BUY ? "" : "disabled"}>${buyLabel}</button></div>`).join("")}</div>
       <p class="lede" style="font-size:13px;margin-top:10px">Les PQ servent à acheter et vendre des cartes au Marché. Les quêtes en rapportent aussi.</p></div>
     <p class="legal">Probabilités affichées pour chaque carte tirée. Les PQ et les cartes n'ont aucune valeur monétaire et ne peuvent pas être reconvertis en argent. Paiements sécurisés par Stripe. Achats réservés aux personnes majeures ou autorisées par un parent. Contenu numérique fourni immédiatement : en achetant, vous demandez son exécution immédiate et renoncez au droit de rétractation de 14 jours. ${PAY_READY ? "" : DEMO_BUY ? "Mode test : aucun paiement n'est effectué." : "Les paiements ouvriront au lancement."}</p>`;
   if ($("buyPass")) $("buyPass").onclick = () => checkout("pass");
@@ -2555,7 +2562,7 @@ async function renderMarket() {
         <select id="mkFam"><option value="">Toutes les familles</option>${Object.entries(FAMS).map(([k, f]) => `<option value="${k}" ${SOC.mkFam === k ? "selected" : ""}>${esc(f.name)}</option>`).join("")}</select>
         <select id="mkTier"><option value="">Toutes les raretés</option>${TIERS.map((n, i) => `<option value="${i}" ${SOC.mkTier === String(i) ? "selected" : ""}>${n}</option>`).join("")}</select></div>
       ${L.length ? `<div class="mk-grid" style="margin-top:10px">${L.map(l => { const it = BYID.get(l.place), left = Date.parse(l.ends_at) - now();
-        return `<div class="mk-item">${cardHTML(it)}<div class="mk-info"><b>${nf(l.bid || l.start)} PQ</b> ${l.bid ? `· ${l.bids} enchère${l.bids > 1 ? "s" : ""}` : "· prix de départ"}<br>${timeLeft(left)} · ${esc(l.seller)}${l.leading ? `<br><span class="lead">Vous menez</span>` : ""}${l.buyout ? `<br>Achat immédiat : ${nf(l.buyout)}` : ""}</div>
+        return `<div class="mk-item">${cardHTML(it)}<div class="mk-info"><b>${PQ(l.bid || l.start)}</b> ${l.bid ? `· ${l.bids} enchère${l.bids > 1 ? "s" : ""}` : "· prix de départ"}<br>${timeLeft(left)} · ${esc(l.seller)}${l.leading ? `<br><span class="lead">Vous menez</span>` : ""}${l.buyout ? `<br>Achat immédiat : ${nf(l.buyout)}` : ""}</div>
           ${l.mine ? (l.bid ? `<small>Votre vente</small>` : `<button class="mini-btn ghost" data-cancel="${l.id}">Annuler la vente</button>`) : `<div class="mk-act">${l.leading ? "" : `<input class="field" type="number" min="${l.min}" value="${l.min}" id="bid${l.id}"><button class="mini-btn" data-bid="${l.id}">Enchérir</button>`}</div>${l.buyout ? `<button class="mini-btn ghost" data-buy="${l.id}">Acheter ${nf(l.buyout)}</button>` : ""}`}</div>`; }).join("")}</div>` : `<div class="empty" style="margin-top:10px">Aucune carte en vente pour ces critères.</div>`}`;
   } else if (SOC.mkTab === "sell") {
     const it = SOC.mkSel && BYID.get(SOC.mkSel), o = it && S.owned[it.i];
@@ -2568,13 +2575,13 @@ async function renderMarket() {
         <p class="lede" style="font-size:13px;margin-top:8px">La carte est mise de côté pendant la vente. 5 % du prix de vente sont prélevés. Sans enchère, elle vous revient à la fin.</p>`
       : `<p class="lede" style="font-size:14px">Choisissez la carte à vendre :</p><div id="slPick"></div>`;
   } else {
-    body = d.history.length ? d.history.map(h => `<div class="prow"><span>${chipHTML(h.place)}<small>${h.mine ? (h.status === "sold" ? `Vendue ${nf(h.price)} PQ (vous recevez ${nf(Math.floor(h.price * .95))})` : h.status === "unsold" ? "Invendue, carte récupérée" : "Vente annulée") : `Remportée pour ${nf(h.price)} PQ`}</small></span><small>${new Date(h.closed_at).toLocaleDateString("fr-FR")}</small></div>`).join("")
+    body = d.history.length ? d.history.map(h => `<div class="prow"><span>${chipHTML(h.place)}<small>${h.mine ? (h.status === "sold" ? `Vendue ${PQ(h.price)} (vous recevez ${PQ(Math.floor(h.price * .95))})` : h.status === "unsold" ? "Invendue, carte récupérée" : "Vente annulée") : `Remportée pour ${PQ(h.price)}`}</small></span><small>${new Date(h.closed_at).toLocaleDateString("fr-FR")}</small></div>`).join("")
       : `<div class="empty">Pas encore de vente ni d'achat.</div>`;
     const mine = d.open.filter(l => l.mine || l.leading);
-    if (mine.length) body = `<h3 style="margin-top:4px">En cours</h3>${mine.map(l => `<div class="prow"><span>${chipHTML(l.place)}<small>${l.mine ? "Votre vente" : "Vous menez"} · ${nf(l.bid || l.start)} PQ · ${timeLeft(Date.parse(l.ends_at) - now())}</small></span></div>`).join("")}<h3 style="margin-top:12px">Terminées</h3>` + body;
+    if (mine.length) body = `<h3 style="margin-top:4px">En cours</h3>${mine.map(l => `<div class="prow"><span>${chipHTML(l.place)}<small>${l.mine ? "Votre vente" : "Vous menez"} · ${PQ(l.bid || l.start)} · ${timeLeft(Date.parse(l.ends_at) - now())}</small></span></div>`).join("")}<h3 style="margin-top:12px">Terminées</h3>` + body;
   }
   el.innerHTML = `<h2>Marché</h2>
-    <p class="lede">Solde : <b>${nf(d.ecus || 0)} PQ</b>. Les PQ d'une enchère sont mis de côté et rendus si quelqu'un surenchérit. Une enchère dans les 2 dernières minutes prolonge la vente.</p>
+    <p class="lede">Solde : <b>${PQ(d.ecus || 0)}</b>. Les PQ d'une enchère sont mis de côté et rendus si quelqu'un surenchérit. Une enchère dans les 2 dernières minutes prolonge la vente.</p>
     <div class="tabsrow">${tabs.map(([k, n]) => `<button class="mini-btn${SOC.mkTab === k ? "" : " ghost"}" data-tab2="${k}">${n}</button>`).join("")}</div>
     <div class="panel">${body}</div>`;
   el.querySelectorAll("[data-tab2]").forEach(b => b.onclick = () => { SOC.mkTab = b.dataset.tab2; renderMarket(); });
@@ -2703,7 +2710,7 @@ function setMobile(m) {
   ui.mobile = m === "map" ? "map" : "panel"; if (m !== "map") setView(m);
   $("app").dataset.mobile = ui.mobile;
   const tabOf = v => v === "collection" || v === "packs" ? v : "menu";
-  document.querySelectorAll(".tabbar button").forEach(b => { const on = (b.dataset.tab === "map" && ui.mobile === "map") || (ui.mobile === "panel" && b.dataset.tab === tabOf(ui.view)); if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  document.querySelectorAll(".tabbar button, #burgerBtn").forEach(b => { const on = (b.dataset.tab === "map" && ui.mobile === "map") || (ui.mobile === "panel" && b.dataset.tab === tabOf(ui.view)); if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
   if (ui.mobile === "map") requestAnimationFrame(resize);
 }
 function setView(view) {
@@ -2713,7 +2720,7 @@ function setView(view) {
   document.querySelectorAll(".side-tabs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === view)));
   RENDER[view](); $("side").scrollTop = 0;
 }
-document.querySelectorAll(".tabbar button").forEach(b => b.onclick = () => setMobile(b.dataset.tab));
+document.querySelectorAll(".tabbar button, #burgerBtn").forEach(b => b.onclick = () => setMobile(b.dataset.tab));
 document.querySelectorAll(".side-tabs button").forEach(b => b.onclick = () => setView(b.dataset.view));
 
 /* ---------- Mode test, jour suivant, GPS ---------- */

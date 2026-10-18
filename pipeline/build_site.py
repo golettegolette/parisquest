@@ -1,6 +1,5 @@
 """Assemble la version hébergée (GitHub Pages) dans site/ à partir de parisquest.html."""
 import json, shutil, time, pathlib
-from PIL import Image, ImageDraw, ImageFont
 
 ROOT = pathlib.Path(__file__).parent
 SITE = ROOT / "site"
@@ -72,32 +71,10 @@ self.addEventListener("fetch", e => {{
 """)
 (SITE / ".nojekyll").write_text("")
 
-# Icônes : plaque de rue bleu nuit, cadre vert, lettres blanches
-FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf"
-def icon(size, maskable=False):
-    S = 4 * size
-    im = Image.new("RGB", (S, S), "#BBA987" if not maskable else "#172B4D")
-    d = ImageDraw.Draw(im)
-    m = int(S * (0.16 if maskable else 0.06))
-    r = int(S * 0.11)
-    d.rounded_rectangle([m, m, S - m, S - m], radius=r, fill="#1F4A36")
-    g = int(S * 0.045)
-    d.rounded_rectangle([m + g, m + g, S - m - g, S - m - g], radius=r - g // 2, fill="#172B4D")
-    w = int(S * 0.012); g2 = g + int(S * 0.03)
-    d.rounded_rectangle([m + g2, m + g2, S - m - g2, S - m - g2], radius=r - g2 // 2, outline="#F6F2E8", width=w)
-    inner = S - 2 * (m + g2)
-    f = ImageFont.truetype(FONT, int(inner * 0.5))
-    d.text((S / 2, S / 2 + inner * 0.02), "PQ", font=f, fill="#F6F2E8", anchor="mm")
-    f2 = ImageFont.truetype(FONT, int(inner * 0.1))
-    d.text((S / 2, S / 2 - inner * 0.3), "PARIS", font=f2, fill="#F6F2E8", anchor="mm")
-    return im.resize((size, size), Image.LANCZOS)
-icon(192).save(SITE / "icons/icon-192.png")
-icon(512).save(SITE / "icons/icon-512.png")
-icon(180).save(SITE / "icons/apple-touch-icon.png")
-icon(512, True).save(SITE / "icons/icon-maskable-512.png")
+# Icônes : générées une fois par make_icons.py (plaque de rue avec fronton), gardées dans site/icons
 
 # Chaîne de données, pour mémoire
 PIPE = SITE / "pipeline"; PIPE.mkdir(exist_ok=True)
-for f in ["build2.py", "db.py", "wikidata.py", "ridership.py", "build_site.py", "build_server.py", "ponts.py", "vestiges.py", "acces.py", "lines.py", "quests.py", "requetes.sql", "parisquest.html"]:
+for f in ["build2.py", "db.py", "wikidata.py", "ridership.py", "build_site.py", "make_icons.py", "build_server.py", "ponts.py", "vestiges.py", "acces.py", "lines.py", "quests.py", "requetes.sql", "parisquest.html", "journal-donnees.md"]:
     shutil.copy(ROOT / f, PIPE / f)
 print("site prêt", VERSION)
