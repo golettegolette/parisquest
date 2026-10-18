@@ -31,10 +31,10 @@ def hav(a1, o1, a2, o2):
     r = math.radians
     return 2 * 6371000 * math.asin(math.sqrt(math.sin(r(a2 - a1) / 2) ** 2 + math.cos(r(a1)) * math.cos(r(a2)) * math.sin(r(o2 - o1) / 2) ** 2))
 
-Q, TAGS = [], {}
+Q, TAGS, MEM = [], {}, {}
 def quest(cat, qid, name, title, desc, rule, val, members=None, total=None, tiers=None, steps=None):
     if members is not None:
-        members = sorted(set(members)); total = len(members)
+        members = sorted(set(members)); total = len(members); MEM[qid] = members
         if rule == "tag": TAGS[val] = members
     if not total: return
     if steps is None: steps = sorted({max(1, math.ceil(total * p)) for p in (tiers or tiers_for(total))})
@@ -43,15 +43,37 @@ def quest(cat, qid, name, title, desc, rule, val, members=None, total=None, tier
 ITEMS_BY = lambda pred: [it["i"] for it in I if pred(it)]
 
 # ---------- Territoires ----------
+ARR_DESC = {
+    1: "Le cœur royal de Paris, du Louvre aux Tuileries et aux Halles.",
+    2: "Le quartier de la Bourse, des passages couverts et de la rue Montorgueil.",
+    3: "Le haut Marais, ses hôtels particuliers et ses ateliers.",
+    4: "L'île de la Cité, l'île Saint-Louis, le bas Marais et l'Hôtel de Ville.",
+    5: "Le Quartier latin : la Sorbonne, le Panthéon et le Jardin des plantes.",
+    6: "Saint-Germain-des-Prés, ses cafés littéraires et le jardin du Luxembourg.",
+    7: "La tour Eiffel, les Invalides, le musée d'Orsay et les ministères.",
+    8: "Les Champs-Élysées, la Madeleine et la place de la Concorde.",
+    9: "Les grands boulevards, l'Opéra Garnier et la Nouvelle Athènes.",
+    10: "Les gares du Nord et de l'Est, le canal Saint-Martin et ses écluses.",
+    11: "Bastille, Oberkampf et les cours d'artisans du faubourg Saint-Antoine.",
+    12: "Bercy, la Coulée verte, la gare de Lyon et le bois de Vincennes.",
+    13: "La Butte-aux-Cailles, le quartier asiatique et Paris Rive Gauche.",
+    14: "Montparnasse, ses ateliers d'artistes, les catacombes et le parc Montsouris.",
+    15: "Le plus peuplé de Paris : Vaugirard, Grenelle et le parc André-Citroën.",
+    16: "Passy, Auteuil, le Trocadéro et le bois de Boulogne.",
+    17: "Les Batignolles, la plaine Monceau et les Épinettes.",
+    18: "Montmartre et ses escaliers, la Goutte-d'Or et La Chapelle.",
+    19: "Les Buttes-Chaumont, le bassin et le parc de la Villette.",
+    20: "Belleville, Ménilmontant et le Père-Lachaise.",
+}
 for a in range(1, 21):
     o = "1er" if a == 1 else f"{a}e"
-    quest("Territoires", f"arr-{a}", f"Le {o} arrondissement", f"Seigneur du {o}", f"Les lieux du {o} arrondissement.", "arr", str(a), ITEMS_BY(lambda it, a=a: ar(it) == a))
-quest("Territoires", "rive-d", "La rive droite", "Boss de la rive droite", "Les lieux des arrondissements de la rive droite.", "rive", "d", ITEMS_BY(lambda it: ar(it) and ar(it) not in LEFT))
-quest("Territoires", "rive-g", "La rive gauche", "Boss de la rive gauche", "Les lieux des arrondissements de la rive gauche.", "rive", "g", ITEMS_BY(lambda it: ar(it) in LEFT))
-quest("Territoires", "montmartre", "Montmartre", "Gamin de la Butte", "Les lieux de la Butte Montmartre.", "tag", "zone:montmartre",
+    quest("Territoires", f"arr-{a}", f"Le {o} arrondissement", f"Seigneur du {o}", ARR_DESC[a], "arr", str(a), ITEMS_BY(lambda it, a=a: ar(it) == a))
+quest("Territoires", "rive-d", "La rive droite", "Boss de la rive droite", "Tous les lieux au nord de la Seine (1er à 4e, 8e à 12e, 16e à 20e).", "rive", "d", ITEMS_BY(lambda it: ar(it) and ar(it) not in LEFT))
+quest("Territoires", "rive-g", "La rive gauche", "Boss de la rive gauche", "Tous les lieux au sud de la Seine (5e, 6e, 7e, 13e, 14e, 15e).", "rive", "g", ITEMS_BY(lambda it: ar(it) in LEFT))
+quest("Territoires", "montmartre", "Montmartre", "Gamin de la Butte", "Le sommet de la Butte, de la place du Tertre aux vignes.", "tag", "zone:montmartre",
       ITEMS_BY(lambda it: ar(it) == 18 and 48.8825 < it["a"] < 48.8895 and 2.3345 < it["o"] < 2.3460))
-quest("Territoires", "bois", "Les Bois de Paris", "Garde forestier", "Boulogne et Vincennes.", "tag", "zone:bois", ITEMS_BY(lambda it: "Bois de" in (it.get("site") or "")))
-quest("Territoires", "tour", "Tour de Paris", "Globe-trotteur parisien", "Au moins une carte dans chacun des 20 arrondissements.", "arrs", "", total=20, steps=[5, 10, 20])
+quest("Territoires", "bois", "Les Bois de Paris", "Garde forestier", "Les bois de Boulogne et de Vincennes, les deux poumons de Paris.", "tag", "zone:bois", ITEMS_BY(lambda it: "Bois de" in (it.get("site") or "")))
+quest("Territoires", "tour", "Tour de Paris", "Globe-trotteur parisien", "Avoir au moins une carte dans chacun des 20 arrondissements.", "arrs", "", total=20, steps=[5, 10, 20])
 
 # ---------- Familles ----------
 FT = {"nature": ("Amoureux du vert", "Toute la nature de Paris."), "eau": ("Porteur d'eau", "Fontaines, ponts, bains et baignades."),
@@ -82,14 +104,16 @@ for c in ORDER:
     if m == "train" or len(L) < 3: continue           # Transilien : 2 ou 3 gares par ligne, regroupées plus bas
     lab = LINES[c]["n"]
     title = {"metro": f"Pilote du {LINES[c]['l']}", "rer": f"As du RER {LINES[c]['l']}", "tram": f"Conducteur du {LINES[c]['l']}", "funi": "Funambule"}[m]
-    quest("Transports", f"ligne-{c}", lab, title, f"Toutes les stations de la ligne dans Paris.", "tag", f"ligne:{c}", [it["i"] for it in L], tiers=[1.0])
-quest("Transports", "funiculaire", "Funiculaire de Montmartre", "Funambule", "La gare basse et la gare haute.", "tag", "ligne:FUN", [it["i"] for it in per_line.get("FUN", [])], tiers=[1.0])
-quest("Transports", "stations", "Toutes les stations", "Roi du sous-sol", "Métro, RER, tramway et gares dans Paris.", "kind", "station", [it["i"] for it in st])
+    far = max(((p, q) for p in L for q in L), key=lambda pq: hav(pq[0]["a"], pq[0]["o"], pq[1]["a"], pq[1]["o"]))
+    far = sorted(far, key=lambda it: (it["o"], it["a"]))
+    quest("Transports", f"ligne-{c}", lab, title, f"Toutes les stations de la ligne dans Paris, de {far[0]['n']} à {far[1]['n']}.", "tag", f"ligne:{c}", [it["i"] for it in L], tiers=[1.0])
+quest("Transports", "funiculaire", "Funiculaire de Montmartre", "Funambule", "La gare basse et la gare haute, au pied et au sommet de la Butte.", "tag", "ligne:FUN", [it["i"] for it in per_line.get("FUN", [])], tiers=[1.0])
+quest("Transports", "stations", "Toutes les stations", "Roi du sous-sol", "Toutes les stations de métro, de RER, de tramway et les gares dans Paris.", "kind", "station", [it["i"] for it in st])
 nlines = {it["i"]: len([c for c in it.get("ln", []) if LINES[c]["m"] in ("metro", "rer")]) for it in st}
 hubs = dedupe([it for it in st if nlines[it["i"]] >= 4])
 quest("Transports", "hubs", "Les grandes correspondances", "Maître des correspondances", "Les stations où se croisent au moins 4 lignes de métro ou de RER.", "tag", "theme:hubs", [it["i"] for it in hubs], tiers=[1.0])
 busy = sorted(dedupe([it for it in st if (it.get("x") or {}).get("valid")]), key=lambda it: -it["x"]["valid"])[:10]
-quest("Transports", "busy", "Les 10 plus fréquentées", "Heure de pointe", "Les stations aux plus fortes validations.", "tag", "theme:busy", [it["i"] for it in busy], tiers=[1.0])
+quest("Transports", "busy", "Les 10 plus fréquentées", "Heure de pointe", "Les 10 stations les plus fréquentées de Paris, selon les validations Navigo.", "tag", "theme:busy", [it["i"] for it in busy], tiers=[1.0])
 
 # ---------- Séries (les 38 collections du jeu) ----------
 for ci, (f, name, sub, idxs) in enumerate(COLS):
@@ -182,9 +206,178 @@ quest("Prestige", "touche", "Touche-à-tout", "Touche-à-tout", "Une carte de ch
 quest("Prestige", "collection", "Collectionneur", "Encyclopédie vivante", "Toutes les cartes de Paris.", "all", "", total=len(I), steps=[100, 1000, 5000, len(I)])
 quest("Prestige", "series", "Séries complètes", "Maître des séries", "Terminer les séries.", "series", "", total=len(COLS), steps=[5, 15, len(COLS)])
 
+
+# ---------- Classement, descriptions et contenu (affichage) ----------
+CATS = ["Arrondissements et quartiers", "Lignes de métro", "RER, tram et funiculaire", "Stations et gares", "Personnalités",
+        "Histoire et mémoire", "Patrimoine", "Nature", "Eau et ponts", "Culture", "Vie de quartier", "Rues et voies", "Grands défis"]
+SERIE_CAT = {0: "Nature", 1: "Nature", 2: "Nature", 3: "Nature", 4: "Nature", 5: "Eau et ponts", 6: "Eau et ponts", 7: "Eau et ponts",
+             8: "Eau et ponts", 9: "Eau et ponts", 10: "Rues et voies", 11: "Rues et voies", 12: "Personnalités", 13: "Personnalités",
+             14: "Personnalités", 15: "Personnalités", 16: "Personnalités", 17: "Personnalités", 18: "Histoire et mémoire",
+             19: "Patrimoine", 20: "Histoire et mémoire", 21: "Patrimoine", 22: "Patrimoine", 23: "Culture", 24: "Culture",
+             25: "Vie de quartier", 26: "Vie de quartier", 27: "Vie de quartier", 28: "Histoire et mémoire", 29: "Histoire et mémoire",
+             30: "Patrimoine", 31: "Eau et ponts", 32: "Rues et voies", 33: "Vie de quartier", 34: "Stations et gares",
+             35: "Stations et gares", 36: "RER, tram et funiculaire", 37: "Stations et gares"}
+PERSO = ["femmes", "serie-12", "serie-13", "serie-14", "serie-15", "plaque-1", "plaque-2", "plaque-3", "plaque-4", "plaque-5",
+         "serie-16", "serie-17", "plaque-0", "plaque-6", "plaque-8", "tombes"]
+HIST = ["antiquite", "serie-20", "moyenage", "modernes", "serie-18", "serie-29", "serie-28", "plaque-7", "plaque-9", "plaque-10", "plaques"]
+DESC = {
+    "fontaines-monu": "Les fontaines sculptées des places et des jardins.",
+    "piscines": "Les piscines de la Ville, des bassins Art déco aux plus récentes.",
+    "fontaines": "Toutes les fontaines : Wallace, à boire, pétillantes et monumentales.",
+    "arbres": "Les arbres classés remarquables pour leur âge, leur taille ou leur histoire.",
+    "platanes": "Les platanes remarquables, l'arbre des boulevards parisiens.",
+    "jpart": "Les jardins cultivés par les habitants, souvent cachés entre deux immeubles.",
+    "squares": "Les squares de quartier, ces petits jardins publics à la parisienne.",
+    "sursis": "Les arbres malades ou dangereux promis à l'abattage : à voir avant qu'ils ne disparaissent.",
+    "parcs": "Tous les parcs, jardins, squares et promenades.",
+    "plaque-0": "Les plaques posées là où des résistants ont vécu, combattu ou sont tombés.",
+    "plaque-1": "Les maisons où ont vécu ou écrit les écrivains et les penseurs.",
+    "plaque-2": "Peintres, sculpteurs et graveurs : les plaques de leurs maisons et ateliers.",
+    "plaque-3": "Compositeurs, musiciens, chanteurs et danseurs.",
+    "plaque-4": "Acteurs, metteurs en scène et cinéastes.",
+    "plaque-5": "Médecins, chimistes, physiciens : là où ils ont vécu ou travaillé.",
+    "plaque-6": "Les plaques des femmes et hommes politiques.",
+    "plaque-7": "Les plaques qui marquent un événement : révolutions, Libération, premières mondiales.",
+    "plaque-8": "Les plaques des officiers et des soldats.",
+    "plaque-9": "Les plaques à la mémoire des civils tués pendant les guerres.",
+    "plaque-10": "Les plaques à la mémoire des victimes des attentats.",
+    "femmes": "Les femmes illustres liées à un lieu de Paris.",
+    "tombes": "Les tombes de personnalités dans les cimetières parisiens.",
+    "plaques": "Toutes les plaques commémoratives de la Ville.",
+    "antiquite": "Arènes, thermes, forum : les traces de la Lutèce gallo-romaine.",
+    "moyenage": "Les vestiges du Moyen Âge : enceintes, églises, maisons.",
+    "modernes": "Les vestiges des XVIᵉ, XVIIᵉ et XVIIIᵉ siècles.",
+    "hotels": "Les hôtels particuliers, demeures de l'aristocratie et de la grande bourgeoisie.",
+    "culte": "Églises, temples, synagogues, mosquées et pagodes.",
+    "cathedrales": "Les cathédrales de toutes les confessions.",
+    "abbayes": "Abbayes, couvents et prieurés, dont il reste parfois un cloître ou une chapelle.",
+    "monuments": "Arcs, colonnes, statues et mémoriaux.",
+    "edifices": "Les édifices remarquables : palais, halles, bâtiments publics.",
+    "theatres": "Théâtres, cabarets et salles de spectacle.",
+    "cinemas": "Les cinémas, des salles d'art et essai aux grands écrans.",
+    "biblios": "Les bibliothèques de la Ville et les grandes bibliothèques.",
+    "oeuvres": "Statues, sculptures, fresques et street art dans l'espace public.",
+    "ateliers": "Les ateliers et cités d'artistes.",
+    "lieuxculture": "Centres culturels, tiers-lieux et salles de concert.",
+    "kiosques": "Les kiosques à journaux, petites rotondes vertes et dorées.",
+    "marches": "Les marchés alimentaires découverts.",
+    "commerces": "Vieilles boutiques et enseignes remarquables.",
+    "insolite": "Les lieux étonnants et secrets de Paris.",
+    "boules": "Les terrains de pétanque.",
+    "rue-villa": "Les villas, ruelles verdoyantes souvent privées : elles se capturent depuis leur entrée.",
+    "rue-impasse": "Jusqu'au bout de chaque impasse.",
+    "rue-cité": "Les cités, groupes de maisons ou d'ateliers autour d'une voie.",
+    "rue-passage": "Les passages, couverts ou à ciel ouvert, qui relient deux rues.",
+    "rue-quai": "Les quais de la Seine et des canaux.",
+    "rue-boulevard": "Des Grands Boulevards aux boulevards des Maréchaux.",
+    "rue-avenue": "Les avenues de Paris.",
+    "rue-place": "Des grandes places royales aux plus petites placettes.",
+    "legend": "Les cartes Légendaires, les plus rares du jeu.",
+    "epic": "Les cartes Épiques, juste en dessous des Légendaires.",
+    "icones": "Les lieux qui ont un article Wikipédia dans plus de 30 langues.",
+    "merveilles": "Les lieux connus dans le monde entier : article Wikipédia dans plus de 60 langues.",
+    "touche": "Avoir au moins une carte de chaque type de lieu.",
+    "collection": "Toutes les cartes de Paris. Bon courage.",
+    "series": "Terminer les séries de la Collection.",
+    "serie-12": "Les femmes scientifiques parmi les femmes illustres.", "serie-13": "Les écrivaines parmi les femmes illustres.",
+    "serie-14": "Les championnes parmi les femmes illustres.", "serie-15": "Les artistes parmi les femmes illustres.",
+    "serie-16": "Les plaques des inventeurs et des ingénieurs.", "serie-17": "Les plaques des aviateurs et des explorateurs.",
+    "serie-21": "Les mairies d'arrondissement et l'Hôtel de Ville.", "serie-23": "Les musées de Paris, des plus grands aux musées de quartier.",
+    "serie-36": "Toutes les stations de tramway dans Paris.",
+    "fam-nature": "Toute la famille Nature.", "fam-eau": "Toute la famille Eau.", "fam-rues": "Toute la famille Rues.",
+    "fam-memoire": "Toute la famille Mémoire.", "fam-patrimoine": "Toute la famille Patrimoine.", "fam-culture": "Toute la famille Culture.",
+    "fam-quartier": "Toute la famille Quartier.", "fam-transport": "Toute la famille Transports.",
+}
+PLUR = {"arbre": "arbres remarquables", "parc": "parcs et jardins", "jpart": "jardins partagés", "jrel": "jardins relais", "sursis": "arbres en sursis",
+        "fontaine": "fontaines", "piscine": "piscines", "baignade": "baignades", "bains": "bains-douches", "rue": "voies", "plaque": "plaques",
+        "femme": "femmes illustres", "vestige": "vestiges", "monde": "sites du patrimoine mondial", "culte": "lieux de culte", "mairie": "mairies",
+        "cimetiere": "cimetières", "musee": "musées", "biblio": "bibliothèques", "theatre": "théâtres", "conserv": "conservatoires",
+        "atelier": "ateliers", "decouverte": "découvertes", "marche": "marchés", "marchesp": "marchés spécialisés", "kiosque": "kiosques",
+        "insolite": "lieux insolites", "sport": "lieux de sport", "station": "stations", "hotelpart": "hôtels particuliers",
+        "abbaye": "abbayes et couvents", "monument": "monuments", "enceinte": "vestiges d'enceintes", "edifice": "édifices",
+        "disparu": "lieux disparus", "oeuvre": "œuvres d'art", "galerie": "galeries", "lieuculture": "lieux culturels", "cinema": "cinémas",
+        "pont": "ponts", "eaulieu": "lieux d'eau", "tombe": "tombes", "cafe": "cafés et restaurants", "magasin": "commerces",
+        "loisir": "lieux de loisirs", "fantome": "stations fantômes"}
+SING = {"arbre": "arbre remarquable", "parc": "parc", "jpart": "jardin partagé", "jrel": "jardin relais", "sursis": "arbre en sursis",
+        "fontaine": "fontaine", "piscine": "piscine", "baignade": "baignade", "bains": "bains-douches", "rue": "voie", "plaque": "plaque",
+        "femme": "femme illustre", "vestige": "vestige", "monde": "site du patrimoine mondial", "culte": "lieu de culte", "mairie": "mairie",
+        "cimetiere": "cimetière", "musee": "musée", "biblio": "bibliothèque", "theatre": "théâtre", "conserv": "conservatoire",
+        "atelier": "atelier", "decouverte": "découverte", "marche": "marché", "marchesp": "marché spécialisé", "kiosque": "kiosque",
+        "insolite": "lieu insolite", "sport": "lieu de sport", "station": "station", "hotelpart": "hôtel particulier",
+        "abbaye": "abbaye", "monument": "monument", "enceinte": "vestige d'enceinte", "edifice": "édifice",
+        "disparu": "lieu disparu", "oeuvre": "œuvre d'art", "galerie": "galerie", "lieuculture": "lieu culturel", "cinema": "cinéma",
+        "pont": "pont", "eaulieu": "lieu d'eau", "tombe": "tombe", "cafe": "café", "magasin": "commerce", "loisir": "lieu de loisirs",
+        "fantome": "station fantôme"}
+nfr = lambda n: f"{n:,}".replace(",", " ")
+lab = lambda k, n: f"{nfr(n)} {SING[k] if n == 1 else PLUR[k]}"
+BYI = {it["i"]: it for it in I}
+def contenu(q):
+    m = MEM.get(q["id"])
+    if q["rule"] == "arrs": return "20 arrondissements"
+    if q["rule"] == "kinds": return f"{len(K)} types de lieux"
+    if q["rule"] == "series": return f"{len(COLS)} séries"
+    if q["rule"] == "all": return f"{nfr(len(I))} cartes"
+    if not m: return ""
+    c = collections.Counter(BYI[i]["k"] for i in m).most_common()
+    if len(c) == 1: return lab(*c[0])
+    top = c[:3]; rest = sum(n for _, n in c[3:])
+    parts = [lab(k, n) for k, n in top] + ([f"{nfr(rest)} autre{'s' if rest > 1 else ''}"] if rest else [])
+    return f"{nfr(len(m))} lieux : " + ", ".join(parts[:-1]) + " et " + parts[-1]
+EX = {"serie-31": ["Pont Neuf", "Pont Alexandre III", "Pont des Arts"]}   # les ponts « rue » n'ont pas de notoriété Wikidata
+INSTIT = re.compile(r"^(Université|École|Institut|Académie|Conservatoire|Collège|Lycée|Alliance|Centre national|SUPINFO|ESCP|La Fémis|Le Cordon)", re.I)
+def a_voir(q):
+    m = MEM.get(q["id"])
+    if q["id"] in EX: return EX[q["id"]]
+    if not m or len(m) <= 3 or q["rule"] in ("arrs", "kinds", "series", "arr", "rive"): return []
+    L = [BYI[i] for i in m]
+    kinds = {it["k"] for it in L}
+    if kinds <= {"station", "fantome"}:
+        L = sorted((it for it in L if (it.get("x") or {}).get("valid")), key=lambda it: -it["x"]["valid"])
+    else:
+        L = sorted((it for it in L if langs(it) >= 3 and not INSTIT.match(it["n"]) and (it["k"] != "magasin" or kinds == {"magasin"})),
+                   key=lambda it: (-langs(it), it["n"]))
+    out, pos = [], []
+    for it in L:
+        n = it["n"][0].upper() + it["n"][1:]
+        if n in out or any(hav(it["a"], it["o"], a, o) < 300 for a, o in pos): continue
+        out.append(n); pos.append((it["a"], it["o"]))
+        if len(out) == 3: break
+    return out if len(out) >= 2 else []
+for q in Q:
+    i = q["id"]
+    if q["cat"] == "Territoires": q["cat"] = "Arrondissements et quartiers"
+    elif i.startswith("ligne-"): q["cat"] = "Lignes de métro" if LINES[i[6:]]["m"] == "metro" else "RER, tram et funiculaire"
+    elif i == "funiculaire": q["cat"] = "RER, tram et funiculaire"
+    elif q["cat"] == "Transports": q["cat"] = "Stations et gares"
+    elif i.startswith("serie-"): q["cat"] = SERIE_CAT[int(i[6:])]
+    elif i in PERSO: q["cat"] = "Personnalités"
+    elif i in HIST: q["cat"] = "Histoire et mémoire"
+    elif q["cat"] in ("Familles", "Prestige"): q["cat"] = "Grands défis"
+    elif q["cat"] in ("Eau",): q["cat"] = "Eau et ponts"
+    elif q["cat"] == "Quartier": q["cat"] = "Vie de quartier"
+    elif q["cat"] == "Rues": q["cat"] = "Rues et voies"
+    elif q["cat"] == "Mémoire": q["cat"] = "Histoire et mémoire"
+    assert q["cat"] in CATS, (i, q["cat"])
+    if i in DESC: q["desc"] = DESC[i]
+    if q["desc"] and q["desc"][-1] not in ".!?": q["desc"] += "."
+    q["what"] = contenu(q); q["ex"] = a_voir(q)
+# ordre : par catégorie, puis lignes et arrondissements dans l'ordre croissant, sinon ordre de création
+def lnum(c):
+    m = re.match(r"([A-Z]+)(\d*)(.*)", c); return (m.group(1), int(m.group(2) or 0), m.group(3))
+FIRST = {"Personnalités": PERSO, "Histoire et mémoire": HIST}
+def key(iq):
+    k, q = iq; i = q["id"]
+    if i.startswith("arr-"): sub = (0, int(i[4:]))
+    elif i.startswith("ligne-"): sub = (0, lnum(i[6:]))
+    elif q["cat"] in FIRST and i in FIRST[q["cat"]]: sub = (0, FIRST[q["cat"]].index(i))
+    else: sub = (1, k)
+    return (CATS.index(q["cat"]), sub)
+Q = [q for _, q in sorted(enumerate(Q), key=lambda iq: (key(iq)[0], str(key(iq)[1][0]), key(iq)[1][1] if isinstance(key(iq)[1][1], tuple) else (key(iq)[1][1],)))]
+for n, q in enumerate(Q): q["ord"] = n
+
 # ---------- Sorties ----------
 ids = [q["id"] for q in Q]; assert len(ids) == len(set(ids)), "identifiants en double"
-out = {"quests": Q, "tags": TAGS, "left": sorted(LEFT)}
+out = {"quests": Q, "cats": CATS, "tags": TAGS, "left": sorted(LEFT)}
 (ROOT / "site" / "data" / "quests.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
 lit = lambda s: "'" + str(s).replace("'", "''") + "'"
 sql = ["-- Parisquest : définitions des quêtes (généré par pipeline/quests.py). À exécuter après quetes.sql. Peut être relancé.",

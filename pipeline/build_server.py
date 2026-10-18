@@ -19,6 +19,15 @@ for it in pl["items"]:
     for r in rings: pts += [dec(r[j], r[j + 1]) for j in range(0, len(r), 2)]
     ext = max((hav(it["a"], it["o"], a, b) for a, b in pts), default=0)
     rows.append([it["i"], it["k"], kd["f"], it["t"], round(it["a"], 6), round(it["o"], 6), round(ext + rad, 1)])
+# Positions et rayons ajustés selon l'accès public (acces.py), pour un serveur déjà rempli
+lit = lambda v: "'" + str(v).replace("'", "''") + "'"
+chg = [r for r, it in zip(rows, pl["items"]) if (it.get("x") or {}).get("rad0")]
+(ROOT / "site" / "supabase" / "acces.sql").write_text(
+    "-- Parisquest : capture selon l'accès public (généré par pipeline/build_server.py après acces.py). Peut être relancé.\n"
+    "-- Voies privées fermées : le lieu est placé à son entrée ; lieux loin de la rue : rayon de capture allongé.\n"
+    "update public.places p set lat = v.lat, lon = v.lon, reach_m = v.reach_m from (values\n  "
+    + ",\n  ".join(f"({lit(r[0])}, {r[4]}::double precision, {r[5]}::double precision, {r[6]}::double precision)" for r in chg)
+    + "\n) v(id, lat, lon, reach_m) where p.id = v.id;\nselect count(*) as lieux_ajustes from public.places where id = any(array[" + ",".join(lit(r[0]) for r in chg) + "]);\n")
 out = ROOT / "site" / "supabase" / "places.csv"
 with open(out, "w", newline="") as f:
     w = csv.writer(f); w.writerow(["id", "kind", "family", "tier", "lat", "lon", "reach_m"]); w.writerows(rows)

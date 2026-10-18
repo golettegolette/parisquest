@@ -13,7 +13,7 @@ Changer l'heure du téléphone, modifier la page ou rejouer une requête ne chan
 
 1. Créer un compte sur [supabase.com](https://supabase.com), puis **New project** (région : Paris ou Francfort). Noter le mot de passe de la base.
 2. **SQL Editor → New query** : coller tout `schema.sql`, cliquer **Run**. Puis une nouvelle requête avec tout `social.sql`, **Run**.
-   Puis, **après** l'import de l'étape 3, dans cet ordre : `direction_a.sql` (capture sur place, classements), `places_arr.sql` (arrondissement de chaque lieu), `quetes.sql` (paquets à 10 minutes, quêtes), `ponts_doublons.sql` (ponts en double : on garde la version rue) et `quests_data.sql` (les 159 quêtes).
+   Puis, **après** l'import de l'étape 3, dans cet ordre : `direction_a.sql` (capture sur place, classements), `places_arr.sql` (arrondissement de chaque lieu), `quetes.sql` (paquets à 10 minutes, quêtes), `ponts_doublons.sql` (ponts en double : on garde la version rue), `acces.sql` (capture selon l'accès public), `places_arr.sql` à nouveau (arrondissements corrigés) et `quests_data.sql` (les 159 quêtes).
    Facultatif mais conseillé : **Database → Extensions → pg_cron** activé avant `social.sql`, pour clôturer les enchères chaque minute (sinon elles se clôturent à chaque consultation du Marché).
 3. **Table Editor → places → Insert → Import data from CSV** : choisir `places.csv` (colonnes id, kind, family, tier, lat, lon, reach_m).
    **Database → Publications → supabase_realtime** : vérifier que `messages` et `guild_messages` y figurent (messages en direct).
@@ -41,6 +41,7 @@ Le webhook vérifie la signature de Stripe, et `credit_purchase` ne crédite jam
 - `places_arr.sql` : arrondissement de chaque lieu (généré par `pipeline/build_server.py`).
 - `quetes.sql` : paquets toutes les 10 minutes (2 avec le Pass), fin du paquet du jour, quêtes : `claim_quest` (vérifie la progression et crédite les PQ une seule fois), `quest_board`, `my_titles`, `quest_leaders`.
 - `ponts_doublons.sql` : retire les 49 ponts en double (version « pont » de Wikidata) et reporte les cartes déjà possédées sur la version « rue » (généré par `pipeline/ponts.py`). Peut être relancé sans risque.
+- `acces.sql` : voies privées fermées placées à leur entrée, rayons de capture allongés pour les lieux loin de la rue (généré par `pipeline/build_server.py` après `pipeline/acces.py`). Peut être relancé.
 - `quests_data.sql` : les quêtes et leurs lieux (généré par `pipeline/quests.py`, après `pipeline/lines.py` pour les lignes de transport).
 
 - `schema.sql` : tables, sécurité (Row Level Security) et les fonctions : `pack_state`, `open_pack`, `open_parigo_pack`, `visit_place`, `credit_purchase` (réservée au webhook).
