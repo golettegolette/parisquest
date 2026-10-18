@@ -60,7 +60,7 @@ if ("serviceWorker" in navigator && location.protocol === "https:") navigator.se
 
 (SITE / "sw.js").write_text(f"""// Parisquest : cache hors ligne de l'application et des données (réseau d'abord, cache en secours).
 const CACHE = "parisquest-{VERSION}";
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./data/places.json", "./data/map.json", "./data/streets.json"];
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./data/places.json", "./data/map.json", "./data/quests.json", "./data/streets.json"];
 self.addEventListener("install", e => {{ e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); }});
 self.addEventListener("activate", e => {{ e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); }});
 self.addEventListener("fetch", e => {{
@@ -98,6 +98,6 @@ icon(512, True).save(SITE / "icons/icon-maskable-512.png")
 
 # Chaîne de données, pour mémoire
 PIPE = SITE / "pipeline"; PIPE.mkdir(exist_ok=True)
-for f in ["build2.py", "db.py", "wikidata.py", "ridership.py", "build_site.py", "build_server.py", "requetes.sql", "parisquest.html"]:
+for f in ["build2.py", "db.py", "wikidata.py", "ridership.py", "build_site.py", "build_server.py", "lines.py", "quests.py", "requetes.sql", "parisquest.html"]:
     shutil.copy(ROOT / f, PIPE / f)
 print("site prêt", VERSION)

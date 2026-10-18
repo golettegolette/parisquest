@@ -10,14 +10,14 @@ Pour essayer sans se déplacer, ajoutez `?test` à l'adresse : un mode test appa
 
 ## Règles
 
-- **Le principe** : collectionnez Paris en le parcourant. Chaque lieu réel est une carte, et on la gagne en y allant.
-- **Capture** : sur place, n'importe quel lieu se capture (le téléphone vérifie que vous êtes à portée, le serveur aussi). La carte entre dans la collection déjà visitée. Ensuite, une visite par jour la fait monter d'un niveau, jusqu'au niveau 5.
-- **Paquet du jour** : un paquet gratuit par jour (3 en réserve au plus), avec 5 lieux tirés près de vous. Ces cartes sont « à découvrir » : elles apparaissent sur la carte et deviennent à vous quand vous allez les capturer.
-- **Rareté** : 60 % Commune, 25 % Peu commune, 10 % Rare, 4 % Épique, 1 % Légendaire dans les paquets. Le palier d'un lieu est fixé par centiles dans son type (notoriété Wikipédia, fréquentation des stations). Sur la carte, les lieux Rares et mieux à moins de 400 m sont entourés de leur couleur.
-- **Score** : Commune 1 point, Peu commune 2, Rare 5, Épique 15, Légendaire 50, doublés si la carte a été visitée sur place.
-- **Classements** : Paris, par arrondissement et entre amis. Le premier collectionneur d'un arrondissement en est le Maître.
-- **Séries** : 38 collections thématiques. **Succès** : objectifs à paliers.
-- **Garde-fous** : 60 visites par jour au maximum, visite refusée si le déplacement depuis la précédente suppose plus de 50 km/h. La position sert à vérifier la portée et à tirer les lieux proches ; elle n'est jamais enregistrée.
+- **Paquets** : un paquet de 5 cartes toutes les 10 minutes (2 minutes avec le Pass PariGo), jusqu'à 10 en réserve, 5 offerts au départ. Chances par carte : 60 % Commune, 25 % Peu commune, 10 % Rare, 4 % Épique, 1 % Légendaire.
+- **Capture sur place** : n'importe quel lieu se capture en y allant (portée vérifiée par le serveur). Une carte visitée porte le sceau « Visité » ; une visite par jour la fait monter d'un niveau, jusqu'au niveau 5.
+- **Quêtes** : 159 quêtes (arrondissements, rives, lignes de métro, RER et tramway, familles, séries, thèmes, raretés), souvent en paliers. Toutes les cartes comptent, quelle que soit leur origine. Chaque palier rapporte des PQ, une seule fois ; le dernier donne un titre. Toucher une quête montre ses lieux sur la carte.
+- **PQ** : la monnaie du jeu. Gagnés avec les quêtes, achetés en Boutique (500 PQ pour 0,99 € et plus), dépensés au Marché aux enchères. Jamais reconvertibles en argent.
+- **Boutique** : 10 paquets pour 0,99 € ; Pass PariGo à 4 € par mois ; Pack PariGo à 1,49 € (20 cartes, une Épique ou mieux garantie).
+- **Classements** : collectionneurs de Paris, par arrondissement (le premier est Maître de l'arrondissement), entre amis, et classement des quêtes.
+- **Stations** : chaque station affiche les pastilles de ses lignes, aux couleurs officielles d'Île-de-France Mobilités.
+- La position du joueur sert à vérifier la portée ; elle n'est jamais enregistrée.
 
 Tant que le serveur n'est pas branché, le jeu tourne en démo locale : la progression et le compteur restent dans le navigateur et ne sont pas protégés. Avec le serveur (dossier `supabase/`), les paquets, le tirage et la collection sont gérés côté serveur et impossibles à tromper. La position du joueur n'est jamais enregistrée.
 
@@ -38,7 +38,7 @@ Tant que le serveur n'est pas branché, le jeu tourne en démo locale : la progr
 Les données de jeu (`data/*.json`) sont une base dérivée des sources ci-dessous et sont publiées sous **Open Database License (ODbL)**, comme l'exige la licence des données de la Ville de Paris.
 
 - **Ville de Paris**, [opendata.paris.fr](https://opendata.paris.fr) : arbres remarquables, arbres d'alignement, espaces verts, fontaines, plaques commémoratives, dénominations des voies, marchés, kiosques, colonnes Morris, sanisettes, jardins partagés, emprises des voies, arrondissements, voies d'eau. Licence ODbL.
-- **Île-de-France Mobilités**, [data.iledefrance-mobilites.fr](https://data.iledefrance-mobilites.fr) : arrêts et validations sur le réseau ferré. Licence Ouverte v2.0.
+- **Île-de-France Mobilités**, [data.iledefrance-mobilites.fr](https://data.iledefrance-mobilites.fr) : arrêts, validations sur le réseau ferré, arrêts et lignes associées, référentiel des lignes (couleurs). Licence Ouverte v2.0.
 - **Wikidata**, [wikidata.org](https://www.wikidata.org) : lieux et monuments, notoriété, dates. CC0.
 - **Photos** : Wikimedia Commons (licence propre à chaque image, voir le lien « Photo » au dos de la carte) et Ville de Paris (crédit indiqué sur la carte).
 - **Fond de carte** : [OpenFreeMap](https://openfreemap.org), données © [contributeurs OpenStreetMap](https://www.openstreetmap.org/copyright) (ODbL), schéma OpenMapTiles.
