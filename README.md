@@ -14,7 +14,7 @@ Pour essayer sans se déplacer, ajoutez `?test` à l'adresse : un mode test appa
 - **Capture sur place** : n'importe quel lieu se capture en y allant (portée vérifiée par le serveur). Une carte visitée porte le sceau « Visité » ; une visite par jour la fait monter d'un niveau, jusqu'au niveau 5.
 - **Quêtes** : 159 quêtes (arrondissements, rives, lignes de métro, RER et tramway, familles, séries, thèmes, raretés), souvent en paliers. Toutes les cartes comptent, quelle que soit leur origine. Chaque palier rapporte des PQ, une seule fois ; le dernier donne un titre. Toucher une quête montre ses lieux sur la carte.
 - **PQ** : la monnaie du jeu. Gagnés avec les quêtes, achetés en Boutique (500 PQ pour 0,99 € et plus), dépensés au Marché aux enchères. Jamais reconvertibles en argent.
-- **Boutique** : 10 paquets pour 0,99 € ; Pass PariGo à 4 € par mois ; Pack PariGo à 1,49 € (20 cartes, une Épique ou mieux garantie).
+- **Boutique** : 10 paquets pour 0,99 € ; Pass PariGo à 3,99 € par mois ; Pack PariGo à 1,49 € (20 cartes, une Épique ou mieux garantie) ; Pack Arrondissement à 2,49 € (15 cartes d'un arrondissement choisi).
 - **Classements** : collectionneurs de Paris, par arrondissement (le premier est Maître de l'arrondissement), entre amis, et classement des quêtes.
 - **Stations** : chaque station affiche les pastilles de ses lignes, aux couleurs officielles d'Île-de-France Mobilités.
 - La position du joueur sert à vérifier la portée ; elle n'est jamais enregistrée.

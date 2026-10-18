@@ -274,7 +274,9 @@ sup { font-size: .62em; line-height: 0; }
 .lede { margin: 0; color: var(--ink-2); max-width: 60ch; line-height: 1.45; }
 .panel { background: rgba(205, 191, 159, .88); border-radius: 10px; padding: 14px; box-shadow: inset 0 0 0 1px var(--joint); }
 .tiers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.tier { border-radius: 6px; padding: 6px 4px 5px; text-align: center; color: var(--white); line-height: 1.1; }
+.tier { border: 0; font: inherit; cursor: pointer; border-radius: 6px; padding: 6px 4px 5px; text-align: center; color: var(--white); line-height: 1.1; transition: opacity .15s, transform .15s, box-shadow .15s; -webkit-tap-highlight-color: transparent; }
+.tiers.filtering .tier[aria-pressed="false"] { opacity: .38; }
+.tier[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--navy); transform: translateY(-1px); }
 .tier b { display: block; font-family: var(--f-plaque); font-size: 18px; font-variant-numeric: tabular-nums; }
 .tier span { font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
 
@@ -560,6 +562,14 @@ sup { font-size: .62em; line-height: 0; }
 .qsec:first-child { margin-top: 2px; }
 .qsec span { font-size: 12px; color: var(--ink-2); letter-spacing: .04em; }
 .qdot { display: inline-block; min-width: 18px; padding: 1px 5px; border-radius: 9px; background: var(--r4); color: #fff; font-size: 11px; text-align: center; }
+.qjump { position: sticky; bottom: 14px; z-index: 5; margin: 12px 0 0 auto; display: flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 9px 14px 9px 16px; background: var(--r4); color: var(--navy); font-family: var(--f-plaque); font-weight: 700; font-size: 14px; letter-spacing: .05em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(23,43,77,.28); cursor: pointer; animation: qjIn .25s ease-out; }
+.qjump[hidden] { display: none; }
+.qjump svg { width: 18px; height: 18px; animation: qjBob 1.2s ease-in-out infinite; }
+@keyframes qjIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes qjBob { 0%, 100% { transform: none; } 50% { transform: translateY(3px); } }
+.qrow.flash { animation: qFlash 1.4s ease-out; }
+@keyframes qFlash { 0%, 40% { box-shadow: inset 0 0 0 2px var(--r4), 0 0 0 7px rgba(181,134,42,.45); } 100% { box-shadow: inset 0 0 0 2px var(--r4), 0 0 0 3px rgba(181,134,42,.18); } }
+@media (prefers-reduced-motion: reduce) { .qjump, .qjump svg, .qrow.flash { animation: none; } }
 .qfoot { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12.5px; color: var(--ink-2); }
 .qrew { font-family: var(--f-plaque); font-weight: 600; white-space: nowrap; color: var(--green-2); }
 .qclaim { background: var(--r4); color: #2B1E05; white-space: nowrap; }
@@ -627,11 +637,32 @@ sup { font-size: .62em; line-height: 0; }
 .offer.hl { box-shadow: inset 0 0 0 2px var(--r4); }
 .premium { border-radius: 12px; padding: 18px; color: var(--white); background: linear-gradient(135deg, #172B4D, #1F4A36 60%, #8C6418); box-shadow: 0 0 0 3px var(--r4), inset 0 0 0 1.5px var(--white); display: flex; flex-direction: column; gap: 8px; margin: 3px; }
 .premium h3 { color: #F7DE95; margin: 0; }
+.picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.spick { border: 0; font: inherit; text-align: left; cursor: pointer; border-radius: 10px; padding: 10px 14px; background: var(--white); box-shadow: inset 0 0 0 1.5px var(--joint); display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 10px; color: var(--ink); }
+.spick > span { display: block; min-width: 0; }
+.spick-t { font-family: var(--f-plaque); font-weight: 700; font-size: 15px; letter-spacing: .05em; text-transform: uppercase; color: var(--navy); }
+.spick-p { font-family: var(--f-plaque); font-weight: 700; font-size: 16px; color: var(--green-2); white-space: nowrap; text-align: right; }
+.spick-w { grid-column: 1 / -1; font-size: 13px; color: var(--ink-2); line-height: 1.3; }
+.spick.gold { background: linear-gradient(135deg, #172B4D, #1F4A36 70%, #8C6418); box-shadow: 0 0 0 2px var(--r4); }
+.spick.gold .spick-t, .spick.gold .spick-w { color: #F6F2E8; } .spick.gold .spick-p { color: #F7DE95; }
+.spick.blue { box-shadow: inset 0 0 0 2px var(--navy); }
+#shPass, #shArr, #shParigo, #shPacks, #shPQ { scroll-margin-top: 12px; }
+.arr-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 10px 0; }
+.arr-b { position: relative; border: 0; font: inherit; cursor: pointer; border-radius: 7px; padding: 7px 2px 9px; background: var(--white); box-shadow: inset 0 0 0 1.5px var(--joint); display: grid; gap: 1px; justify-items: center; overflow: hidden; color: var(--ink); }
+.arr-b b { font-family: var(--f-plaque); font-size: 16px; color: var(--navy); }
+.arr-b small { font-size: 10.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.arr-b i { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--green); }
+.arr-b em { position: absolute; top: 3px; right: 3px; font-style: normal; min-width: 16px; padding: 0 4px; border-radius: 8px; background: var(--r4); color: var(--navy); font-size: 10.5px; font-weight: 700; line-height: 16px; }
+.arr-b[aria-pressed="true"] { background: var(--navy); box-shadow: 0 0 0 2px var(--green); }
+.arr-b[aria-pressed="true"] b, .arr-b[aria-pressed="true"] small { color: var(--white); }
+.arr-sel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.arr-sel b { display: block; font-family: var(--f-plaque); font-size: 17px; color: var(--navy); }
+.arr-sel small { color: var(--ink-2); font-size: 13px; }
 .premium .big { font-family: var(--f-plaque); font-size: 30px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; line-height: 1; }
 .premium ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.5; }
 .odds { display: grid; grid-template-columns: auto repeat(5, minmax(0, 1fr)); gap: 4px 6px; font-size: 12.5px; align-items: center; }
 .odds span { text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.odds .h { font-family: var(--f-plaque); font-weight: 600; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--white); border-radius: 4px; padding: 2px 0; }
+.odds .h { font-family: var(--f-plaque); font-weight: 600; font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; letter-spacing: .06em; text-transform: uppercase; color: var(--white); border-radius: 4px; padding: 2px 0; }
 .legal { font-size: 11.5px; line-height: 1.5; color: var(--ink-2); }
 .badge-pass { display: inline-block; font-family: var(--f-plaque); font-weight: 700; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #2B1E05; background: linear-gradient(90deg, #E9C46A, #FFF3C4, #E9C46A); padding: 2px 7px; border-radius: 4px; vertical-align: 2px; }
 @media (prefers-reduced-motion: reduce) { .card.r4 .face, .card.r3 .face-in::after, .card.r4 .face-in::after, .bp-body::after { animation: none; } }
@@ -743,7 +774,8 @@ const PARIGO_SIZE = 20, PARIGO_ODDS = [.32, .28, .22, .13, .05];
 /* Achats en euros : 10 paquets 0,99 € ; Pack PariGo 1,49 € (un offert chaque jour avec le Pass).
    Équilibre : 10 paquets = 50 cartes, ~0,5 Légendaire et ~2 Épiques attendues (volume) ;
    Pack PariGo = 20 cartes, ~1 Légendaire et ~2,6 Épiques attendues, peu de Communes (qualité). */
-const PRICE = { p10: "0,99 €", parigo: "1,49 €", pass: "4 € / mois" };
+const PRICE = { p10: "0,99 €", parigo: "1,49 €", pass: "3,99 € / mois", arr: "2,49 €" };
+const ARR_SIZE = 15;   // Pack Arrondissement : 15 cartes tirées dans un arrondissement choisi
 // montant en PQ avec le jeton (affichage seulement ; les messages texte gardent « PQ »)
 const PQ = n => `${nf(n)}<i class="pqi" role="img" aria-label="PQ"></i>`;
 const ECU_OFFERS = [{ id: "e500", ecus: 500, eur: "0,99 €" }, { id: "e1200", ecus: 1200, eur: "1,99 €", bonus: "+20 %" }, { id: "e3500", ecus: 3500, eur: "4,99 €", bonus: "+40 %", hl: true }, { id: "e8000", ecus: 8000, eur: "9,99 €", bonus: "+60 %" }];
@@ -767,7 +799,7 @@ const SB_CONF = window.PQ_SUPABASE && window.PQ_SUPABASE.url ? window.PQ_SUPABAS
 const TEST_ALLOWED = !SB_CONF && (!HOSTED || /[?&]test\b/.test(location.search));
 const passActive = () => SB_CONF ? !!(ui.server && ui.server.passUntil && ui.server.passUntil > Date.now() + ui.clockOffset) : S.pass && S.pass.until > Date.now();
 const packPeriod = () => passActive() ? PASS_PERIOD : PACK_PERIOD;
-const DEFAULT_STATE = () => ({ pos: { lat: 48.8600, lon: 2.3565 }, owned: {}, packs: { n: PACK_START, anchor: Date.now(), seen: Date.now(), bonus: 0 }, parigo: { n: 0, freeOn: "" }, scouts: [], dayOffset: 0, done: {}, hidden: {}, pending: {}, daily: { n: 1, day: "" }, test: !HOSTED, profile: { name: "", show: [], since: Date.now() }, stats: { packs: 0, won: 0, lost: 0 }, settings: { unowned: true, hiacc: true, sound: true }, wallet: { bought: 0, spent: 0, quests: 0 }, qclaims: {}, pass: { until: 0 }, achSeen: {}, deck: [] });
+const DEFAULT_STATE = () => ({ pos: { lat: 48.8600, lon: 2.3565 }, owned: {}, packs: { n: PACK_START, anchor: Date.now(), seen: Date.now(), bonus: 0 }, parigo: { n: 0, freeOn: "" }, scouts: [], dayOffset: 0, done: {}, hidden: {}, pending: {}, daily: { n: 1, day: "" }, test: !HOSTED, profile: { name: "", show: [], since: Date.now() }, stats: { packs: 0, won: 0, lost: 0 }, settings: { unowned: true, hiacc: true, sound: true }, arrPacks: {}, wallet: { bought: 0, spent: 0, quests: 0 }, qclaims: {}, pass: { until: 0 }, achSeen: {}, deck: [] });
 function load() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -1468,11 +1500,16 @@ function renderCollection() {
   if (!ui.ready) return;
   const ownedIds = Object.keys(S.owned).filter(id => BYID.has(id));
   const ownedBy = {}, tierCounts = [0, 0, 0, 0, 0];
-  for (const id of ownedIds) { const it = BYID.get(id); ownedBy[famOf(it)] = (ownedBy[famOf(it)] || 0) + 1; tierCounts[S.owned[id].tier]++; }
+  const tierOf = id => { const t = S.owned[id] && S.owned[id].tier; return t >= 0 && t <= 4 ? t : BYID.get(id).t; };
+  for (const id of ownedIds) { const it = BYID.get(id); ownedBy[famOf(it)] = (ownedBy[famOf(it)] || 0) + 1; }
+  ui.tiers = (ui.tiers || []).filter(t => t >= 0 && t <= 4);
   const fam = ui.fam;
   if (ui.col != null && (!COLS[ui.col] || (fam && COLS[ui.col][0] !== fam))) ui.col = null;
   const colSel = ui.col != null ? COLS[ui.col] : null, colSet = colSel ? new Set(colSel[3].map(i => ITEMS[i].i)) : null;
-  const list = ownedIds.map(id => BYID.get(id)).filter(it => (!fam || famOf(it) === fam) && (!colSet || colSet.has(it.i))).sort((a, b) => (S.owned[b.i].tier - S.owned[a.i].tier) || ((S.owned[b.i].at || 0) - (S.owned[a.i].at || 0)));
+  // filtres famille et collection, puis rareté (plusieurs raretés possibles) ; les compteurs suivent famille et collection
+  const base = ownedIds.map(id => BYID.get(id)).filter(it => (!fam || famOf(it) === fam) && (!colSet || colSet.has(it.i)));
+  for (const it of base) tierCounts[tierOf(it.i)]++;
+  const list = base.filter(it => !ui.tiers.length || ui.tiers.includes(tierOf(it.i))).sort((a, b) => (tierOf(b.i) - tierOf(a.i)) || ((S.owned[b.i].at || 0) - (S.owned[a.i].at || 0)));
   const cols = COLS.map((c, ci) => ({ c, ci, n: c[3].filter(i => S.owned[ITEMS[i].i]).length })).filter(x => !fam || x.c[0] === fam)
     .sort((a, b) => (b.n > 0) - (a.n > 0) || (b.n / b.c[3].length) - (a.n / a.c[3].length) || a.c[3].length - b.c[3].length);
   const PP = proj(S.pos.lat, S.pos.lon), pend = Object.keys(S.pending).map(id => BYID.get(id)).filter(Boolean).map(it => ({ it, d: distTo(it, PP) })).sort((a, b) => a.d - b.d);
@@ -1486,7 +1523,7 @@ function renderCollection() {
     <h2>Ma collection</h2>
     <p class="lede">${nf(ownedIds.length)} carte${ownedIds.length > 1 ? "s" : ""} sur ${nf(ITEMS.length)} lieux de Paris · ${nf(score())} points.</p>
     ${pendHTML}
-    <div class="tiers">${TIERS.map((n, i) => `<div class="tier" style="background:var(${TIER_VAR[i]})"><b>${nf(tierCounts[i])}</b><span>${n}</span></div>`).join("")}</div>
+    <div class="tiers${ui.tiers.length ? " filtering" : ""}" role="group" aria-label="Filtrer par rareté">${TIERS.map((n, i) => `<button class="tier" data-tier="${i}" aria-pressed="${ui.tiers.includes(i)}" style="background:var(${TIER_VAR[i]})"><b>${nf(tierCounts[i])}</b><span>${n}</span></button>`).join("")}</div>
     <div class="dds">
       <details class="panel dd" id="ddFam" ${ui.famOpen ? "open" : ""}>
         <summary><span class="dd-k">Famille</span><span class="dd-v"><em>${fam ? esc(FAMS[fam].name) : "Toutes"}</em></span><span class="dd-n">${nf(famN)} / ${nf(famT)}</span>${chev}</summary>
@@ -1507,9 +1544,9 @@ function renderCollection() {
     </div>
     <div>
       <div class="grid-head"><h3>Mes cartes · ${nf(list.length)}</h3>
-        <span style="display:flex;gap:6px;flex-wrap:wrap">${fam ? `<button class="filter-chip" data-clear="fam">${esc(FAMS[fam].name)} <b>×</b></button>` : ""}${colSel ? `<button class="filter-chip" data-clear="col">${esc(colSel[1])} <b>×</b></button>` : ""}</span></div>
+        <span style="display:flex;gap:6px;flex-wrap:wrap">${ui.tiers.length ? `<button class="filter-chip" data-clear="tiers">${ui.tiers.slice().sort((a, b) => b - a).map(t => TIERS[t]).join(", ")} <b>×</b></button>` : ""}${fam ? `<button class="filter-chip" data-clear="fam">${esc(FAMS[fam].name)} <b>×</b></button>` : ""}${colSel ? `<button class="filter-chip" data-clear="col">${esc(colSel[1])} <b>×</b></button>` : ""}</span></div>
       ${list.length ? `<div class="grid">${list.slice(0, ui.shown).map(it => `<button data-id="${esc(it.i)}" aria-label="${esc(it.n)}">${cardHTML(it)}</button>`).join("")}</div>${list.length > ui.shown ? `<button class="mini-btn ghost more" id="moreBtn">Afficher plus (${nf(list.length - ui.shown)})</button>` : ""}`
-        : `<div class="empty">Aucune carte${colSel ? " de cette collection" : fam ? " dans cette famille" : ""} pour l'instant.<br>Ouvrez des paquets dans l'onglet Paquets.</div>`}
+        : `<div class="empty">Aucune carte${ui.tiers.length ? " de cette rareté" : ""}${colSel ? " dans cette collection" : fam ? " dans cette famille" : ""} pour l'instant.<br>Ouvrez des paquets dans l'onglet Paquets.</div>`}
     </div>
     `;
   const root = $("viewCollection");
@@ -1517,7 +1554,8 @@ function renderCollection() {
   $("ddCol").ontoggle = () => { ui.colOpen = $("ddCol").open; };
   root.querySelectorAll(".fam").forEach(b => b.onclick = () => { const f = b.dataset.f || null; if (f !== ui.fam) ui.col = null; ui.fam = f; ui.famOpen = false; ui.shown = 48; renderCollection(); });
   root.querySelectorAll(".cols .col").forEach(b => b.onclick = () => { ui.col = b.dataset.c === "" ? null : +b.dataset.c; ui.colOpen = false; ui.shown = 48; renderCollection(); });
-  root.querySelectorAll("[data-clear]").forEach(b => b.onclick = () => { if (b.dataset.clear === "fam") ui.fam = null; else ui.col = null; ui.shown = 48; renderCollection(); });
+  root.querySelectorAll("[data-clear]").forEach(b => b.onclick = () => { if (b.dataset.clear === "fam") ui.fam = null; else if (b.dataset.clear === "tiers") ui.tiers = []; else ui.col = null; ui.shown = 48; renderCollection(); });
+  root.querySelectorAll(".tiers [data-tier]").forEach(b => b.onclick = () => { const t = +b.dataset.tier; ui.tiers = ui.tiers.includes(t) ? ui.tiers.filter(x => x !== t) : [...ui.tiers, t]; ui.shown = 48; renderCollection(); });
   root.querySelectorAll(".grid > button").forEach(b => b.onclick = () => openCard(b.dataset.id));
   root.querySelectorAll("[data-pend]").forEach(b => b.onclick = () => showOnMap(b.dataset.pend));
   if ($("moreBtn")) $("moreBtn").onclick = () => { ui.shown += 48; renderCollection(); };
@@ -1544,7 +1582,7 @@ function packInfo() {
 const mmss = ms => { const t = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
 const nextText = pi => pi.off ? "Connectez-vous pour recevoir vos paquets." : pi.nextAt == null ? "Réserve pleine : ouvrez un paquet pour relancer le compteur." : `Prochain paquet dans ${mmss(pi.nextAt - Date.now())}`;
 const stackHTML = n => Array.from({ length: PACK_CAP }, (_, i) => `<i class="${i < n ? "on" : ""}"></i>`).join("");
-function applyServerState(js) { ui.server = { packs: js.packs, bonus: js.bonus_packs || 0, parigo: js.parigo_packs || 0, parigoFree: !!js.parigo_free, nextAt: js.next_at ? Date.parse(js.next_at) : null, ecus: js.ecus, score: js.score, passUntil: js.pass_until ? Date.parse(js.pass_until) : 0 }; ui.clockOffset = Date.parse(js.server_now) - Date.now(); }
+function applyServerState(js) { ui.server = { packs: js.packs, bonus: js.bonus_packs || 0, parigo: js.parigo_packs || 0, parigoFree: !!js.parigo_free, nextAt: js.next_at ? Date.parse(js.next_at) : null, ecus: js.ecus, score: js.score, passUntil: js.pass_until ? Date.parse(js.pass_until) : 0, arrPacks: js.arr_packs || {} }; ui.clockOffset = Date.parse(js.server_now) - Date.now(); }
 async function openPack() {
   if (ui.opening || !ui.ready) return;
   ui.opening = true;
@@ -1615,6 +1653,44 @@ async function buyParigoPack() {
   } finally { ui.opening = false; }
 }
 
+/* ---------- Pack Arrondissement : 15 cartes d'un arrondissement choisi (chances d'un paquet normal) ---------- */
+const arrName = a => `${a}${a === 1 ? "er" : "e"} arrondissement`;
+const arrShort = a => `${a}${a === 1 ? "er" : "e"}`;
+const arrStock = a => SB_CONF ? ((ui.server && ui.server.arrPacks) || {})[a] || 0 : (S.arrPacks || {})[a] || 0;
+let ARR_POOL = null;
+function arrPool(a) {
+  if (!ARR_POOL) { ARR_POOL = {}; ITEMS.forEach((it, i) => { const r = arrOf(it); if (r) { (ARR_POOL[r] = ARR_POOL[r] || [[], [], [], [], []])[it.t].push(i); } }); }
+  return ARR_POOL[a] || [[], [], [], [], []];
+}
+async function openArrPack(a) {
+  if (ui.opening || !ui.ready) return;
+  ui.opening = true;
+  try {
+    let drawn;
+    if (SB_CONF) {
+      if (!SB || !ui.user) { toast("Connectez-vous d'abord (onglet Paquets)."); return; }
+      const { data, error } = await SB.rpc("open_arr_pack", { p_arr: a });
+      if (error) { toast(/aucun pack/i.test(error.message) ? `Aucun Pack ${arrName(a)} disponible.` : "Le serveur n'a pas répondu. Réessayez."); return; }
+      applyServerState(data); drawn = data.cards.map(c => ({ id: c.id, isNew: c.new }));
+    } else {
+      if (!arrStock(a)) { toast(`Aucun Pack ${arrName(a)} disponible.`); return; }
+      S.arrPacks[a] -= 1; if (!S.arrPacks[a]) delete S.arrPacks[a];
+      const pools = arrPool(a); drawn = [];
+      for (let k = 0; k < ARR_SIZE; k++) {
+        let t = drawTierWith(TIER_ODDS);
+        // rareté absente dans cet arrondissement : la plus proche
+        for (let d = 1; !pools[t].length && d < 5; d++) t = pools[Math.max(0, t - d)].length ? Math.max(0, t - d) : pools[Math.min(4, t + d)].length ? Math.min(4, t + d) : t;
+        const it = ITEMS[pools[t][Math.floor(rnd() * pools[t].length)]];
+        drawn.push({ id: it.i, isNew: !S.owned[it.i] && !drawn.some(x => x.id === it.i) });
+      }
+    }
+    const cards = [];
+    for (const c of drawn) { const it = BYID.get(c.id); if (!it) continue; const o = S.owned[it.i]; if (o) o.copies = (o.copies || 1) + 1; else S.owned[it.i] = { tier: it.t, lvl: 1, copies: 1, vis: 0, last: null, at: Date.now() }; cards.push({ it, isNew: c.isNew }); }
+    S.stats.packs += 1; const msgs = []; for (const c of cards) msgs.push(...checkCollections(c.it)); msgs.push(...checkAchievements());
+    save(); refreshAll(); openBooster(cards, msgs, "arr:" + a);
+  } finally { ui.opening = false; }
+}
+
 /* ---------- Ouverture animée ----------
    Booster qui tremble et se déchire (son), puis pile de cartes face cachée, de la moins rare à la plus rare.
    Toucher la carte ou flèche droite / espace : retourner, puis passer à la suivante. Flèche gauche : revenir. */
@@ -1663,9 +1739,9 @@ function openBooster(cards, msgs, kind) {
   OP.cards = cards.map((c, k) => ({ ...c, k })).sort((a, b) => a.it.t - b.it.t || (b.isNew - a.isNew) || a.k - b.k);
   OP.idx = 0; OP.up = OP.cards.map(() => false); OP.msgs = msgs; OP.kind = kind; OP.phase = "booster";
   $("opener").hidden = false; $("opNav").hidden = true; $("opAll").hidden = true;
-  $("opTitle").innerHTML = `<div class="k">${kind === "parigo" ? "Pack PariGo" : kind === "daily" ? "Paquet du jour" : "Paquet"}</div><div class="t">${OP.cards.length} cartes</div>`;
+  $("opTitle").innerHTML = `<div class="k">${kind === "parigo" ? "Pack PariGo" : kind === "daily" ? "Paquet du jour" : /^arr:/.test(kind || "") ? `Pack ${arrName(+kind.slice(4))}` : "Paquet"}</div><div class="t">${OP.cards.length} cartes</div>`;
   if (kind === "capture") { OP.phase = "booster"; showStack(); $("opNav").hidden = true; $("opAll").hidden = true; setTimeout(() => { if (OP.phase === "stack" && !OP.up[0]) revealCurrent(); }, 250); return; }
-  $("opStage").innerHTML = `<div class="bpack${kind === "parigo" ? " parigo" : ""}" id="bpack"><div class="bp-top"></div><div class="bp-body"><small>Paris</small><b>PQ</b><span>${kind === "parigo" ? "PariGo · 20 cartes" : "5 cartes"}</span></div></div>`;
+  $("opStage").innerHTML = `<div class="bpack${kind === "parigo" ? " parigo" : ""}" id="bpack"><div class="bp-top"></div><div class="bp-body"><small>Paris</small><b>PQ</b><span>${kind === "parigo" ? "PariGo · 20 cartes" : /^arr:/.test(kind || "") ? `${arrShort(+kind.slice(4))} arr. · ${ARR_SIZE} cartes` : "5 cartes"}</span></div></div>`;
   const bp = $("bpack");
   clearTimeout(OP.t1); clearTimeout(OP.t2); clearTimeout(OP.t3);
   OP.t1 = setTimeout(() => { bp.classList.add("shake"); SND.shake(); }, 300);
@@ -1686,7 +1762,7 @@ function drawOp(anim) {
   $("ocard").onclick = opStep;
   $("opCount").textContent = `${OP.idx + 1} / ${n}`;
   $("opPrev").disabled = OP.idx === 0;
-  $("opTitle").innerHTML = up ? `<div class="k">${esc(KINDS[c.it.k].l)} · ${c.capture ? "capturée sur place" : c.pending ? `à découvrir · ${fmtDist(distTo(c.it, proj(S.pos.lat, S.pos.lon)))}` : c.isNew ? "nouvelle carte" : "doublon"}</div><div class="t tier-label" style="color:${c.it.t === 4 ? "#F7DE95" : c.it.t ? lighten(getTierColor(c.it.t)) : "#F6F2E8"}"><span style="display:block;font-size:.55em;letter-spacing:.2em">${"★".repeat(c.it.t + 1)}</span>${TIERS[c.it.t]}</div>` : `<div class="k">${OP.kind === "parigo" ? "Pack PariGo" : "Paquet"}</div><div class="t">Touchez pour retourner</div>`;
+  $("opTitle").innerHTML = up ? `<div class="k">${esc(KINDS[c.it.k].l)} · ${c.capture ? "capturée sur place" : c.pending ? `à découvrir · ${fmtDist(distTo(c.it, proj(S.pos.lat, S.pos.lon)))}` : c.isNew ? "nouvelle carte" : "doublon"}</div><div class="t tier-label" style="color:${c.it.t === 4 ? "#F7DE95" : c.it.t ? lighten(getTierColor(c.it.t)) : "#F6F2E8"}"><span style="display:block;font-size:.55em;letter-spacing:.2em">${"★".repeat(c.it.t + 1)}</span>${TIERS[c.it.t]}</div>` : `<div class="k">${OP.kind === "parigo" ? "Pack PariGo" : /^arr:/.test(OP.kind || "") ? `Pack ${arrShort(+OP.kind.slice(4))} arrondissement` : "Paquet"}</div><div class="t">Touchez pour retourner</div>`;
 }
 const tagOf = c => c.capture ? "Capturée" : c.pending ? "À découvrir" : c.isNew ? "Nouvelle" : "Doublon";
 const lighten = hex => { const n = parseInt(hex.slice(1), 16), f = c => Math.min(255, Math.round(c + (255 - c) * .45)); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; };
@@ -2159,12 +2235,32 @@ async function renderQuests() {
       </div>
     </details>
     <input class="field" type="search" id="qSearch" placeholder="Rechercher une quête, un lieu, un titre…" value="${esc(ui.qq)}" aria-label="Rechercher une quête">
-    <div class="qlist">${body || `<div class="empty">Aucune quête ici pour l'instant.</div>`}</div>`;
+    <div class="qlist">${body || `<div class="empty">Aucune quête ici pour l'instant.</div>`}</div>
+    ${ready ? `<button class="qjump" id="qJump" hidden><span>${ready > 1 ? `${ready} quêtes à récupérer` : "1 quête à récupérer"}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>` : ""}`;
   $("ddQcat").ontoggle = () => { ui.qcatOpen = $("ddQcat").open; };
   el.querySelectorAll("[data-qc]").forEach(b => b.onclick = () => { ui.qcat = b.dataset.qc; ui.qcatOpen = false; renderQuests(); el.scrollTop = 0; });
   $("qSearch").oninput = e => { ui.qq = e.target.value; clearTimeout(ui.qt); ui.qt = setTimeout(() => { renderQuests(); const f = $("qSearch"); if (f) { f.focus(); f.setSelectionRange(f.value.length, f.value.length); } }, 250); };
   el.querySelectorAll("[data-claim]").forEach(b => b.onclick = e => { e.stopPropagation(); b.disabled = true; claimQuest(b.dataset.claim); });
   el.querySelectorAll("[data-q]").forEach(r => r.onclick = () => showQuestOnMap(r.dataset.q));
+  qJumpWatch(el);
+}
+// Bouton temporaire « quête à récupérer » : visible tant qu'aucune quête prête n'est à l'écran ; il y descend
+function qJumpWatch(el) {
+  const btn = $("qJump"); if (ui.qObs) { ui.qObs.disconnect(); ui.qObs = null; }
+  if (!btn) return;
+  const rows = [...el.querySelectorAll(".qrow.ready")], seen = new Set();
+  btn.hidden = false;
+  if (rows.length && "IntersectionObserver" in window) {
+    ui.qObs = new IntersectionObserver(es => { for (const e of es) { if (e.isIntersecting) seen.add(e.target); else seen.delete(e.target); } btn.hidden = seen.size > 0; }, { root: null, threshold: .6 });
+    rows.forEach(r => ui.qObs.observe(r));
+  }
+  btn.onclick = () => {
+    let row = el.querySelector(".qrow.ready");
+    if (!row) { ui.qcat = "ready"; renderQuests(); row = viewEl("quests").querySelector(".qrow.ready"); }
+    if (!row) return;
+    row.scrollIntoView({ behavior: "smooth", block: "center" });
+    row.classList.remove("flash"); void row.offsetWidth; row.classList.add("flash");
+  };
 }
 function showQuestOnMap(id) {
   const q = QUESTS.find(x => x.id === id); if (!q) return;
@@ -2353,6 +2449,7 @@ async function checkout(sku) {
   if (sku === "pass") { S.pass.until = Math.max(Date.now(), S.pass.until || 0) + 30 * 86400000; toast("Démo : Pass PariGo activé pour 30 jours, sans paiement."); }
   else if (sku === "p10") { S.packs.bonus = (S.packs.bonus || 0) + 10; toast("Démo : +10 paquets, sans paiement."); }
   else if (sku === "parigo") { S.parigo.n = (S.parigo.n || 0) + 1; toast("Démo : +1 Pack PariGo, sans paiement."); }
+  else if (/^arr\d+$/.test(sku)) { const a = +sku.slice(3); S.arrPacks = S.arrPacks || {}; S.arrPacks[a] = (S.arrPacks[a] || 0) + 1; toast(`Démo : +1 Pack ${arrName(a)}, sans paiement.`); }
   else { const o = ECU_OFFERS.find(x => x.id === sku); if (!o) return; S.wallet.bought += o.ecus; toast(`Démo : +${nf(o.ecus)} PQ, sans paiement.`); }
   save(); refreshAll();
 }
@@ -2361,22 +2458,50 @@ function renderShop() {
   const pa = passActive(), until = SB_CONF ? (ui.server && ui.server.passUntil) : S.pass.until;
   const buyLabel = PAY_READY ? "Acheter" : DEMO_BUY ? "Simuler l'achat" : "Bientôt";
   const oddsRow = (label, odds) => `<span>${label}</span>${odds.map(o => `<span>${String(Math.round(o * 1000) / 10).replace(".", ",")} %</span>`).join("")}`;
+  const can = PAY_READY || DEMO_BUY;
+  const pg = parigoInfo();
+  // Pack Arrondissement : progression par arrondissement pour aider à choisir
+  const own = {}, tot = {};
+  for (const it of ITEMS) { const r = arrOf(it); if (r) { tot[r] = (tot[r] || 0) + 1; if (S.owned[it.i]) own[r] = (own[r] || 0) + 1; } }
+  if (!ui.shopArr) ui.shopArr = +Object.keys(tot).sort((x, y) => (own[y] || 0) / tot[y] - (own[x] || 0) / tot[x])[0] || 1;
+  const A = ui.shopArr, stockA = arrStock(A);
+  const anyArr = Object.keys(tot).filter(r => arrStock(+r));
+  const pick = (id, ttl, price, why, cls = "") => `<button class="spick${cls}" data-go="${id}"><span class="spick-t">${ttl}</span><span class="spick-p">${price}</span><span class="spick-w">${why}</span></button>`;
   viewEl("shop").innerHTML = `<h2>Boutique</h2>
     <p class="lede">Solde : <b>${PQ(ecus())}</b>${pa ? ` · <span class="badge-pass">Pass PariGo</span>` : ""}</p>
-    <div class="premium"><h3>Pass PariGo</h3><div class="big">4 € / mois</div>
+    <div class="picks" role="navigation" aria-label="Que voulez-vous ?">
+      ${pick("shPass", "Pass PariGo", PRICE.pass, "Le plus de paquets : un toutes les 2 min", " gold")}
+      ${pick("shArr", "Pack Arrondissement", PRICE.arr, `${ARR_SIZE} cartes du quartier de votre choix`, " blue")}
+      ${pick("shParigo", "Pack PariGo", PRICE.parigo, "20 cartes, une Épique au moins")}
+      ${pick("shPacks", "10 paquets", PRICE.p10, "Pour ouvrir plus tout de suite")}
+      ${pick("shPQ", "PQ", "dès 0,99 €", "Pour enchérir au Marché")}
+    </div>
+    ${anyArr.length || pg.free || pg.stock ? `<div class="panel stock"><h3>Vos packs à ouvrir</h3><div class="btn-row">${pg.free || pg.stock ? `<button class="btn" id="openParigoTop">${pg.free ? "Pack PariGo du jour" : `Pack PariGo (${pg.stock})`}</button>` : ""}${anyArr.map(r => `<button class="btn light" data-open-arr="${r}">Pack ${arrShort(+r)} (${arrStock(+r)})</button>`).join("")}</div></div>` : ""}
+    <div class="premium" id="shPass"><h3>Pass PariGo</h3><div class="big">${PRICE.pass}</div>
       <ul><li>Un paquet toutes les <b>2 minutes</b> au lieu de 10</li><li><b>Un Pack PariGo offert chaque jour</b></li><li>Badge PariGo sur votre profil</li><li>Sans engagement, résiliable à tout moment</li></ul>
       ${pa ? `<p style="margin:0;font-size:14px">Actif jusqu'au ${new Date(until).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.</p>` : `<button class="btn" id="buyPass">${PAY_READY ? "S'abonner" : DEMO_BUY ? "Simuler l'abonnement" : "Bientôt disponible"}</button>`}</div>
-    ${(() => { const pg = parigoInfo(); return `<div class="premium" style="background:linear-gradient(135deg,#8C6418,#172B4D 55%,#2D63B0)"><h3>Pack PariGo</h3><div class="big">${PARIGO_SIZE} cartes · ${PRICE.parigo}</div>
+    <div class="panel arrpack" id="shArr"><h3>Pack Arrondissement · ${PRICE.arr}</h3>
+      <p class="lede" style="font-size:14px">${ARR_SIZE} cartes tirées au hasard dans l'arrondissement de votre choix, avec les chances d'un paquet normal. Idéal pour avancer une quête d'arrondissement. Choisissez :</p>
+      <div class="arr-grid">${Array.from({ length: 20 }, (_, i) => i + 1).map(r => `<button class="arr-b" data-arr="${r}" aria-pressed="${r === A}"><b>${arrShort(r)}</b><small>${nf(own[r] || 0)} / ${nf(tot[r] || 0)}</small><i style="width:${Math.round((own[r] || 0) / (tot[r] || 1) * 100)}%"></i>${arrStock(r) ? `<em>${arrStock(r)}</em>` : ""}</button>`).join("")}</div>
+      <div class="arr-sel"><div><b>${esc(arrName(A))}</b><small>${nf(tot[A] || 0)} lieux · vous en avez ${nf(own[A] || 0)}</small></div>
+        <div class="btn-row">${stockA ? `<button class="btn" data-open-arr="${A}">Ouvrir (${stockA})</button>` : ""}<button class="btn${stockA ? " light" : ""}" data-sku="arr${A}" ${can ? "" : "disabled"}>${PAY_READY ? `Acheter · ${PRICE.arr}` : DEMO_BUY ? `Simuler l'achat · ${PRICE.arr}` : "Bientôt disponible"}</button></div></div></div>
+    <div class="premium" id="shParigo" style="background:linear-gradient(135deg,#8C6418,#172B4D 55%,#2D63B0)"><h3>Pack PariGo</h3><div class="big">${PARIGO_SIZE} cartes · ${PRICE.parigo}</div>
       <ul><li>Meilleures chances de cartes rares</li><li>Au moins une Épique ou une Légendaire garantie</li><li>Offert chaque jour avec le Pass PariGo</li></ul>
-      <div class="odds"><span></span>${TIERS.map((n, i) => `<span class="h" style="background:var(${TIER_VAR[i]})">${n.replace("Peu commune", "Peu com.")}</span>`).join("")}${oddsRow("Paquet", TIER_ODDS)}${oddsRow("PariGo", PARIGO_ODDS)}</div>
-      <div class="btn-row">${pg.free || pg.stock ? `<button class="btn" id="openParigo">${pg.free ? "Ouvrir mon Pack du jour" : `Ouvrir (${pg.stock} en stock)`}</button>` : ""}<button class="btn${pg.free || pg.stock ? " light" : ""}" id="buyParigo" ${PAY_READY || DEMO_BUY ? "" : "disabled"}>${PAY_READY ? `Acheter · ${PRICE.parigo}` : DEMO_BUY ? `Simuler l'achat · ${PRICE.parigo}` : "Bientôt disponible"}</button></div></div>`; })()}
-    <div class="panel"><h3>Paquets</h3><div class="shop-grid"><div class="offer hl"><b>10 paquets</b><small>Ajoutés à votre réserve, sans limite</small><span class="price">${PRICE.p10}</span><button class="mini-btn" data-sku="p10" ${PAY_READY || DEMO_BUY ? "" : "disabled"}>${buyLabel}</button></div></div></div>
-    <div class="panel"><h3>PQ</h3><div class="shop-grid">${ECU_OFFERS.map(o => `<div class="offer${o.hl ? " hl" : ""}"><b>${PQ(o.ecus)}</b><small>${o.bonus ? `${o.bonus} de PQ` : "Pour commencer"}</small><span class="price">${o.eur}</span><button class="mini-btn" data-sku="${o.id}" ${PAY_READY || DEMO_BUY ? "" : "disabled"}>${buyLabel}</button></div>`).join("")}</div>
+      <div class="btn-row">${pg.free || pg.stock ? `<button class="btn" id="openParigo">${pg.free ? "Ouvrir mon Pack du jour" : `Ouvrir (${pg.stock} en stock)`}</button>` : ""}<button class="btn${pg.free || pg.stock ? " light" : ""}" id="buyParigo" ${can ? "" : "disabled"}>${PAY_READY ? `Acheter · ${PRICE.parigo}` : DEMO_BUY ? `Simuler l'achat · ${PRICE.parigo}` : "Bientôt disponible"}</button></div></div>
+    <div class="panel" id="shPacks"><h3>Paquets</h3><div class="shop-grid"><div class="offer hl"><b>10 paquets</b><small>Ajoutés à votre réserve, sans limite</small><span class="price">${PRICE.p10}</span><button class="mini-btn" data-sku="p10" ${can ? "" : "disabled"}>${buyLabel}</button></div></div></div>
+    <div class="panel" id="shPQ"><h3>PQ</h3><div class="shop-grid">${ECU_OFFERS.map(o => `<div class="offer${o.hl ? " hl" : ""}"><b>${PQ(o.ecus)}</b><small>${o.bonus ? `${o.bonus} de PQ` : "Pour commencer"}</small><span class="price">${o.eur}</span><button class="mini-btn" data-sku="${o.id}" ${can ? "" : "disabled"}>${buyLabel}</button></div>`).join("")}</div>
       <p class="lede" style="font-size:13px;margin-top:10px">Les PQ servent à acheter et vendre des cartes au Marché. Les quêtes en rapportent aussi.</p></div>
+    <div class="panel"><h3>Probabilités par carte</h3><div class="odds"><span></span>${["Com.", "Peu c.", "Rare", "Épique", "Lég."].map((n, i) => `<span class="h" style="background:var(${TIER_VAR[i]})">${n}</span>`).join("")}${oddsRow("Paquet", TIER_ODDS)}${oddsRow("Arrond.", TIER_ODDS)}${oddsRow("PariGo", PARIGO_ODDS)}</div>
+      <p class="lede" style="font-size:12.5px;margin-top:8px">Paquet : 5 cartes · Pack Arrondissement : ${ARR_SIZE} cartes (si une rareté manque dans l'arrondissement, la plus proche) · Pack PariGo : 20 cartes dont au moins une Épique.</p></div>
     <p class="legal">Probabilités affichées pour chaque carte tirée. Les PQ et les cartes n'ont aucune valeur monétaire et ne peuvent pas être reconvertis en argent. Paiements sécurisés par Stripe. Achats réservés aux personnes majeures ou autorisées par un parent. Contenu numérique fourni immédiatement : en achetant, vous demandez son exécution immédiate et renoncez au droit de rétractation de 14 jours. ${PAY_READY ? "" : DEMO_BUY ? "Mode test : aucun paiement n'est effectué." : "Les paiements ouvriront au lancement."}</p>`;
   if ($("buyPass")) $("buyPass").onclick = () => checkout("pass");
   $("buyParigo").onclick = () => checkout("parigo");
   if ($("openParigo")) $("openParigo").onclick = buyParigoPack;
+  if ($("openParigoTop")) $("openParigoTop").onclick = buyParigoPack;
+  const sh = viewEl("shop");
+  sh.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { const el = $(b.dataset.go); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); });
+  sh.querySelectorAll("[data-arr]").forEach(b => b.onclick = () => { ui.shopArr = +b.dataset.arr; const y = $("side").scrollTop; renderShop(); $("side").scrollTop = y; });
+  sh.querySelectorAll("[data-open-arr]").forEach(b => b.onclick = () => openArrPack(+b.dataset.openArr));
   viewEl("shop").querySelectorAll("[data-sku]").forEach(b => b.onclick = () => checkout(b.dataset.sku));
 }
 

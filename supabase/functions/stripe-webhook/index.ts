@@ -1,4 +1,4 @@
-// Parisquest : reçoit les événements Stripe et crédite les achats (écus, Pass PariGo).
+// Parisquest : reçoit les événements Stripe et crédite les achats (PQ, paquets, Pack PariGo, Pack Arrondissement, Pass PariGo).
 // Déploiement : supabase functions deploy stripe-webhook --no-verify-jwt
 // Secrets requis : STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
 // Dans Stripe : Developers → Webhooks → endpoint https://<projet>.supabase.co/functions/v1/stripe-webhook
@@ -50,8 +50,15 @@ Deno.serve(async (req) => {
       const user = s.client_reference_id ?? s.metadata?.user_id;
       if (!user) return new Response("sans joueur", { status: 200 });
       if (s.mode === "payment" && s.payment_status === "paid") {
-        const g = GOODS[s.metadata?.sku];
-        if (g) await credit(user, s.id, g);
+        const arr = Number(s.metadata?.arr);
+        if (s.metadata?.sku === "arr" && arr >= 1 && arr <= 20) {
+          // Pack Arrondissement : crédit dédié (idempotent, même référence de paiement)
+          const { error } = await admin.rpc("credit_arr_pack", { p_user: user, p_ref: s.id, p_arr: arr, p_n: 1 });
+          if (error) throw new Error(error.message);
+        } else {
+          const g = GOODS[s.metadata?.sku];
+          if (g) await credit(user, s.id, g);
+        }
       } else if (s.mode === "subscription" && s.subscription) {
         const sub = await stripe(`subscriptions/${s.subscription}`);
         await credit(user, s.id, {}, periodEnd(sub));
