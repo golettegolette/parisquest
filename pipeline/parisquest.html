@@ -1441,7 +1441,7 @@ let pendingToasts = [];
 function openModal(it, msgHTML, reveal) {
   const o = S.owned[it.i], tier = o ? o.tier : it.t;
   $("modalMsg").innerHTML = msgHTML;
-  $("modalCard").innerHTML = cardHTML(it, { flippable: true, extraClass: (reveal ? `reveal${tier >= 3 ? " glow" : ""}` : "") + (o ? "" : " locked") });
+  $("modalCard").innerHTML = cardHTML(it, { flippable: true, extraClass: reveal ? `reveal${tier >= 3 ? " glow" : ""}` : "" });
   $("mapBtn").hidden = false; $("mapBtn").onclick = () => { closeModal(); showOnMap(it.i); };
   $("modalCard").firstElementChild.style.setProperty("--glow", getTierColor(tier));
   $("flipBtn").textContent = "Retourner la carte"; $("modal").classList.remove("pack"); ui.packModal = false;
@@ -2041,7 +2041,7 @@ function renderCatalogList() {
   list.sort(cmp);
   const own = list.filter(it => S.owned[it.i]).length;
   $("catOut").innerHTML = `<div class="grid-head" style="margin-top:6px"><h3>${nf(list.length)} carte${list.length > 1 ? "s" : ""} · ${nf(own)} possédée${own > 1 ? "s" : ""}</h3></div>
-    ${list.length ? `<div class="grid">${list.slice(0, CAT.shown).map(it => `<button data-id="${esc(it.i)}" aria-label="${esc(it.n)}">${cardHTML(it, { extraClass: S.owned[it.i] ? "" : "locked" })}</button>`).join("")}</div>
+    ${list.length ? `<div class="grid">${list.slice(0, CAT.shown).map(it => `<button data-id="${esc(it.i)}" aria-label="${esc(it.n)}">${cardHTML(it)}</button>`).join("")}</div>
     ${list.length > CAT.shown ? `<button class="mini-btn ghost more" id="catMore">Afficher plus (${nf(list.length - CAT.shown)})</button>` : ""}` : `<div class="empty">Aucune carte ne correspond.</div>`}`;
   $("catOut").querySelectorAll(".grid > button").forEach(b => b.onclick = () => openCard(b.dataset.id));
   if ($("catMore")) $("catMore").onclick = () => { CAT.shown += 48; renderCatalogList(); };
